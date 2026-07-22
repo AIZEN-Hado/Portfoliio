@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Offline UPI Mesh — Docs — Yashsingh Chauhan</title>
-  <meta name="description" content="Offline UPI Mesh documentation: overview, architecture, installation, and how to use.">
+  <meta name="description" content="Offline UPI Mesh documentation: a Spring Boot backend simulating offline UPI payments over mesh networking with RSA + AES-GCM encryption.">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/docs.css">
 </head>
@@ -30,11 +32,17 @@
       <h2 class="docs__sidetitle">Offline UPI Mesh</h2>
       <nav class="docs__toc">
         <a href="#overview">Overview</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#getting-started">Getting Started</a>
-        <a href="#how-to-use">How to Use</a>
-        <a href="#configuration">Configuration</a>
-        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#architecture">System Architecture</a>
+        <a href="#security">Security Flow</a>
+        <a href="#pipeline">Transaction Pipeline</a>
+        <a href="#gossip">Mesh Gossip Flow</a>
+        <a href="#problems">Problems &amp; Solutions</a>
+        <a href="#structure">Project Structure</a>
+        <a href="#tech-stack">Tech Stack</a>
+        <a href="#running">How to Run</a>
+        <a href="#api">API Overview</a>
+        <a href="#limitations">Limitations</a>
+        <a href="#roadmap">Future Improvements</a>
       </nav>
       <a class="btn-ghost btn-ghost--sm docs__back" href="https://github.com/AIZEN-Hado/Offline_upi" target="_blank" rel="noopener">GitHub Repo</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-upimesh">&larr; Back to Portfolio</a>
@@ -45,66 +53,228 @@
       <h1>Offline UPI Mesh</h1>
       <p class="docs__tag">Secure Offline Payment Simulation over Mesh Networking</p>
 
+      <div class="docs__badges">
+        <span>Java 17</span>
+        <span>Spring Boot</span>
+        <span>RSA + AES-GCM</span>
+        <span>Gossip Protocol</span>
+        <span>H2 In-Memory DB</span>
+        <span>Maven Wrapper</span>
+      </div>
+
+      <blockquote>A Spring Boot backend simulating <b>offline UPI payments using mesh networking + cryptographic security</b>.</blockquote>
+
       <section id="overview">
-        <h2>Overview</h2>
-        <p>Spring Boot backend simulating offline UPI payments: transactions are encrypted with RSA + AES-GCM, wrapped in TTL-bound mesh packets, gossiped device-to-device until a bridge device with connectivity relays them to the backend server for settlement.</p>
-        <div class="callout"><b>Stack</b>Java · Spring Boot · RSA + AES-GCM · Mesh Networking · Gossip Protocol</div>
+        <h2>Concept Overview</h2>
+        <p>Digital payments fail entirely without internet connectivity. Offline UPI Mesh demonstrates how a payment created on an offline device can still reach settlement — encrypted end-to-end and relayed device-to-device until any one device in the mesh has connectivity.</p>
+        <pre><code>📱 Sender (Offline)
+      │
+      ▼
+🔐 Encrypt (RSA + AES-GCM)
+      │
+      ▼
+📦 Mesh Packet
+      │
+      ▼
+📡 Device-to-Device Gossip
+      │
+      ▼
+📱📱📱 Intermediate Devices
+      │
+      ▼
+🌐 Bridge Device (Internet)
+      │
+      ▼
+☁️ Backend Server
+      │
+      ▼
+💰 Settlement</code></pre>
       </section>
 
       <section id="architecture">
-        <h2>Architecture</h2>
-        <div class="todo">Add an architecture description or diagram here — main components, how data flows between them, and key design decisions.</div>
+        <h2>System Architecture</h2>
+        <pre><code>┌──────────────────────────────┐
+│ 📱 Sender Device             │
+│------------------------------│
+│ Create Payment               │
+│ Encrypt Data 🔐              │
+└──────────────┬───────────────┘
+               ▼
+┌──────────────────────────────┐
+│ 📦 Mesh Packet               │
+│------------------------------│
+│ TTL ⏳                       │
+│ Ciphertext 🔒                │
+└──────────────┬───────────────┘
+               ▼
+┌──────────────────────────────┐
+│ 📡 Mesh Network              │
+│------------------------------│
+│ 📱 → 📱 → 📱 → 📱            │
+│ Gossip Protocol 🔁           │
+└──────────────┬───────────────┘
+               ▼
+┌──────────────────────────────┐
+│ 🌐 Bridge Node               │
+│------------------------------│
+│ Upload Packet ⬆️             │
+└──────────────┬───────────────┘
+               ▼
+┌────────────────────────────────────┐
+│ ☁️ Spring Boot Backend             │
+│------------------------------------│
+│ Hash → Deduplicate ⚡              │
+│ Decrypt 🔓                         │
+│ Validate ⏱️                        │
+│ Settle 💰                          │
+└────────────────────────────────────┘</code></pre>
       </section>
 
-      <section id="getting-started">
-        <h2>Getting Started</h2>
-        <h3>Prerequisites</h3>
+      <section id="security">
+        <h2>Security Flow</h2>
+        <pre><code>📝 Payment Data
+   ▼
+🔑 Generate AES Key
+   ▼
+🔒 Encrypt Payload (AES-GCM)
+   ▼
+🔐 Encrypt AES Key (RSA)
+   ▼
+📦 Final Packet:
+[ RSA Key ][ IV ][ Ciphertext ]</code></pre>
+        <div class="callout"><b>Guarantees</b>Tamper-proof · Confidential · Authenticated</div>
+      </section>
+
+      <section id="pipeline">
+        <h2>Transaction Pipeline</h2>
+        <pre><code>📥 Packet Received
+      ▼
+🔁 Hash (SHA-256)
+      ▼
+⚡ Idempotency Check
+      ├── ❌ Duplicate → Drop
+      ▼
+🔓 Decrypt
+      ▼
+⏱️ Validate Timestamp
+      ▼
+💰 Settle Transaction
+      ▼
+📒 Store in Ledger</code></pre>
+      </section>
+
+      <section id="gossip">
+        <h2>Mesh Gossip Flow</h2>
+        <pre><code>Round 1:
+📱 A → 📱 B → 📱 C
+
+Round 2:
+📱 A → 📱 B → 📱 C → 📱 D → 📱 E
+
+Result:
+✅ All devices hold packet</code></pre>
+      </section>
+
+      <section id="problems">
+        <h2>Problems &amp; Solutions</h2>
+        <div class="card-grid">
+          <div class="card">
+            <h3>Untrusted Devices</h3>
+            <p class="card__desc">A stranger's device relays your payment packet.</p>
+            <p><b>Solution — Encryption.</b> Intermediate devices cannot read or modify the payload; they only forward ciphertext.</p>
+          </div>
+          <div class="card">
+            <h3>Duplicate Transactions</h3>
+            <p class="card__desc">Multiple bridges upload the same packet to the backend.</p>
+            <p><b>Solution — Idempotency.</b> <code>Hash → Atomic Check → Only 1 Processed</code>.</p>
+          </div>
+          <div class="card">
+            <h3>Replay Attacks</h3>
+            <p class="card__desc">An old packet is captured and re-sent later.</p>
+            <p><b>Solution</b> — timestamp validation ⏱️ and a unique nonce per transaction 🔑.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="structure">
+        <h2>Project Structure</h2>
+        <pre><code>📦 upi-offline-mesh
+│
+├── 📁 controller        → API layer
+├── 📁 service           → Business logic
+├── 📁 model             → Data
+├── 📁 crypto            → Encryption 🔐
+├── 📁 config            → Setup ⚙️
+│
+├── 📄 UpiMeshApplication.java  → Entry point 🚀
+└── 📄 application.properties   → Config</code></pre>
+      </section>
+
+      <section id="tech-stack">
+        <h2>Tech Stack</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Layer</th><th>Technology</th></tr>
+          <tr><td>Backend</td><td>Spring Boot</td></tr>
+          <tr><td>Language</td><td>Java 17</td></tr>
+          <tr><td>Database</td><td>H2 (in-memory)</td></tr>
+          <tr><td>Security</td><td>RSA + AES-GCM</td></tr>
+          <tr><td>Build Tool</td><td>Maven Wrapper</td></tr>
+        </table></div>
+      </section>
+
+      <section id="running">
+        <h2>How to Run</h2>
+        <pre><code><span class="c"># Windows</span>
+<span class="k">mvnw.cmd</span> spring-boot:run
+
+<span class="c"># Mac/Linux</span>
+<span class="k">./mvnw</span> spring-boot:run</code></pre>
+        <p>Then open <code>http://localhost:8080</code>.</p>
+
+        <h3>Demo flow</h3>
+        <div class="step"><span class="step__num">1</span><div class="step__body"><h3>Inject Payment</h3><p>Create an encrypted payment on the (simulated) offline sender.</p></div></div>
+        <div class="step"><span class="step__num">2</span><div class="step__body"><h3>Run Gossip</h3><p>Propagate the mesh packet device-to-device.</p></div></div>
+        <div class="step"><span class="step__num">3</span><div class="step__body"><h3>Bridge Upload</h3><p>A connected bridge device flushes packets to the backend.</p></div></div>
+        <div class="step"><span class="step__num">4</span><div class="step__body"><h3>Settlement</h3><p>The backend deduplicates, decrypts, validates, and settles into the ledger.</p></div></div>
+      </section>
+
+      <section id="api">
+        <h2>API Overview</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+          <tr><td>GET</td><td><code>/</code></td><td>Dashboard</td></tr>
+          <tr><td>GET</td><td><code>/api/accounts</code></td><td>Accounts</td></tr>
+          <tr><td>POST</td><td><code>/api/demo/send</code></td><td>Send payment</td></tr>
+          <tr><td>POST</td><td><code>/api/mesh/gossip</code></td><td>Gossip</td></tr>
+          <tr><td>POST</td><td><code>/api/mesh/flush</code></td><td>Upload</td></tr>
+          <tr><td>POST</td><td><code>/api/bridge/ingest</code></td><td>Core API</td></tr>
+        </table></div>
+      </section>
+
+      <section id="limitations">
+        <h2>Limitations</h2>
         <ul>
-          <li>Java 17+</li>
-          <li>Maven or Gradle</li>
+          <li>No real bank integration</li>
+          <li>No real Bluetooth</li>
+          <li>No authentication</li>
+          <li>Offline double-spend possible</li>
         </ul>
-        <h3>Installation</h3>
-        <div class="step">
-          <span class="step__num">1</span>
-          <div class="step__body">
-            <h3>Clone the repository</h3>
-            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/Offline_upi</code></pre>
-          </div>
-        </div>
-        <div class="step">
-          <span class="step__num">2</span>
-          <div class="step__body">
-            <h3>Install dependencies</h3>
-            <div class="todo">Add the install command(s), e.g. <code>pip install -r requirements.txt</code> / <code>npm install</code> / <code>mvn install</code>.</div>
-          </div>
-        </div>
-        <div class="step">
-          <span class="step__num">3</span>
-          <div class="step__body">
-            <h3>Run the project</h3>
-            <div class="todo">Add the run command and what a successful start looks like.</div>
-          </div>
-        </div>
       </section>
 
-      <section id="how-to-use">
-        <h2>How to Use</h2>
-        <div class="todo">Add step-by-step usage instructions here — the main workflow a user follows, with screenshots or example commands and expected output.</div>
-      </section>
-
-      <section id="configuration">
-        <h2>Configuration</h2>
-        <div class="todo">Document environment variables, config files, API keys, and optional settings (e.g. an <code>.env</code> example block).</div>
-      </section>
-
-      <section id="troubleshooting">
-        <h2>Troubleshooting / FAQ</h2>
-        <div class="todo">List common errors and their fixes, plus frequently asked questions.</div>
+      <section id="roadmap">
+        <h2>Future Improvements</h2>
+        <ul>
+          <li>Redis for idempotency</li>
+          <li>Real BLE communication</li>
+          <li>Authentication (JWT)</li>
+          <li>Cloud deployment</li>
+        </ul>
+        <div class="callout"><b>In one line</b>Built a Spring Boot backend simulating offline UPI transactions using mesh networking, hybrid encryption (RSA + AES-GCM), and idempotent transaction processing for secure and reliable settlement — <i>Offline → Secure → Distributed → Reliable</i>.</div>
       </section>
 
       <nav class="docs__pager">
         <a class="btn-ghost btn-ghost--sm" href="classlyai.html">&larr; ClasslyAI</a>
-        <span></span>
+        <a class="btn-ghost btn-ghost--sm" href="allears.html">All-Ears &rarr;</a>
       </nav>
     </article>
 
@@ -118,7 +288,6 @@
   </footer>
 
   <script>
-    // Mobile nav + active TOC highlighting
     (function () {
       var burger = document.getElementById("navBurger");
       var links = document.getElementById("navLinks");
@@ -128,27 +297,17 @@
         burger.setAttribute("aria-expanded", String(open));
       });
       var toc = document.querySelectorAll(".docs__toc a");
-      var sections = Array.prototype.map.call(toc, function (a) {
-        return document.querySelector(a.getAttribute("href"));
-      });
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            var i = sections.indexOf(e.target);
-            toc.forEach(function (a) { a.classList.remove("is-active"); });
-            if (i > -1) toc[i].classList.add("is-active");
-          }
-        });
-      }, { rootMargin: "-30% 0px -60% 0px" }).observe && sections.forEach(function (s) {
-        if (s) new IntersectionObserver(function (entries) {
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {
             if (e.isIntersecting) {
-              toc.forEach(function (a) { a.classList.remove("is-active"); });
-              var a = document.querySelector('.docs__toc a[href="#' + e.target.id + '"]');
-              if (a) a.classList.add("is-active");
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
             }
           });
-        }, { rootMargin: "-30% 0px -60% 0px" }).observe(s);
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
       });
     })();
   </script>

@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClasslyAI — Docs — Yashsingh Chauhan</title>
-  <meta name="description" content="ClasslyAI documentation: overview, architecture, installation, and how to use.">
+  <meta name="description" content="ClasslyAI documentation: AI-powered LMS and course marketplace — features, setup, environment configuration, API groups, and deployment notes.">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/docs.css">
 </head>
@@ -30,12 +32,19 @@
       <h2 class="docs__sidetitle">ClasslyAI</h2>
       <nav class="docs__toc">
         <a href="#overview">Overview</a>
-        <a href="#architecture">Architecture</a>
+        <a href="#features">Core Features</a>
+        <a href="#tech-stack">Tech Stack</a>
+        <a href="#modules">Main Modules</a>
+        <a href="#structure">Project Structure</a>
         <a href="#getting-started">Getting Started</a>
-        <a href="#how-to-use">How to Use</a>
-        <a href="#configuration">Configuration</a>
-        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#environment">Environment Variables</a>
+        <a href="#running">Run Locally</a>
+        <a href="#api">API Groups</a>
+        <a href="#highlights">Highlights</a>
+        <a href="#deployment">Deployment Notes</a>
+        <a href="#roadmap">Roadmap</a>
       </nav>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="https://classlyai-1.onrender.com" target="_blank" rel="noopener">Live Site</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="https://github.com/AIZEN-Hado/CLASSLYAI" target="_blank" rel="noopener">GitHub Repo</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-classlyai">&larr; Back to Portfolio</a>
     </aside>
@@ -43,65 +52,268 @@
     <!-- ============ BODY ============ -->
     <article class="docs__body">
       <h1>ClasslyAI</h1>
-      <p class="docs__tag">AI-Powered LMS & Course Marketplace</p>
+      <p class="docs__tag">AI-Powered LMS &amp; Course Marketplace</p>
+
+      <div class="docs__badges">
+        <span>React 19</span>
+        <span>Vite 7</span>
+        <span>Tailwind CSS 3</span>
+        <span>Node.js · Express</span>
+        <span>MongoDB</span>
+        <span>Stripe</span>
+        <span>MIT License</span>
+      </div>
 
       <section id="overview">
         <h2>Overview</h2>
-        <p>A modern Learning Management System combining teaching, course delivery, marketplace sales, student engagement, and AI-assisted learning. Students browse, purchase (Stripe) and learn; instructors publish and analyze; admins monitor the platform — with AI tools for notes, quizzes, and answer checking.</p>
-        <div class="callout"><b>Stack</b>React 19 · Vite · Tailwind CSS · Node.js · Express · MongoDB · Stripe · Google OAuth</div>
+        <p>ClasslyAI is a modern Learning Management System built to combine teaching, course delivery, marketplace sales, student engagement, and AI-assisted learning in one platform.</p>
+        <div class="callout"><b>Live Demo</b>The platform is deployed and usable right now: <a href="https://classlyai-1.onrender.com" target="_blank" rel="noopener">classlyai-1.onrender.com</a></div>
+        <p>It supports the full workflow:</p>
+        <ul>
+          <li>Students can browse, purchase, and learn from courses</li>
+          <li>Instructors can create, manage, and analyze course performance</li>
+          <li>Admins can monitor platform activity and manage operations</li>
+          <li>AI tools help with notes, quizzes, and answer checking</li>
+        </ul>
+        <figure class="shot">
+          <img src="https://github.com/user-attachments/assets/b9b4dc1a-e243-478e-8c33-fcc5f63e2c29" alt="ClasslyAI platform preview" loading="lazy">
+          <figcaption>Platform Preview</figcaption>
+        </figure>
       </section>
 
-      <section id="architecture">
-        <h2>Architecture</h2>
-        <div class="todo">Add an architecture description or diagram here — main components, how data flows between them, and key design decisions.</div>
+      <section id="features">
+        <h2>Core Features</h2>
+        <div class="card-grid">
+          <div class="card">
+            <h3>Student Experience</h3>
+            <ul>
+              <li>Browse and search public marketplace courses</li>
+              <li>Purchase courses with Stripe</li>
+              <li>Access enrolled lessons and learning resources</li>
+              <li>Track lecture progress</li>
+              <li>Take quizzes and review performance</li>
+              <li>Use AI chat and answer checker tools</li>
+              <li>View personal course analytics</li>
+              <li>Receive broadcasts and announcements</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Instructor Experience</h3>
+            <ul>
+              <li>Create and manage marketplace courses</li>
+              <li>Update lectures, resources, and course settings</li>
+              <li>Generate AI-based notes and quiz content</li>
+              <li>Manage coupons and pricing</li>
+              <li>Track student engagement</li>
+              <li>Access course and quiz analytics</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Admin Experience</h3>
+            <ul>
+              <li>Monitor platform-wide activity</li>
+              <li>Manage courses and users</li>
+              <li>View dashboards and operational data</li>
+              <li>Review system usage and progress metrics</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>AI Tools</h3>
+            <ul>
+              <li>AI-generated notes and quiz content</li>
+              <li>Student AI chat</li>
+              <li>Answer checking and document-based evaluation</li>
+              <li>OCR document scanning (Tesseract.js)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tech-stack">
+        <h2>Tech Stack</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Layer</th><th>Tools</th></tr>
+          <tr><td>Frontend</td><td>React 19, Vite, Tailwind CSS, React Router, Axios</td></tr>
+          <tr><td>Backend</td><td>Node.js, Express</td></tr>
+          <tr><td>Database</td><td>MongoDB, Mongoose</td></tr>
+          <tr><td>Auth</td><td>JWT, Google OAuth</td></tr>
+          <tr><td>Payments</td><td>Stripe</td></tr>
+          <tr><td>Charts</td><td>Recharts</td></tr>
+          <tr><td>AI / Utilities</td><td>Tesseract.js, PDF tools, custom AI routes</td></tr>
+        </table></div>
+      </section>
+
+      <section id="modules">
+        <h2>Main Modules</h2>
+        <ul>
+          <li>Authentication with email/password and Google OAuth</li>
+          <li>Course management and lecture delivery</li>
+          <li>Marketplace search and course purchases</li>
+          <li>Quiz creation, attempts, submission, and analytics</li>
+          <li>AI notes and quiz generation</li>
+          <li>Student AI chat</li>
+          <li>Answer checking and document-based evaluation</li>
+          <li>Broadcast and announcement system</li>
+          <li>Reviews and coupons</li>
+          <li>Instructor and admin dashboards</li>
+        </ul>
+      </section>
+
+      <section id="structure">
+        <h2>Project Structure</h2>
+        <pre><code>LMScopy/
+├── client/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── config/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── package.json
+├── server/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── index.js
+│   └── package.json
+└── README.md</code></pre>
       </section>
 
       <section id="getting-started">
         <h2>Getting Started</h2>
-        <h3>Prerequisites</h3>
-        <ul>
-          <li>Node.js 18+</li>
-          <li>MongoDB (local or Atlas)</li>
-          <li>Stripe test keys</li>
-          <li>Google OAuth credentials</li>
-        </ul>
-        <h3>Installation</h3>
         <div class="step">
           <span class="step__num">1</span>
           <div class="step__body">
             <h3>Clone the repository</h3>
-            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/CLASSLYAI</code></pre>
+            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/CLASSLYAI.git
+<span class="k">cd</span> CLASSLYAI</code></pre>
           </div>
         </div>
         <div class="step">
           <span class="step__num">2</span>
           <div class="step__body">
-            <h3>Install dependencies</h3>
-            <div class="todo">Add the install command(s), e.g. <code>pip install -r requirements.txt</code> / <code>npm install</code> / <code>mvn install</code>.</div>
+            <h3>Install frontend dependencies</h3>
+            <pre><code><span class="k">cd</span> client
+<span class="k">npm install</span></code></pre>
           </div>
         </div>
         <div class="step">
           <span class="step__num">3</span>
           <div class="step__body">
-            <h3>Run the project</h3>
-            <div class="todo">Add the run command and what a successful start looks like.</div>
+            <h3>Install backend dependencies</h3>
+            <pre><code><span class="k">cd</span> ../server
+<span class="k">npm install</span></code></pre>
           </div>
         </div>
       </section>
 
-      <section id="how-to-use">
-        <h2>How to Use</h2>
-        <div class="todo">Add step-by-step usage instructions here — the main workflow a user follows, with screenshots or example commands and expected output.</div>
+      <section id="environment">
+        <h2>Environment Variables</h2>
+        <h3>Client</h3>
+        <p>Create a <code>.env</code> file inside <code>client/</code>:</p>
+        <pre><code>VITE_API_URL=http://localhost:5000/api
+VITE_SESSION_EXPIRY_DAYS=7
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key</code></pre>
+        <h3>Server</h3>
+        <p>Create a <code>.env</code> file inside <code>server/</code>:</p>
+        <pre><code>PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
+STRIPE_SECRET_KEY=your_stripe_secret_key
+AI_ENCRYPTION_KEY=your_64_char_hex_key
+ADMIN_SECRET_KEY=your_admin_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+RENDER_EXTERNAL_URL=</code></pre>
       </section>
 
-      <section id="configuration">
-        <h2>Configuration</h2>
-        <div class="todo">Document environment variables, config files, API keys, and optional settings (e.g. an <code>.env</code> example block).</div>
+      <section id="running">
+        <h2>Run Locally</h2>
+        <div class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <h3>Start the backend</h3>
+            <pre><code><span class="k">cd</span> server
+<span class="k">npm run dev</span></code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <h3>Start the frontend</h3>
+            <pre><code><span class="k">cd</span> client
+<span class="k">npm run dev</span></code></pre>
+          </div>
+        </div>
+        <h3>App URLs</h3>
+        <pre><code>Frontend: http://localhost:5173
+Backend:  http://localhost:5000
+Health:   http://localhost:5000/api/health</code></pre>
+
+        <h3>Available scripts</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Frontend</th><th>Backend</th></tr>
+          <tr><td><code>npm run dev</code></td><td><code>npm run dev</code></td></tr>
+          <tr><td><code>npm run build</code></td><td><code>npm start</code></td></tr>
+          <tr><td><code>npm run preview</code></td><td></td></tr>
+          <tr><td><code>npm run lint</code></td><td></td></tr>
+        </table></div>
       </section>
 
-      <section id="troubleshooting">
-        <h2>Troubleshooting / FAQ</h2>
-        <div class="todo">List common errors and their fixes, plus frequently asked questions.</div>
+      <section id="api">
+        <h2>API Groups</h2>
+        <p>The backend exposes route groups for:</p>
+        <pre><code>/api/auth          /api/student-ai
+/api/courses       /api/evaluate
+/api/marketplace   /api/broadcasts
+/api/purchase      /api/reviews
+/api/quizzes       /api/coupons
+/api/resources     /api/instructor
+/api/ai            /api/admin
+                   /api/activities</code></pre>
+      </section>
+
+      <section id="highlights">
+        <h2>Highlights</h2>
+        <ul>
+          <li>Clean full-stack separation between client and server</li>
+          <li>Role-based workflows for students, instructors, and admins</li>
+          <li>Stripe checkout with webhook handling</li>
+          <li>JWT-based auth with protected routes</li>
+          <li>Google sign-in integration</li>
+          <li>AI-assisted learning utilities</li>
+          <li>Course progress and analytics tracking</li>
+          <li>Scalable route/controller/model structure</li>
+        </ul>
+      </section>
+
+      <section id="deployment">
+        <h2>Deployment Notes</h2>
+        <div class="callout"><b>Before deploying publicly</b>
+          Rotate all secrets and keys · use production Stripe credentials · secure MongoDB network access · restrict CORS to your real frontend domain · keep environment variables out of version control.
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <h2>Roadmap</h2>
+        <ul>
+          <li>Real-time notifications</li>
+          <li>Better mobile UI polish</li>
+          <li>Expanded AI tutoring workflows</li>
+          <li>Richer instructor reporting</li>
+          <li>More collaboration features for learners</li>
+        </ul>
+        <p>Licensed under <b>MIT</b>.</p>
       </section>
 
       <nav class="docs__pager">
@@ -120,7 +332,6 @@
   </footer>
 
   <script>
-    // Mobile nav + active TOC highlighting
     (function () {
       var burger = document.getElementById("navBurger");
       var links = document.getElementById("navLinks");
@@ -130,27 +341,17 @@
         burger.setAttribute("aria-expanded", String(open));
       });
       var toc = document.querySelectorAll(".docs__toc a");
-      var sections = Array.prototype.map.call(toc, function (a) {
-        return document.querySelector(a.getAttribute("href"));
-      });
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            var i = sections.indexOf(e.target);
-            toc.forEach(function (a) { a.classList.remove("is-active"); });
-            if (i > -1) toc[i].classList.add("is-active");
-          }
-        });
-      }, { rootMargin: "-30% 0px -60% 0px" }).observe && sections.forEach(function (s) {
-        if (s) new IntersectionObserver(function (entries) {
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {
             if (e.isIntersecting) {
-              toc.forEach(function (a) { a.classList.remove("is-active"); });
-              var a = document.querySelector('.docs__toc a[href="#' + e.target.id + '"]');
-              if (a) a.classList.add("is-active");
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
             }
           });
-        }, { rootMargin: "-30% 0px -60% 0px" }).observe(s);
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
       });
     })();
   </script>

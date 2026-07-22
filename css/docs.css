@@ -69,9 +69,12 @@
   color: var(--on-primary);
 }
 .docs__body pre {
-  background: var(--canvas-night-soft);
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
   padding: var(--sp-xl);
   margin: var(--sp-md) 0 var(--sp-xl);
   overflow-x: auto;
@@ -144,6 +147,59 @@
   text-transform: uppercase;
   color: var(--on-primary-mute);
 }
+
+/* shadcn-inspired components (monochrome) */
+.card {
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: var(--sp-xl);
+  margin: var(--sp-md) 0 var(--sp-xl);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+}
+.card:hover { background: var(--glass-bg-strong); transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.24); }
+.card > h3:first-child { margin-top: 0; }
+.card__desc { font-size: 13px; color: var(--ink-mute); margin-top: -4px; }
+
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-md); margin: var(--sp-md) 0 var(--sp-xl); }
+.card-grid .card { margin: 0; }
+
+/* Image gallery */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-md); margin: var(--sp-md) 0 var(--sp-xl); }
+.gallery a, .shot {
+  display: block;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--canvas-night-soft);
+}
+.gallery img, .shot img { width: 100%; height: auto; display: block; filter: grayscale(0.15); transition: filter 0.3s ease, transform 0.3s ease; }
+.gallery a:hover img, .shot:hover img { filter: none; transform: scale(1.015); }
+.shot { margin: var(--sp-md) 0 var(--sp-xl); }
+.shot figcaption {
+  padding: var(--sp-sm) var(--sp-md);
+  border-top: 1px solid var(--hairline);
+  font-size: 11px;
+  letter-spacing: 1.17px;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* kbd-style inline chip */
+.docs__body kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: 1px solid var(--hairline);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 2px 7px;
+  color: var(--on-primary);
+}
+
+@media (max-width: 767px) { .card-grid { grid-template-columns: 1fr; } }
 
 /* TODO placeholder — remove when real content is added */
 .todo {

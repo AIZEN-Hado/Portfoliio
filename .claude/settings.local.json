@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://api.github.com/users/AIZEN-Hado/repos?per_page=100&sort=updated\")"
+    ]
+  }
+}

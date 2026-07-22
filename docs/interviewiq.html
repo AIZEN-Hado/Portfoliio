@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InterviewIQ — Docs — Yashsingh Chauhan</title>
-  <meta name="description" content="InterviewIQ documentation: overview, architecture, installation, and how to use.">
+  <meta name="description" content="InterviewIQ documentation: a full-stack AI-driven interview platform — features, setup guide, environment configuration, and troubleshooting.">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/docs.css">
 </head>
@@ -30,12 +32,17 @@
       <h2 class="docs__sidetitle">InterviewIQ</h2>
       <nav class="docs__toc">
         <a href="#overview">Overview</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#getting-started">Getting Started</a>
-        <a href="#how-to-use">How to Use</a>
-        <a href="#configuration">Configuration</a>
+        <a href="#features">Key Features</a>
+        <a href="#tech-stack">Tech Stack</a>
+        <a href="#system-design">System Design</a>
+        <a href="#getting-started">Installation &amp; Setup</a>
+        <a href="#environment">Environment Variables</a>
+        <a href="#running">Running the App</a>
+        <a href="#verify">Verify Setup</a>
         <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#structure">Project Structure</a>
       </nav>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="https://interviewiq-vm8j.onrender.com" target="_blank" rel="noopener">Live Site</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="https://github.com/AIZEN-Hado/3.interviewIQ" target="_blank" rel="noopener">GitHub Repo</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-interviewiq">&larr; Back to Portfolio</a>
     </aside>
@@ -45,62 +52,170 @@
       <h1>InterviewIQ</h1>
       <p class="docs__tag">AI-Powered Interview Platform</p>
 
+      <div class="docs__badges">
+        <span>React</span>
+        <span>Node.js · Express</span>
+        <span>MongoDB</span>
+        <span>JWT Auth</span>
+        <span>LLM Integration</span>
+        <span>Live on Render</span>
+      </div>
+
       <section id="overview">
         <h2>Overview</h2>
-        <p>Full-stack AI-driven interview platform that simulates real hiring processes: dynamic question generation from resume data and job requirements, real-time response evaluation with structured feedback, and an analytics dashboard for candidate performance.</p>
-        <div class="callout"><b>Stack</b>React · Tailwind CSS · Node.js · Express · MongoDB · JWT · LLM Integration</div>
+        <p>InterviewIQ is a <b>full-stack AI-driven interview platform</b> designed to simulate real-world hiring processes by automating interview creation, candidate evaluation, and response analysis.</p>
+        <p>Built with a modern tech stack, the platform enables dynamic interview experiences, real-time feedback, and intelligent candidate assessment using AI.</p>
+        <div class="callout"><b>Live Demo</b>The platform is deployed and usable right now: <a href="https://interviewiq-vm8j.onrender.com" target="_blank" rel="noopener">interviewiq-vm8j.onrender.com</a></div>
+
       </section>
 
-      <section id="architecture">
-        <h2>Architecture</h2>
-        <div class="todo">Add an architecture description or diagram here — main components, how data flows between them, and key design decisions.</div>
+      <section id="features">
+        <h2>Key Features</h2>
+        <ul>
+          <li><b>AI-Powered Interview Engine</b> — dynamically generates interview questions based on resume data and job requirements.</li>
+          <li><b>Resume Screening &amp; Analysis</b> — upload resumes and automatically extract key insights for candidate shortlisting.</li>
+          <li><b>Real-Time Response Evaluation</b> — analyze candidate answers with structured feedback and performance insights.</li>
+          <li><b>Smart Interview Workflow</b> — end-to-end pipeline from interview creation → candidate interaction → evaluation.</li>
+          <li><b>Analytics Dashboard</b> — visualize candidate performance with charts and actionable metrics.</li>
+          <li><b>Scalable Architecture</b> — designed to handle real-time interactions and asynchronous workflows efficiently.</li>
+        </ul>
+      </section>
+
+      <section id="tech-stack">
+        <h2>Tech Stack</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Layer</th><th>Technology</th></tr>
+          <tr><td>Frontend</td><td>React.js · Tailwind CSS</td></tr>
+          <tr><td>Backend</td><td>Node.js · Express.js</td></tr>
+          <tr><td>Database</td><td>MongoDB</td></tr>
+          <tr><td>Other</td><td>REST APIs · JWT Authentication · AI/LLM Integration</td></tr>
+        </table></div>
+      </section>
+
+      <section id="system-design">
+        <h2>System Design Highlights</h2>
+        <ul>
+          <li>Modular backend architecture for scalability</li>
+          <li>Real-time data handling for interview sessions</li>
+          <li>Asynchronous processing for AI evaluation</li>
+          <li>Optimized API design for low latency</li>
+        </ul>
       </section>
 
       <section id="getting-started">
-        <h2>Getting Started</h2>
+        <h2>Installation &amp; Setup</h2>
         <h3>Prerequisites</h3>
         <ul>
-          <li>Node.js 18+</li>
-          <li>MongoDB (local or Atlas)</li>
-          <li>An LLM API key</li>
+          <li>Node.js (v18 or above recommended)</li>
+          <li>npm or yarn</li>
+          <li>MongoDB (local or MongoDB Atlas)</li>
+          <li>Git</li>
         </ul>
-        <h3>Installation</h3>
+
         <div class="step">
           <span class="step__num">1</span>
           <div class="step__body">
             <h3>Clone the repository</h3>
-            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/3.interviewIQ</code></pre>
+            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/3.interviewIQ.git
+<span class="k">cd</span> 3.interviewIQ</code></pre>
           </div>
         </div>
         <div class="step">
           <span class="step__num">2</span>
           <div class="step__body">
-            <h3>Install dependencies</h3>
-            <div class="todo">Add the install command(s), e.g. <code>pip install -r requirements.txt</code> / <code>npm install</code> / <code>mvn install</code>.</div>
+            <h3>Install backend dependencies</h3>
+            <pre><code><span class="k">cd</span> server
+<span class="k">npm install</span></code></pre>
           </div>
         </div>
         <div class="step">
           <span class="step__num">3</span>
           <div class="step__body">
-            <h3>Run the project</h3>
-            <div class="todo">Add the run command and what a successful start looks like.</div>
+            <h3>Install frontend dependencies</h3>
+            <pre><code><span class="k">cd</span> ../client
+<span class="k">npm install</span></code></pre>
           </div>
         </div>
       </section>
 
-      <section id="how-to-use">
-        <h2>How to Use</h2>
-        <div class="todo">Add step-by-step usage instructions here — the main workflow a user follows, with screenshots or example commands and expected output.</div>
+      <section id="environment">
+        <h2>Environment Variables</h2>
+        <h3>Server</h3>
+        <p>Create a <code>.env</code> file inside the <code>server</code> folder:</p>
+        <pre><code>PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_api_key   <span class="c"># if used</span></code></pre>
+        <h3>Client</h3>
+        <p>Create a <code>.env</code> file inside the <code>client</code> folder:</p>
+        <pre><code>REACT_APP_API_URL=http://localhost:5000</code></pre>
       </section>
 
-      <section id="configuration">
-        <h2>Configuration</h2>
-        <div class="todo">Document environment variables, config files, API keys, and optional settings (e.g. an <code>.env</code> example block).</div>
+      <section id="running">
+        <h2>Running the Application</h2>
+        <div class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <h3>Start the backend server</h3>
+            <pre><code><span class="k">cd</span> server
+<span class="k">npm start</span></code></pre>
+            <p>Backend runs on <code>http://localhost:5000</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <h3>Start the frontend</h3>
+            <pre><code><span class="k">cd</span> client
+<span class="k">npm start</span></code></pre>
+            <p>Frontend runs on <code>http://localhost:3000</code></p>
+          </div>
+        </div>
+
+        <h3>Optional improvements</h3>
+        <p><b>Auto-restart the backend</b> with Nodemon:</p>
+        <pre><code><span class="k">npm install</span> -g nodemon
+<span class="k">nodemon</span> server.js</code></pre>
+        <p><b>Run frontend &amp; backend together</b>:</p>
+        <pre><code><span class="k">npm install</span> -g concurrently</code></pre>
+      </section>
+
+      <section id="verify">
+        <h2>Verify Setup</h2>
+        <ul>
+          <li>Open <code>http://localhost:3000</code></li>
+          <li>Ensure the frontend loads correctly</li>
+          <li>Check the backend connection (no console errors)</li>
+          <li>Test basic features (login / interview flow)</li>
+        </ul>
       </section>
 
       <section id="troubleshooting">
-        <h2>Troubleshooting / FAQ</h2>
-        <div class="todo">List common errors and their fixes, plus frequently asked questions.</div>
+        <h2>Common Issues &amp; Fixes</h2>
+        <h3>Port already in use</h3>
+        <pre><code><span class="k">npx kill-port</span> 5000</code></pre>
+        <h3>MongoDB connection error</h3>
+        <ul>
+          <li>Verify <code>MONGO_URI</code></li>
+          <li>Ensure the MongoDB service is running</li>
+        </ul>
+        <h3>node_modules issues</h3>
+        <pre><code><span class="k">rm</span> -rf node_modules package-lock.json
+<span class="k">npm install</span></code></pre>
+        <h3>Environment variables not loading</h3>
+        <ul>
+          <li>Ensure <code>.env</code> is in the correct directory</li>
+          <li>Restart the server after changes</li>
+        </ul>
+      </section>
+
+      <section id="structure">
+        <h2>Project Structure</h2>
+        <pre><code>3.interviewIQ/
+│
+├── client/        <span class="c"># React frontend</span>
+├── server/        <span class="c"># Node.js backend</span>
+├── README.md</code></pre>
       </section>
 
       <nav class="docs__pager">
@@ -119,7 +234,6 @@
   </footer>
 
   <script>
-    // Mobile nav + active TOC highlighting
     (function () {
       var burger = document.getElementById("navBurger");
       var links = document.getElementById("navLinks");
@@ -129,27 +243,17 @@
         burger.setAttribute("aria-expanded", String(open));
       });
       var toc = document.querySelectorAll(".docs__toc a");
-      var sections = Array.prototype.map.call(toc, function (a) {
-        return document.querySelector(a.getAttribute("href"));
-      });
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            var i = sections.indexOf(e.target);
-            toc.forEach(function (a) { a.classList.remove("is-active"); });
-            if (i > -1) toc[i].classList.add("is-active");
-          }
-        });
-      }, { rootMargin: "-30% 0px -60% 0px" }).observe && sections.forEach(function (s) {
-        if (s) new IntersectionObserver(function (entries) {
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {
             if (e.isIntersecting) {
-              toc.forEach(function (a) { a.classList.remove("is-active"); });
-              var a = document.querySelector('.docs__toc a[href="#' + e.target.id + '"]');
-              if (a) a.classList.add("is-active");
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
             }
           });
-        }, { rootMargin: "-30% 0px -60% 0px" }).observe(s);
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
       });
     })();
   </script>

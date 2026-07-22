@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All-Ears — Docs — Yashsingh Chauhan</title>
+  <meta name="description" content="All-Ears documentation: a Spotify-inspired music streaming Android app built with React Native, Expo, and Firebase — features, roles, setup, and roadmap.">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+
+  <nav class="nav is-solid">
+    <a href="../index.html" class="nav__wordmark">YASHSINGH&nbsp;CHAUHAN</a>
+    <button class="nav__burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main class="container docs">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="docs__side">
+      <p class="eyebrow">Project Docs</p>
+      <h2 class="docs__sidetitle">All-Ears</h2>
+      <nav class="docs__toc">
+        <a href="#overview">Overview</a>
+        <a href="#features">Features</a>
+        <a href="#roles">User Roles</a>
+        <a href="#tech-stack">Tech Stack</a>
+        <a href="#structure">Project Structure</a>
+        <a href="#getting-started">Getting Started</a>
+        <a href="#learned">What I Learned</a>
+        <a href="#roadmap">Future Improvements</a>
+      </nav>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="https://github.com/AIZEN-Hado/ALL-EARS" target="_blank" rel="noopener">GitHub Repo</a>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-allears">&larr; Back to Portfolio</a>
+    </aside>
+
+    <!-- ============ BODY ============ -->
+    <article class="docs__body">
+      <h1>All-Ears</h1>
+      <p class="docs__tag">Spotify-Inspired Music Streaming App — First Android Application</p>
+
+      <div class="docs__badges">
+        <span>React Native</span>
+        <span>Expo 54</span>
+        <span>TypeScript</span>
+        <span>Firebase</span>
+        <span>Android</span>
+        <span>In Progress</span>
+      </div>
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>All-Ears is a modern music streaming application where users can listen to songs, discover artists, create playlists, and enjoy a complete role-based music experience.</p>
+        <p>This project is special — it is the <b>very first Android app</b> I built. It taught me real-world mobile app development: Firebase integration, authentication flows, audio playback, and structuring a larger app with modern tools.</p>
+        <div class="callout"><b>Status</b>In progress — my milestone project for Android-focused mobile development.</div>
+      </section>
+
+      <section id="features">
+        <h2>Features</h2>
+        <ul>
+          <li>🔐 Google Sign-In authentication</li>
+          <li>👤 Role-based access for Listener, Artist, and Admin</li>
+          <li>🎶 Music playback with queue, shuffle, repeat, and recently played tracking</li>
+          <li>🔍 Search songs, artists, and genres</li>
+          <li>❤️ Like songs and build a personal music library</li>
+          <li>📃 Create and manage playlists</li>
+          <li>🎤 Artist upload flow for songs and cover art</li>
+          <li>✅ Admin approval and rejection system for songs</li>
+          <li>👥 Admin user management with role updates and bans</li>
+          <li>📊 Analytics dashboard for users, plays, top songs, and genre insights</li>
+        </ul>
+      </section>
+
+      <section id="roles">
+        <h2>User Roles</h2>
+        <div class="card-grid">
+          <div class="card">
+            <h3>🎧 Listener</h3>
+            <ul>
+              <li>Discover trending songs and new releases</li>
+              <li>Search songs, artists, and genres</li>
+              <li>Like songs and organize playlists</li>
+              <li>View recently played music</li>
+              <li>Explore artist profiles</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🎤 Artist</h3>
+            <ul>
+              <li>Upload original songs</li>
+              <li>Add cover art and genre details</li>
+              <li>Submit tracks for approval</li>
+              <li>Share music with listeners on the platform</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🛠️ Admin</h3>
+            <ul>
+              <li>Review and moderate uploaded songs</li>
+              <li>Approve or reject submissions</li>
+              <li>Manage users and update roles</li>
+              <li>Ban or unban accounts</li>
+              <li>Monitor platform analytics and activity</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tech-stack">
+        <h2>Tech Stack</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Area</th><th>Technology</th></tr>
+          <tr><td>Framework</td><td>React Native · Expo 54 · Expo Router</td></tr>
+          <tr><td>Language</td><td>TypeScript</td></tr>
+          <tr><td>Styling</td><td>NativeWind</td></tr>
+          <tr><td>Auth</td><td>Firebase Authentication · Google Sign-In</td></tr>
+          <tr><td>Data</td><td>Firestore · Firebase Storage</td></tr>
+          <tr><td>Audio</td><td>Expo AV</td></tr>
+          <tr><td>Charts</td><td>React Native Gifted Charts</td></tr>
+        </table></div>
+      </section>
+
+      <section id="structure">
+        <h2>Project Structure</h2>
+        <pre><code>app/          <span class="c">Main screens and file-based routes</span>
+components/   <span class="c">Reusable UI components</span>
+contexts/     <span class="c">Auth, player, and theme providers</span>
+lib/          <span class="c">Firebase auth, Firestore, and storage helpers</span>
+types/        <span class="c">Shared TypeScript interfaces and types</span>
+constants/    <span class="c">Roles and theme constants</span>
+assets/       <span class="c">Static images and app assets</span></code></pre>
+      </section>
+
+      <section id="getting-started">
+        <h2>Getting Started</h2>
+        <div class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <h3>Clone the repository</h3>
+            <pre><code><span class="k">git clone</span> https://github.com/AIZEN-Hado/ALL-EARS.git
+<span class="k">cd</span> ALL-EARS</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <h3>Install dependencies</h3>
+            <pre><code><span class="k">npm install</span></code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">3</span>
+          <div class="step__body">
+            <h3>Add environment variables</h3>
+            <p>Create a local environment file and add:</p>
+            <pre><code>EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_web_client_id</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">4</span>
+          <div class="step__body">
+            <h3>Set up Firebase</h3>
+            <p>Make sure your Firebase project has:</p>
+            <ul>
+              <li>Firebase Authentication enabled</li>
+              <li>Google Sign-In enabled</li>
+              <li>Firestore Database enabled</li>
+              <li>Firebase Storage enabled</li>
+              <li>Android app configuration added correctly</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">5</span>
+          <div class="step__body">
+            <h3>Start the app</h3>
+            <pre><code><span class="k">npm run android</span>   <span class="c"># run on Android</span>
+<span class="k">npm start</span>         <span class="c"># or start the development server</span></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="learned">
+        <h2>What I Learned</h2>
+        <ul>
+          <li>📱 Android-focused mobile app development</li>
+          <li>🔐 Authentication and user session flow</li>
+          <li>☁️ Firebase services in a real application</li>
+          <li>🎵 Music playback and queue management</li>
+          <li>🧭 Role-based navigation and routing</li>
+          <li>🗂️ Structuring a larger React Native project</li>
+        </ul>
+      </section>
+
+      <section id="roadmap">
+        <h2>Future Improvements</h2>
+        <ul>
+          <li>💬 Social features and user interactions</li>
+          <li>🔔 Push notifications</li>
+          <li>🎚️ Improved player experience</li>
+          <li>📈 Smarter recommendations</li>
+          <li>🎨 More polish, animation, and accessibility</li>
+        </ul>
+        <div class="callout"><b>Final note</b>This project represents my first Android application and an important step in my growth as a developer.</div>
+      </section>
+
+      <nav class="docs__pager">
+        <a class="btn-ghost btn-ghost--sm" href="upimesh.html">&larr; Offline UPI Mesh</a>
+        <span></span>
+      </nav>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <span class="footer__mark">YASHSINGH CHAUHAN</span>
+      <span class="footer__legal">© 2026 Yashsingh Chauhan — VIT Bhopal</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var burger = document.getElementById("navBurger");
+      var links = document.getElementById("navLinks");
+      burger.addEventListener("click", function () {
+        var open = links.classList.toggle("is-open");
+        burger.classList.toggle("is-open", open);
+        burger.setAttribute("aria-expanded", String(open));
+      });
+      var toc = document.querySelectorAll(".docs__toc a");
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
+            }
+          });
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>

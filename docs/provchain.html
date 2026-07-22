@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ProvChain — Docs — Yashsingh Chauhan</title>
-  <meta name="description" content="ProvChain documentation: overview, architecture, installation, and how to use.">
+  <meta name="description" content="ProvChain documentation: an AI code provenance and drift intelligence platform auditing AI-generated code against live CVE records with multi-signal ML risk scoring.">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/docs.css">
 </head>
@@ -30,77 +32,107 @@
       <h2 class="docs__sidetitle">ProvChain</h2>
       <nav class="docs__toc">
         <a href="#overview">Overview</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#getting-started">Getting Started</a>
-        <a href="#how-to-use">How to Use</a>
-        <a href="#configuration">Configuration</a>
-        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#problem">The Problem</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#risk-scoring">Risk Scoring</a>
+        <a href="#pipeline">Retrieval Pipeline</a>
+        <a href="#cicd">CI/CD Integration</a>
+        <a href="#results">Results</a>
       </nav>
-      
       <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-provchain">&larr; Back to Portfolio</a>
     </aside>
 
     <!-- ============ BODY ============ -->
     <article class="docs__body">
       <h1>ProvChain</h1>
-      <p class="docs__tag">AI Code Provenance & Drift Intelligence Platform</p>
+      <p class="docs__tag">AI Code Provenance &amp; Drift Intelligence Platform</p>
+
+      <div class="docs__badges">
+        <span>ML Risk Scoring</span>
+        <span>200+ Live CVEs</span>
+        <span>Drift Detection</span>
+        <span>CVSS</span>
+        <span>Embeddings</span>
+        <span>CI/CD Security</span>
+      </div>
 
       <section id="overview">
         <h2>Overview</h2>
-        <p>Audits AI-generated code against 200+ live CVE records with a multi-signal ML risk-scoring framework combining drift detection, CVSS severity, and semantic similarity. An embeddings-based retrieval pipeline provides automated vulnerability explanation and remediation recommendations for CI/CD security auditing.</p>
-        <div class="callout"><b>Stack</b>ML Risk Scoring · CVE/CVSS · Drift Detection · Embeddings · CI/CD Security</div>
+        <p>ProvChain is an AI-powered <b>code provenance engine</b> that audits AI-generated code against <b>200+ live CVE records</b>, producing explainable risk classifications and remediation recommendations for scalable CI/CD security auditing.</p>
+        <p>It combines drift detection, CVSS severity, and semantic similarity into a <b>multi-signal ML risk-scoring framework</b> — reducing manual security review effort by 80%.</p>
+        <div class="callout"><b>In one line</b>AI code enters the pipeline → ProvChain traces where it came from, how far it drifted, and what it might carry — before it ships.</div>
       </section>
 
-      <section id="architecture">
-        <h2>Architecture</h2>
-        <div class="todo">Add an architecture description or diagram here — main components, how data flows between them, and key design decisions.</div>
+      <section id="problem">
+        <h2>The Problem</h2>
+        <p>AI assistants now write a large share of production code, and that code enters codebases largely unaudited. Generated snippets can reproduce vulnerable patterns from training data, drift from vetted implementations, or embed dependencies with known CVEs. Manual security review cannot keep pace with the volume — teams need automated provenance and risk intelligence at the point where code merges.</p>
       </section>
 
-      <section id="getting-started">
-        <h2>Getting Started</h2>
-        <h3>Prerequisites</h3>
-        <ul>
-          <li>Python 3.11+</li>
-          <li>Access to a CVE feed</li>
-          <li>An embeddings model or API</li>
-        </ul>
-        <h3>Installation</h3>
-        <div class="step">
-          <span class="step__num">1</span>
-          <div class="step__body">
-            <h3>Clone the repository</h3>
-            <pre><code><span class="k">git clone</span> &lt;repo-url&gt;</code></pre>
+      <section id="capabilities">
+        <h2>Capabilities</h2>
+        <div class="card-grid">
+          <div class="card">
+            <h3>Provenance Auditing</h3>
+            <p class="card__desc">Where did this code come from?</p>
+            <p>Audits AI-generated code against 200+ continuously updated CVE records, flagging fragments that match or resemble known-vulnerable patterns.</p>
           </div>
-        </div>
-        <div class="step">
-          <span class="step__num">2</span>
-          <div class="step__body">
-            <h3>Install dependencies</h3>
-            <div class="todo">Add the install command(s), e.g. <code>pip install -r requirements.txt</code> / <code>npm install</code> / <code>mvn install</code>.</div>
+          <div class="card">
+            <h3>Drift Detection</h3>
+            <p class="card__desc">How far has it moved from the baseline?</p>
+            <p>Measures how generated code diverges from vetted reference implementations — drift is a leading signal of silent behavioral or security change.</p>
           </div>
-        </div>
-        <div class="step">
-          <span class="step__num">3</span>
-          <div class="step__body">
-            <h3>Run the project</h3>
-            <div class="todo">Add the run command and what a successful start looks like.</div>
+          <div class="card">
+            <h3>Explainable Risk Classification</h3>
+            <p class="card__desc">Why is this risky?</p>
+            <p>Every classification carries its contributing signals — drift magnitude, CVSS severity, similarity score — so reviewers see the reasoning, not just a verdict.</p>
+          </div>
+          <div class="card">
+            <h3>Automated Remediation</h3>
+            <p class="card__desc">What should be done about it?</p>
+            <p>An embeddings-based retrieval pipeline surfaces vulnerability explanations and concrete remediation recommendations alongside each finding.</p>
           </div>
         </div>
       </section>
 
-      <section id="how-to-use">
-        <h2>How to Use</h2>
-        <div class="todo">Add step-by-step usage instructions here — the main workflow a user follows, with screenshots or example commands and expected output.</div>
+      <section id="risk-scoring">
+        <h2>Multi-Signal Risk Scoring</h2>
+        <p>Risk is never a single number from a black box. ProvChain fuses three independent signals into one explainable score:</p>
+        <div class="tblwrap"><table>
+          <tr><th>Signal</th><th>What it measures</th><th>Why it matters</th></tr>
+          <tr><td>Drift detection</td><td>Divergence from vetted baseline implementations</td><td>Silent drift precedes silent vulnerabilities</td></tr>
+          <tr><td>CVSS severity</td><td>Industry-standard severity of any matched CVE</td><td>Anchors the score to recognized threat impact</td></tr>
+          <tr><td>Semantic similarity</td><td>Embedding-space closeness to known-vulnerable code</td><td>Catches rewrites and paraphrases that string matching misses</td></tr>
+        </table></div>
+        <pre><code>risk = f( drift, cvss, semantic_similarity )
+     → classification + contributing-signal breakdown
+     → explanation + remediation recommendation</code></pre>
       </section>
 
-      <section id="configuration">
-        <h2>Configuration</h2>
-        <div class="todo">Document environment variables, config files, API keys, and optional settings (e.g. an <code>.env</code> example block).</div>
+      <section id="pipeline">
+        <h2>Embeddings Retrieval Pipeline</h2>
+        <ol>
+          <li><b>Ingest</b> — AI-generated code enters from the CI/CD pipeline or review queue.</li>
+          <li><b>Embed</b> — code fragments are embedded into a vector space alongside indexed CVE records and vulnerable-pattern corpora.</li>
+          <li><b>Retrieve</b> — nearest known vulnerabilities and reference implementations are pulled for comparison.</li>
+          <li><b>Score</b> — the multi-signal framework classifies risk with full signal attribution.</li>
+          <li><b>Explain</b> — matched CVEs are summarized with automated vulnerability explanations and remediation steps.</li>
+        </ol>
       </section>
 
-      <section id="troubleshooting">
-        <h2>Troubleshooting / FAQ</h2>
-        <div class="todo">List common errors and their fixes, plus frequently asked questions.</div>
+      <section id="cicd">
+        <h2>CI/CD Integration</h2>
+        <p>ProvChain is designed to run where code review actually happens — as an automated gate in the delivery pipeline. Findings are produced per commit or per merge request, so risky AI-generated code is caught before it reaches production, at a scale no manual review process can match.</p>
+      </section>
+
+      <section id="results">
+        <h2>Results</h2>
+        <div class="tblwrap"><table>
+          <tr><th>Metric</th><th>Outcome</th></tr>
+          <tr><td>Manual security review effort</td><td><b>Reduced by 80%</b></td></tr>
+          <tr><td>CVE coverage</td><td><b>200+ live records</b> audited against</td></tr>
+          <tr><td>Risk classification</td><td><b>Explainable</b> — every verdict carries its contributing signals</td></tr>
+          <tr><td>Deployment model</td><td>Scalable CI/CD security auditing</td></tr>
+        </table></div>
       </section>
 
       <nav class="docs__pager">
@@ -119,7 +151,6 @@
   </footer>
 
   <script>
-    // Mobile nav + active TOC highlighting
     (function () {
       var burger = document.getElementById("navBurger");
       var links = document.getElementById("navLinks");
@@ -129,27 +160,17 @@
         burger.setAttribute("aria-expanded", String(open));
       });
       var toc = document.querySelectorAll(".docs__toc a");
-      var sections = Array.prototype.map.call(toc, function (a) {
-        return document.querySelector(a.getAttribute("href"));
-      });
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            var i = sections.indexOf(e.target);
-            toc.forEach(function (a) { a.classList.remove("is-active"); });
-            if (i > -1) toc[i].classList.add("is-active");
-          }
-        });
-      }, { rootMargin: "-30% 0px -60% 0px" }).observe && sections.forEach(function (s) {
-        if (s) new IntersectionObserver(function (entries) {
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {
             if (e.isIntersecting) {
-              toc.forEach(function (a) { a.classList.remove("is-active"); });
-              var a = document.querySelector('.docs__toc a[href="#' + e.target.id + '"]');
-              if (a) a.classList.add("is-active");
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
             }
           });
-        }, { rootMargin: "-30% 0px -60% 0px" }).observe(s);
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
       });
     })();
   </script>
