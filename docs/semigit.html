@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SemiGit — Docs — Yashsingh Chauhan</title>
+  <meta name="description" content="SemiGit documentation: a local-first VS Code extension that detects feature-level milestones and generates Conventional Commits — fully offline by default.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+
+  <nav class="nav is-solid">
+    <a href="../index.html" class="nav__wordmark">YASHSINGH&nbsp;CHAUHAN</a>
+    <button class="nav__burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main class="container docs">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="docs__side">
+      <p class="eyebrow">Project Docs</p>
+      <h2 class="docs__sidetitle">SemiGit</h2>
+      <nav class="docs__toc">
+        <a href="#overview">Overview</a>
+        <a href="#why">Why SemiGit</a>
+        <a href="#features">Features</a>
+        <a href="#quick-start">Quick Start</a>
+        <a href="#usage">Usage Guide</a>
+        <a href="#commands">Commands</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#ai-providers">AI Providers</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#privacy">Data &amp; Privacy</a>
+        <a href="#backtest">Backtest Harness</a>
+        <a href="#development">Development</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#faq">FAQ</a>
+        <a href="#security">Security</a>
+        <a href="#limitations">Limitations</a>
+      </nav>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-semigit">&larr; Back to Portfolio</a>
+    </aside>
+
+    <!-- ============ BODY ============ -->
+    <article class="docs__body">
+      <h1>SemiGit</h1>
+      <p class="docs__tag">AI-Powered Semantic Commit Generation — VS Code Extension</p>
+
+      <div class="docs__badges">
+        <span>TypeScript · Strict</span>
+        <span>90+ Tests Passing</span>
+        <span>One Universal .vsix</span>
+        <span>Fully Offline</span>
+        <span>MIT License</span>
+      </div>
+
+      <blockquote>Commits should mark <b>what changed</b>, not <b>when you got tired</b>.</blockquote>
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>SemiGit is a <b>local-first VS Code extension</b> that watches your coding session, understands each change <b>structurally</b> (via the TypeScript compiler) and <b>semantically</b>, detects when you've crossed a feature-level milestone, and generates a Conventional Commit for it.</p>
+        <p>It runs <b>fully offline by default</b> (no API key, no network), ships as <b>one universal build</b> (SQLite compiled to WebAssembly — no native module, no per-OS packaging), and its output quality is <b>measured against real git history</b> rather than asserted.</p>
+        <div class="callout"><b>Stack</b>TypeScript (strict) · VS Code Extension API · TS Compiler API · React + Tailwind (webview) · sql.js (SQLite → WASM) · Drizzle · Zod · simple-git · Turbo monorepo</div>
+      </section>
+
+      <section id="why">
+        <h2>Why SemiGit</h2>
+        <p>Most git history is noisy: <code>wip</code>, <code>fix</code>, <code>stuff</code>, <code>final2</code>. That happens because commits are made when a developer <i>feels</i> done — an arbitrary point in time — and writing a good message is friction, so people don't.</p>
+        <p>Existing tools format a message you already typed. None of them decide <b>when</b> a commit should happen or <b>what</b> it represents, based on the actual code change. SemiGit does both:</p>
+        <ol>
+          <li>It watches saves and diffs your code's <b>structure</b> (functions, classes, methods, interfaces, components, imports) — not line counts.</li>
+          <li>It scores whether you've reached a <b>feature-level milestone</b>.</li>
+          <li>When you have, it writes the <b>Conventional Commit</b> for that unit of work.</li>
+        </ol>
+      </section>
+
+      <section id="features">
+        <h2>Features</h2>
+        <ul>
+          <li><b>Semantic milestone detection</b> — a weighted score over structural change volume, files touched, session duration, and analysis confidence.</li>
+          <li><b>Conventional Commit generation</b> — <code>type(scope): subject</code> plus a body summarizing what changed.</li>
+          <li><b>Three commit modes</b> — Suggest (default), Automatic, Hybrid.</li>
+          <li><b>Works fully offline</b> — a deterministic heuristic engine means zero setup, zero cost, zero network.</li>
+          <li><b>Optional AI providers</b> — OpenAI, Anthropic, Google Gemini, DeepSeek, and local Ollama, behind one interface with automatic fallback to the offline engine.</li>
+          <li><b>Compiler-grade parsing</b> — JS/TS structure comes from the TypeScript Compiler API.</li>
+          <li><b>Live sidebar</b> — current session, milestone score, detected feature, commit suggestions.</li>
+          <li><b>Dashboard</b> — commit frequency, session time, and a development timeline.</li>
+          <li><b>Per-commit provider attribution</b> — analytics distinguish AI-generated from heuristic commits.</li>
+          <li><b>Evaluation harness</b> — replay the pipeline over real git history and measure output quality.</li>
+          <li><b>One universal <code>.vsix</code></b> — no native module, no ABI matching, no system Node requirement.</li>
+        </ul>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick Start</h2>
+        <h3>Prerequisites</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Requirement</th><th>Version</th><th>Notes</th></tr>
+          <tr><td>Node.js</td><td>≥ 20.19</td><td>for building only — the extension runs on VS Code's own runtime</td></tr>
+          <tr><td>npm</td><td>≥ 10</td><td>ships with Node</td></tr>
+          <tr><td>Git</td><td>any recent</td><td>required on <code>PATH</code> — it's a Git tool</td></tr>
+          <tr><td>VS Code</td><td>≥ 1.85</td><td></td></tr>
+        </table></div>
+
+        <h3>Build</h3>
+        <pre><code><span class="k">npm install</span>      <span class="c"># no native compilation — persistence is WebAssembly</span>
+<span class="k">npm run build</span>    <span class="c"># builds shared → service → webview → extension</span>
+<span class="k">npm test</span>         <span class="c"># optional: runs the full test suite</span></code></pre>
+
+        <h3>Run</h3>
+        <div class="step">
+          <span class="step__num">1</span>
+          <div class="step__body"><h3>Open the project</h3><p>Open the SemiGit folder in VS Code.</p></div>
+        </div>
+        <div class="step">
+          <span class="step__num">2</span>
+          <div class="step__body"><h3>Launch the Extension Development Host</h3><p>Press <b>F5</b> → <b>Run SemiGit Extension</b>. A second VS Code window opens with SemiGit loaded.</p></div>
+        </div>
+        <div class="step">
+          <span class="step__num">3</span>
+          <div class="step__body"><h3>Open a git repository</h3><p>In that window, <b>File → Open Folder</b> and open a <b>Git repository</b> containing <code>.ts / .tsx / .js / .jsx / .py</code> files. (Run <code>git init</code> first if it isn't a repo.)</p></div>
+        </div>
+        <div class="step">
+          <span class="step__num">4</span>
+          <div class="step__body"><h3>Open the sidebar</h3><p>Click the <b>SemiGit</b> icon in the Activity Bar.</p></div>
+        </div>
+
+        <h3>Try it without installing anything</h3>
+        <p>The analysis engines are pure TypeScript, so you can watch SemiGit <b>grade itself against real git history</b> without launching the extension:</p>
+        <pre><code><span class="k">npm install</span> &amp;&amp; <span class="k">npm run build</span>
+<span class="k">npm run backtest</span> -- .              <span class="c"># replay SemiGit over this repo's own commits</span>
+<span class="k">npm run backtest</span> -- /path/to/repo --limit 100
+<span class="k">npm run backtest</span> -- . --json       <span class="c"># machine-readable output</span></code></pre>
+        <div class="callout"><b>Tip</b>This is the fastest way to evaluate whether the tool's judgement is any good.</div>
+      </section>
+
+      <section id="usage">
+        <h2>Usage Guide</h2>
+        <h3>The basic loop</h3>
+        <ol>
+          <li><b>Open a git repo</b> with supported source files and make sure the SemiGit sidebar is visible.</li>
+          <li><b>Write code and save</b> (<code>Ctrl/Cmd+S</code>). SemiGit only analyzes on save, not on every keystroke.</li>
+          <li>After the debounce window (default 2s), the sidebar updates: <b>Current session</b> (elapsed time, files changed, milestone-score progress bar), <b>Detected feature</b> (inferred name + confidence), and <b>Suggestions</b> (a commit card once the score crosses the threshold).</li>
+          <li><b>Click Commit</b> on the suggestion card. SemiGit stages those files and creates the commit.</li>
+        </ol>
+
+        <h3>Forcing an evaluation</h3>
+        <ul>
+          <li><b>SemiGit: Evaluate Milestone Now</b> — score the session immediately and report the result.</li>
+          <li><b>SemiGit: Generate Commit</b> — build a commit draft right now, regardless of the threshold.</li>
+        </ul>
+
+        <h3>Commit modes</h3>
+        <p>Set <code>semigit.commitMode</code>:</p>
+        <div class="tblwrap"><table>
+          <tr><th>Mode</th><th>Behavior</th></tr>
+          <tr><td><code>suggest</code> <i>(default)</i></td><td>Shows a suggestion card. <b>Nothing is committed until you click.</b></td></tr>
+          <tr><td><code>automatic</code></td><td>Commits as soon as a milestone is detected (score ≥ <code>suggestThreshold</code>). No prompt.</td></tr>
+          <tr><td><code>hybrid</code></td><td>Suggests normally, but auto-commits when the score is high (≥ <code>autoCommitThreshold</code>).</td></tr>
+        </table></div>
+        <div class="callout"><b>Note</b><code>automatic</code> and <code>hybrid</code> create commits with no confirmation. They never push unless you explicitly enable <code>semigit.autoPushToRemote</code>. To undo an unwanted commit, use <code>git reset --soft HEAD~1</code> (your changes stay staged).</div>
+
+        <h3>The dashboard</h3>
+        <p><b>SemiGit: Open Dashboard</b> shows:</p>
+        <ul>
+          <li><b>Metric tiles</b> — total commits, AI-generated commits, average commit size, features completed, refactors, sessions</li>
+          <li><b>Commit frequency</b> — a bar chart over time</li>
+          <li><b>Session time</b> — minutes coded per day</li>
+          <li><b>Timeline</b> — an append-only feed of sessions, milestones, generated commits, and created commits</li>
+        </ul>
+      </section>
+
+      <section id="commands">
+        <h2>Commands</h2>
+        <p>Open the Command Palette (<code>Ctrl/Cmd+Shift+P</code>) and type "SemiGit".</p>
+        <div class="tblwrap"><table>
+          <tr><th>Command</th><th>What it does</th></tr>
+          <tr><td>SemiGit: Start Monitoring</td><td>Begin a session for the current workspace</td></tr>
+          <tr><td>SemiGit: Stop Monitoring</td><td>End the session and stop watching files</td></tr>
+          <tr><td>SemiGit: Evaluate Milestone Now</td><td>Score the session immediately and show the result</td></tr>
+          <tr><td>SemiGit: Generate Commit</td><td>Build a commit draft now, ignoring the threshold</td></tr>
+          <tr><td>SemiGit: Open Dashboard</td><td>Open the analytics + timeline panel</td></tr>
+          <tr><td>SemiGit: Choose AI Provider</td><td>Pick Offline / Local LLM / Cloud API, and enter a key if needed</td></tr>
+          <tr><td>SemiGit: Set API Key</td><td>Store the API key for the active provider in the OS keychain</td></tr>
+          <tr><td>SemiGit: Test AI Provider</td><td>Make one real call and report whether the provider actually responds</td></tr>
+          <tr><td>SemiGit: Restart Service</td><td>Restart the local analysis service</td></tr>
+        </table></div>
+      </section>
+
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <p>All settings live under <code>semigit.*</code> in VS Code settings.</p>
+        <div class="tblwrap"><table>
+          <tr><th>Setting</th><th>Type</th><th>Default</th><th>Scope</th><th>Description</th></tr>
+          <tr><td><code>provider</code></td><td>enum</td><td><code>heuristic</code></td><td>window</td><td><code>heuristic</code>, <code>openai</code>, <code>anthropic</code>, <code>gemini</code>, <code>deepseek</code>, <code>ollama</code>. <code>heuristic</code> = fully offline.</td></tr>
+          <tr><td><code>model</code></td><td>string</td><td><code>""</code></td><td>window</td><td>Model id for the provider. Empty uses the provider default.</td></tr>
+          <tr><td><code>commitMode</code></td><td>enum</td><td><code>suggest</code></td><td><b>machine</b></td><td><code>suggest</code>, <code>automatic</code>, or <code>hybrid</code>.</td></tr>
+          <tr><td><code>suggestThreshold</code></td><td>number 0–1</td><td><code>0.5</code></td><td>window</td><td>Milestone score at/above which a commit is suggested.</td></tr>
+          <tr><td><code>autoCommitThreshold</code></td><td>number 0–1</td><td><code>0.8</code></td><td><b>machine</b></td><td>Higher bar for auto-committing in hybrid mode.</td></tr>
+          <tr><td><code>debounceMs</code></td><td>100–60000</td><td><code>2000</code></td><td>window</td><td>Idle time after a save before analysis runs.</td></tr>
+          <tr><td><code>autoPushToRemote</code></td><td>boolean</td><td><code>false</code></td><td><b>machine</b></td><td>Push after creating a commit.</td></tr>
+          <tr><td><code>enabledLanguages</code></td><td>string[]</td><td>all</td><td>window</td><td>Which of <code>javascript</code>, <code>typescript</code>, <code>python</code> to analyze.</td></tr>
+          <tr><td><code>analyticsScope</code></td><td>enum</td><td><code>repository</code></td><td>window</td><td>Aggregate analytics per <code>repository</code> or per <code>machine</code>.</td></tr>
+          <tr><td><code>maxFilesPerCommit</code></td><td>number ≥ 1</td><td><code>50</code></td><td>window</td><td>Safety cap on files folded into one commit.</td></tr>
+          <tr><td><code>servicePath</code></td><td>string</td><td><code>""</code></td><td><b>machine</b></td><td><i>Advanced — executes code.</i> Absolute path to the service entry. Leave blank to auto-resolve.</td></tr>
+        </table></div>
+
+        <h3>Why some settings are machine-scoped</h3>
+        <p><code>commitMode</code>, <code>autoCommitThreshold</code>, <code>autoPushToRemote</code>, and <code>servicePath</code> are <b>machine-scoped</b> deliberately. A repository you clone ships its own <code>.vscode/settings.json</code>; if these were workspace-scoped, an untrusted repo could silently switch you into <code>automatic</code> mode, enable pushing, or point the extension at an arbitrary executable. Machine scope means only <i>your</i> User settings can change them.</p>
+
+        <h3>Tuning the milestone threshold</h3>
+        <ul>
+          <li>Commits triggering <b>too often</b> → raise <code>suggestThreshold</code> (e.g. <code>0.65</code>).</li>
+          <li>Commits <b>never</b> triggering → lower it (e.g. <code>0.35</code>), or use <b>Evaluate Milestone Now</b> to see the current score and the reasons behind it.</li>
+        </ul>
+      </section>
+
+      <section id="ai-providers">
+        <h2>AI Providers</h2>
+        <p><b>AI is entirely optional.</b> The default <code>heuristic</code> provider is deterministic, offline, and free. An LLM only improves the <i>quality of the feature label and commit subject</i> — it is never required to detect milestones or create commits.</p>
+
+        <h3>Setting one up</h3>
+        <ol>
+          <li><code>Ctrl/Cmd+Shift+P</code> → <b>SemiGit: Choose AI Provider</b></li>
+          <li>Pick <b>Offline (heuristic)</b>, <b>Local LLM (Ollama)</b>, or <b>Cloud API</b> → provider</li>
+          <li>Paste your key when prompted</li>
+          <li>Run <b>SemiGit: Test AI Provider</b> → expect <code>✓ "&lt;provider&gt;" responded</code></li>
+        </ol>
+        <div class="tblwrap"><table>
+          <tr><th>Provider</th><th>Key required</th><th>Where to get it</th><th>Default model</th></tr>
+          <tr><td><code>heuristic</code></td><td>no</td><td>built in, offline</td><td>—</td></tr>
+          <tr><td><code>ollama</code></td><td>no</td><td>run locally (<code>ollama serve</code>, <code>ollama pull llama3.1</code>)</td><td><code>llama3.1</code></td></tr>
+          <tr><td><code>openai</code></td><td>yes</td><td>platform.openai.com</td><td><code>gpt-4o-mini</code></td></tr>
+          <tr><td><code>anthropic</code></td><td>yes</td><td>console.anthropic.com</td><td><code>claude-3-5-haiku-latest</code></td></tr>
+          <tr><td><code>gemini</code></td><td>yes</td><td>aistudio.google.com</td><td><code>gemini-1.5-flash</code></td></tr>
+          <tr><td><code>deepseek</code></td><td>yes</td><td>platform.deepseek.com</td><td><code>deepseek-chat</code></td></tr>
+        </table></div>
+
+        <h3>What actually gets sent</h3>
+        <p>Cloud providers receive only a <b>sanitized structural summary</b>: repository name, file paths, changed identifier names, and a semantic summary — <b>never your raw file contents</b>. All free-text fields pass through a prompt-injection sanitizer before interpolation, and responses are normalized through a strict Zod schema.</p>
+
+        <h3>Key storage</h3>
+        <p>Keys are stored in the <b>OS keychain</b> via VS Code SecretStorage, passed to the local service <b>in memory only</b>, and never written to disk, the database, or logs. Any provider failure (bad key, network error, rate limit) silently falls back to the offline heuristic.</p>
+
+        <h3>Cost</h3>
+        <p>One LLM call happens per milestone evaluation — not per keystroke or save. With the cheap default models this is negligible.</p>
+      </section>
+
+      <section id="how-it-works">
+        <h2>How It Works</h2>
+        <h3>The pipeline</h3>
+        <pre><code>save file → capture (extension)
+          → AST diff (TS compiler)
+          → semantic categorization
+          → feature analysis (AI or heuristic)
+          → milestone score ≥ threshold?
+              ├─ no  → keep watching
+              └─ yes → commit draft (Conventional Commit)
+                        ├─ Suggest   → show in sidebar
+                        ├─ Automatic → commit now
+                        └─ Hybrid    → commit if score high</code></pre>
+        <ol>
+          <li><b>Capture</b> — the extension watches saves/creates/deletes for enabled languages and sends the path, event type, and content to the local service.</li>
+          <li><b>AST diff</b> — the file's previous and current content are parsed and compared, producing structural deltas: <code>function login added</code>, <code>method refresh removed</code>, etc.</li>
+          <li><b>Semantic categorization</b> — deltas are aggregated into a human-readable summary and a Conventional Commit category (<code>feat</code>, <code>fix</code>, <code>refactor</code>, <code>docs</code>, <code>test</code>, <code>chore</code>, …), with file-path heuristics for tests/docs/config.</li>
+          <li><b>Feature analysis</b> — the active provider (AI or heuristic) produces a normalized <code>FeatureAnalysis</code>: label, category, confidence, suggested type, scope, rationale.</li>
+          <li><b>Milestone scoring</b> — see the formula below.</li>
+          <li><b>Commit generation</b> — a Conventional Commit header plus a body listing the rationale and files.</li>
+          <li><b>Persistence</b> — every stage is recorded; the timeline and analytics update live.</li>
+        </ol>
+
+        <h3>The milestone score</h3>
+        <p>A weighted sum of five saturating signals, all normalized to <code>[0, 1]</code>:</p>
+        <pre><code>score = 0.15 × files
+      + 0.25 × structural
+      + 0.15 × duration
+      + 0.25 × featureConfidence
+      + 0.20 × aiConfidence</code></pre>
+        <div class="tblwrap"><table>
+          <tr><th>Signal</th><th>Saturates at</th></tr>
+          <tr><td>files changed</td><td>5 files</td></tr>
+          <tr><td>structural changes</td><td>8 entity deltas</td></tr>
+          <tr><td>session duration</td><td>30 minutes</td></tr>
+        </table></div>
+        <p>A commit is <b>suggested</b> when <code>score ≥ suggestThreshold</code> (default <code>0.5</code>), and <b>auto-created</b> in hybrid mode when <code>score ≥ autoCommitThreshold</code> (default <code>0.8</code>). Every decision carries a human-readable <code>reasons</code> list explaining the score.</p>
+
+        <h3>Language support</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Language</th><th>Parser</th><th>Detected entities</th></tr>
+          <tr><td>TypeScript / TSX</td><td>TypeScript Compiler API</td><td>functions, classes, methods, interfaces, enums, type aliases, arrow functions, JSX components, imports</td></tr>
+          <tr><td>JavaScript / JSX</td><td>TypeScript Compiler API</td><td>same as above</td></tr>
+          <tr><td>Python</td><td>heuristic parser</td><td>functions, classes, methods, imports</td></tr>
+        </table></div>
+        <p><code>web-tree-sitter</code> is supported as an opt-in upgrade: place <code>tree-sitter-&lt;lang&gt;.wasm</code> grammar files in a folder and set the <code>SEMIGIT_GRAMMARS_DIR</code> environment variable. Missing grammars simply keep the default parser.</p>
+      </section>
+
+      <section id="architecture">
+        <h2>Architecture</h2>
+        <h3>Three processes, three trust boundaries</h3>
+        <pre><code>┌─ VS Code Extension Host ──────────────────────────┐
+│ extension: service supervisor · commands · status │
+└──────┬──────────────────────────────┬─────────────┘
+       │ JSON-RPC over stdio          │ postMessage (Zod-validated)
+┌──────▼──────────────────────┐  ┌────▼──────────────────────┐
+│ Local Service (Node child)  │  │ Sandboxed Webview (CSP)   │
+│ · JSON-RPC handlers (Zod)   │  │ · React sidebar+dashboard │
+│ · pipeline + engines        │  └───────────────────────────┘
+│ · sql.js — SQLite in WASM   │
+│ · simple-git (no shell) → git
+└─────────────────────────────┘</code></pre>
+        <p><b>Why three processes?</b></p>
+        <ul>
+          <li>The <b>webview</b> is a sandboxed browser context — it can't touch the filesystem, so UI code is isolated from your machine.</li>
+          <li>The <b>extension host</b> is shared with every other extension; keeping analysis out of it means a heavy parse never freezes your editor.</li>
+          <li>The <b>service</b> is a child process the extension supervises, restarts on crash, and can kill.</li>
+        </ul>
+        <p>Nothing crosses a boundary without passing a Zod schema at runtime. A compile-time drift check ensures the schemas can never silently diverge from their TypeScript types.</p>
+
+        <h3>Design principles</h3>
+        <ul>
+          <li><b>Interface seams everywhere</b> — <code>LanguageParser</code>, <code>AIProvider</code>, and the repository layer are all swappable without touching orchestration. Swapping SQLite→WASM and regex→TS-compiler each touched one implementation file.</li>
+          <li><b>Deterministic core</b> — every engine is pure and synchronous; AI is an optional enhancement, not a dependency.</li>
+          <li><b>Composition root</b> — all wiring happens in one container; no service locators or globals.</li>
+        </ul>
+
+        <h3>Project structure</h3>
+        <pre><code>semigit/
+├─ packages/
+│  ├─ shared/      @semigit/shared   — domain types, typed IPC contract, Zod schemas
+│  ├─ service/     @semigit/service  — engines, AI layer, persistence, JSON-RPC server
+│  ├─ extension/   semigit           — VS Code extension: supervisor, commands, sidebar
+│  └─ webview/     @semigit/webview  — React + Tailwind UI (sidebar + dashboard)
+├─ scripts/verify-vsix.mjs           — packaging regression guard
+├─ .github/workflows/                — ci.yml (3-OS matrix), release.yml
+└─ turbo.json · tsconfig.base.json · biome.json</code></pre>
+        <pre><code>packages/service/src/
+├─ ai/             provider registry, adapters, heuristic fallback, prompt sanitization
+├─ backtest/       evaluation harness (backtest.ts, cli.ts)
+├─ db/             sql.js client, Drizzle schema, migration runner
+├─ engines/        ast/ · semantic · feature · milestone · commit · analytics · util
+├─ git/            GitService (simple-git only, never a shell)
+├─ pipeline/       orchestration of the full flow
+├─ repositories/   typed data access
+├─ rpc/            JSON-RPC server + validated handlers
+└─ config.ts · container.ts · logger.ts · paths.ts · index.ts</code></pre>
+      </section>
+
+      <section id="privacy">
+        <h2>Data, Storage &amp; Privacy</h2>
+        <h3>Where data lives</h3>
+        <div class="tblwrap"><table>
+          <tr><th>OS</th><th>Path</th></tr>
+          <tr><td>Windows</td><td><code>%APPDATA%\SemiGit\semigit.db</code></td></tr>
+          <tr><td>macOS</td><td><code>~/Library/Application Support/SemiGit/semigit.db</code></td></tr>
+          <tr><td>Linux</td><td><code>~/.local/share/SemiGit/semigit.db</code></td></tr>
+        </table></div>
+        <p>A single SQLite file, plus a <code>.tmp</code> file used for atomic writes. Deleting it resets all history.</p>
+
+        <h3>What is stored</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Table</th><th>Contents</th></tr>
+          <tr><td><code>repositories</code></td><td>repo path + name</td></tr>
+          <tr><td><code>sessions</code></td><td>start/end time, duration</td></tr>
+          <tr><td><code>file_changes</code></td><td><b>path, event type, timestamp only</b></td></tr>
+          <tr><td><code>ast_changes</code></td><td>structural deltas (entity type, name, change type)</td></tr>
+          <tr><td><code>semantic_changes</code></td><td>summary, category, confidence</td></tr>
+          <tr><td><code>features</code></td><td>detected feature candidates</td></tr>
+          <tr><td><code>milestones</code></td><td>score + detection time</td></tr>
+          <tr><td><code>commits</code></td><td>type, scope, message, hash, confidence, provider</td></tr>
+          <tr><td><code>timeline_events</code></td><td>the human-readable activity feed</td></tr>
+          <tr><td><code>settings</code></td><td>your merged configuration</td></tr>
+          <tr><td><code>ai_providers</code></td><td>provider/model records</td></tr>
+          <tr><td><code>_migrations</code></td><td>schema-version bookkeeping</td></tr>
+        </table></div>
+
+        <h3>What is not stored</h3>
+        <ul>
+          <li><b>Your source code.</b> File contents are used in memory to compute the AST diff, then discarded. Only derived facts ("a function named <code>login</code> was added") persist.</li>
+          <li><b>Your API keys.</b> They live in the OS keychain and in service memory only.</li>
+        </ul>
+
+        <h3>Network</h3>
+        <p>Zero network traffic with the default <code>heuristic</code> provider. With a cloud provider, exactly one request per milestone evaluation, carrying only the sanitized structural summary. There is no telemetry, no analytics upload, and no account.</p>
+      </section>
+
+      <section id="backtest">
+        <h2>The Backtest / Evaluation Harness</h2>
+        <p>How do you know the milestone detection and message generation are actually good? Measure them.</p>
+        <pre><code><span class="k">npm run backtest</span> -- &lt;path-to-git-repo&gt; [--limit N] [--json]</code></pre>
+        <p>The harness replays the <b>exact same engines</b> the live extension uses over a repository's real commit history — reconstructing each commit's before/after for every changed file — and compares what SemiGit <i>would</i> have generated to what the developer actually wrote.</p>
+        <div class="tblwrap"><table>
+          <tr><th>Metric</th><th>Meaning</th></tr>
+          <tr><td>Milestone-boundary flag rate</td><td>% of real commits SemiGit would have recognized as a commit point. A calibration proxy — humans commit at real boundaries.</td></tr>
+          <tr><td>Commit-type match rate</td><td>% of real Conventional Commits whose <code>type</code> SemiGit matched. Shown as <code>n/a</code> for repos that don't use Conventional Commits.</td></tr>
+          <tr><td>Avg subject word-overlap</td><td>Rough text similarity to the human subject. Human messages are terse and varied, so low values are expected; treat this as directional only.</td></tr>
+        </table></div>
+        <p>It also prints per-commit <code>real → generated</code> rows so you can eyeball the quality. This is the feedback loop used to tune the scoring weights and message heuristics: change the code, re-run the backtest, and watch the numbers move.</p>
+      </section>
+
+      <section id="development">
+        <h2>Development</h2>
+        <h3>Scripts</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Command</th><th>Purpose</th></tr>
+          <tr><td><code>npm run build</code></td><td>Build all packages (produces a self-contained, platform-independent <code>.vsix</code> payload)</td></tr>
+          <tr><td><code>npm run dev</code></td><td>Watch mode across packages</td></tr>
+          <tr><td><code>npm test</code></td><td>Run every package's test suite</td></tr>
+          <tr><td><code>npm run typecheck</code></td><td>Strict TypeScript check</td></tr>
+          <tr><td><code>npm run lint</code></td><td>Biome lint + format check</td></tr>
+          <tr><td><code>npm run format</code></td><td>Auto-format</td></tr>
+          <tr><td><code>npm run backtest -- &lt;repo&gt;</code></td><td>Run the evaluation harness</td></tr>
+          <tr><td><code>npm run verify-vsix &lt;file&gt;</code></td><td>Assert a packaged <code>.vsix</code> is complete</td></tr>
+          <tr><td><code>npm run clean</code></td><td>Remove build artifacts</td></tr>
+        </table></div>
+
+        <h3>Packaging</h3>
+        <pre><code><span class="k">cd</span> packages/extension
+<span class="k">npx vsce package</span> --no-dependencies -o semigit.vsix</code></pre>
+        <p>Because persistence is WebAssembly, <b>one <code>.vsix</code> runs on every OS and CPU</b> — no platform matrix, no native rebuilds, and no requirement that the user has Node installed.</p>
+
+        <h3>Testing</h3>
+        <p>90+ tests across all four packages:</p>
+        <ul>
+          <li><b>Unit</b> — engines, schemas, scoring, parsing, message generation</li>
+          <li><b>Integration</b> — real temporary git repositories, real SQLite round-trips</li>
+          <li><b>Security</b> — adversarial cases (argument injection, path traversal, oversized commits)</li>
+        </ul>
+
+        <h3>CI</h3>
+        <p><code>.github/workflows/ci.yml</code> runs on Windows, Linux, and macOS: lint → typecheck → tests → blocking dependency audit → build → <code>.vsix</code> packaging-regression check.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting</h2>
+        <h3>The service won't start / the sidebar says "Not connected"</h3>
+        <ol>
+          <li>Open <b>View → Output</b> and select <b>SemiGit</b> from the dropdown — all service logs and errors go there.</li>
+          <li>Make sure <code>npm run build</code> completed (the build copies the service and UI into the extension).</li>
+          <li>Try <b>SemiGit: Restart Service</b>.</li>
+          <li>If the service crashes repeatedly, the extension stops it and shows a notification with a <b>Restart Service</b> action.</li>
+        </ol>
+
+        <h3>No suggestions ever appear</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Check</th><th>Fix</th></tr>
+          <tr><td>Is the folder a git repo?</td><td>Run <code>git init</code></td></tr>
+          <tr><td>Did you <b>save</b> the file?</td><td>Analysis runs on save, not on typing</td></tr>
+          <tr><td>Is the file a supported type?</td><td><code>.ts .tsx .js .jsx .py</code></td></tr>
+          <tr><td>Is the language enabled?</td><td>Check <code>semigit.enabledLanguages</code></td></tr>
+          <tr><td>Is the score below threshold?</td><td>Run <b>Evaluate Milestone Now</b> to see the score and reasons; lower <code>semigit.suggestThreshold</code></td></tr>
+          <tr><td>Change too small?</td><td>The score needs meaningful structural change — one-line edits won't trigger it</td></tr>
+        </table></div>
+
+        <h3>The commit fails</h3>
+        <ul>
+          <li>Ensure <b>git is installed and on <code>PATH</code></b>.</li>
+          <li>Ensure the folder is a git repository with changes to stage.</li>
+          <li>"No staged changes to commit" means the files in the draft had nothing to stage.</li>
+          <li>If you exceed <code>semigit.maxFilesPerCommit</code>, the commit is refused by design — raise the cap or commit manually.</li>
+        </ul>
+
+        <h3>AI isn't being used (it silently fell back to the heuristic)</h3>
+        <p>Run <b>SemiGit: Test AI Provider</b>. It reports the exact reason:</p>
+        <div class="tblwrap"><table>
+          <tr><th>Message</th><th>Cause</th></tr>
+          <tr><td><code>provider is set to "heuristic" (offline)</code></td><td>You haven't selected an AI provider</td></tr>
+          <tr><td><code>No API key set for this provider</code></td><td>Run <b>Set API Key</b></td></tr>
+          <tr><td>An HTTP/auth error</td><td>Bad or expired key</td></tr>
+          <tr><td>A network/timeout error</td><td>Connectivity, or Ollama isn't running</td></tr>
+        </table></div>
+        <p>Any failure is non-fatal — SemiGit continues with the offline engine.</p>
+
+        <h3>The sidebar or dashboard is blank</h3>
+        <p>The webview has an error boundary; it will display the error and a reload action. Check the <b>SemiGit</b> output channel for a <code>clientError</code> line, then reload the window (<code>Developer: Reload Window</code>).</p>
+
+        <h3>Analytics look wrong with multiple VS Code windows open</h3>
+        <p>Each window runs its own service instance against the same database file. Concurrent writes are last-writer-wins, so some recent analytics rows can be lost. Writes are atomic, so the file never corrupts — and <b>your git history is never affected</b>. Prefer one window at a time for accurate analytics.</p>
+
+        <h3>Resetting everything</h3>
+        <p>Delete the database file (see <a href="#privacy">Data &amp; Privacy</a>) and restart. This clears sessions, timeline, and analytics. It does not touch your git history.</p>
+      </section>
+
+      <section id="faq">
+        <h2>FAQ</h2>
+        <p><b>Does it commit automatically without asking?</b><br>Not by default. <code>semigit.commitMode</code> is <code>suggest</code>, which only shows a card — nothing is committed until you click. <code>automatic</code> and <code>hybrid</code> do commit unattended if you enable them.</p>
+        <p><b>Does it push to my remote?</b><br>No. <code>semigit.autoPushToRemote</code> defaults to <code>false</code>, and it's machine-scoped so a cloned repo can't turn it on.</p>
+        <p><b>Do I need an API key?</b><br>No. The offline heuristic is the default and handles the entire pipeline, including auto-commit.</p>
+        <p><b>Is my source code sent to an AI provider?</b><br>No. Only a sanitized structural summary — file paths, changed identifier names, and a semantic summary. Raw file contents never leave your machine.</p>
+        <p><b>Do I need Node.js installed to use the extension?</b><br>No. The service runs on VS Code's own runtime. Node is only needed to build from source.</p>
+        <p><b>Which languages are supported?</b><br>TypeScript, TSX, JavaScript, JSX (via the TypeScript compiler) and Python (heuristic parser).</p>
+        <p><b>Can I undo an automatic commit?</b><br>Yes — <code>git reset --soft HEAD~1</code> keeps your changes staged.</p>
+        <p><b>Does it work offline?</b><br>Completely, in the default configuration.</p>
+      </section>
+
+      <section id="security">
+        <h2>Security</h2>
+        <p>SemiGit crosses several trust boundaries, so these invariants are enforced and documented:</p>
+        <ul>
+          <li><b>Prompt-injection sanitization</b> — repo names, paths, and identifiers are attacker-influenced, so all free text is sanitized (newlines, backticks, tags, override tokens stripped; length capped) before entering a prompt.</li>
+          <li><b>Untrusted webview</b> — every <code>postMessage</code> payload is validated with a schema before being forwarded; the webview runs under a strict nonce-based CSP with no <code>unsafe-inline</code>/<code>unsafe-eval</code>.</li>
+          <li><b>Validated RPC boundary</b> — every parameter is schema-checked: paths must be absolute, contain no null bytes, and no <code>..</code> traversal after normalization.</li>
+          <li><b>Secrets never persisted</b> — API keys live in the OS keychain and service memory only, and the logger redacts sensitive fields. Logs go to stderr, never stdout (which carries the RPC stream).</li>
+          <li><b>Git without a shell</b> — all git access goes through <code>simple-git</code> with arguments passed as an array and a <code>--</code> separator, so a filename can never be interpreted as a flag. No <code>child_process.exec</code>, no <code>shell: true</code>.</li>
+          <li><b>Commit caps</b> — every commit path enforces <code>maxFilesPerCommit</code>.</li>
+          <li><b>Machine-scoped destructive settings</b> — an untrusted workspace cannot enable auto-commit, auto-push, or redirect the service executable.</li>
+          <li><b>Bounded memory</b> — all caches keyed by session or repository have eviction limits.</li>
+        </ul>
+      </section>
+
+      <section id="limitations">
+        <h2>Limitations &amp; Roadmap</h2>
+        <h3>Known limitations</h3>
+        <ul>
+          <li>Python analysis uses the heuristic parser, not a full grammar — less precise than JS/TS.</li>
+          <li>Milestone weights are hand-tuned, not learned.</li>
+          <li>Concurrent VS Code windows share one database; recent analytics writes are last-writer-wins.</li>
+          <li>Generated subjects describe <i>structure</i> ("add AuthService"); only an LLM can infer deeper intent.</li>
+        </ul>
+        <h3>Possible next steps</h3>
+        <ul>
+          <li>Tree-sitter grammars bundled by default for Python parity</li>
+          <li>Learned or user-tunable milestone weights informed by the backtest</li>
+          <li>Inline commit preview and editing before committing</li>
+          <li>Heuristic-vs-AI comparison run through the evaluation harness</li>
+        </ul>
+        <p>Licensed under <b>MIT</b>.</p>
+      </section>
+
+      <nav class="docs__pager">
+        <a class="btn-ghost btn-ghost--sm" href="policypilot.html">&larr; PolicyPilot AI</a>
+        <a class="btn-ghost btn-ghost--sm" href="provchain.html">ProvChain &rarr;</a>
+      </nav>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <span class="footer__mark">YASHSINGH CHAUHAN</span>
+      <span class="footer__legal">© 2026 Yashsingh Chauhan — VIT Bhopal</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var burger = document.getElementById("navBurger");
+      var links = document.getElementById("navLinks");
+      burger.addEventListener("click", function () {
+        var open = links.classList.toggle("is-open");
+        burger.classList.toggle("is-open", open);
+        burger.setAttribute("aria-expanded", String(open));
+      });
+      var toc = document.querySelectorAll(".docs__toc a");
+      toc.forEach(function (a) {
+        var s = document.querySelector(a.getAttribute("href"));
+        if (!s) return;
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              toc.forEach(function (x) { x.classList.remove("is-active"); });
+              a.classList.add("is-active");
+            }
+          });
+        }, { rootMargin: "-20% 0px -70% 0px" }).observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>

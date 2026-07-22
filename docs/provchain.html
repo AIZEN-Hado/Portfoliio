@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProvChain — Docs — Yashsingh Chauhan</title>
+  <meta name="description" content="ProvChain documentation: overview, architecture, installation, and how to use.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+
+  <nav class="nav is-solid">
+    <a href="../index.html" class="nav__wordmark">YASHSINGH&nbsp;CHAUHAN</a>
+    <button class="nav__burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main class="container docs">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="docs__side">
+      <p class="eyebrow">Project Docs</p>
+      <h2 class="docs__sidetitle">ProvChain</h2>
+      <nav class="docs__toc">
+        <a href="#overview">Overview</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#getting-started">Getting Started</a>
+        <a href="#how-to-use">How to Use</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+      </nav>
+      
+      <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-provchain">&larr; Back to Portfolio</a>
+    </aside>
+
+    <!-- ============ BODY ============ -->
+    <article class="docs__body">
+      <h1>ProvChain</h1>
+      <p class="docs__tag">AI Code Provenance & Drift Intelligence Platform</p>
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>Audits AI-generated code against 200+ live CVE records with a multi-signal ML risk-scoring framework combining drift detection, CVSS severity, and semantic similarity. An embeddings-based retrieval pipeline provides automated vulnerability explanation and remediation recommendations for CI/CD security auditing.</p>
+        <div class="callout"><b>Stack</b>ML Risk Scoring · CVE/CVSS · Drift Detection · Embeddings · CI/CD Security</div>
+      </section>
+
+      <section id="architecture">
+        <h2>Architecture</h2>
+        <div class="todo">Add an architecture description or diagram here — main components, how data flows between them, and key design decisions.</div>
+      </section>
+
+      <section id="getting-started">
+        <h2>Getting Started</h2>
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>Python 3.11+</li>
+          <li>Access to a CVE feed</li>
+          <li>An embeddings model or API</li>
+        </ul>
+        <h3>Installation</h3>
+        <div class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <h3>Clone the repository</h3>
+            <pre><code><span class="k">git clone</span> &lt;repo-url&gt;</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <h3>Install dependencies</h3>
+            <div class="todo">Add the install command(s), e.g. <code>pip install -r requirements.txt</code> / <code>npm install</code> / <code>mvn install</code>.</div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step__num">3</span>
+          <div class="step__body">
+            <h3>Run the project</h3>
+            <div class="todo">Add the run command and what a successful start looks like.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-to-use">
+        <h2>How to Use</h2>
+        <div class="todo">Add step-by-step usage instructions here — the main workflow a user follows, with screenshots or example commands and expected output.</div>
+      </section>
+
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <div class="todo">Document environment variables, config files, API keys, and optional settings (e.g. an <code>.env</code> example block).</div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting / FAQ</h2>
+        <div class="todo">List common errors and their fixes, plus frequently asked questions.</div>
+      </section>
+
+      <nav class="docs__pager">
+        <a class="btn-ghost btn-ghost--sm" href="semigit.html">&larr; SemiGit</a>
+        <a class="btn-ghost btn-ghost--sm" href="interviewiq.html">InterviewIQ &rarr;</a>
+      </nav>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <span class="footer__mark">YASHSINGH CHAUHAN</span>
+      <span class="footer__legal">© 2026 Yashsingh Chauhan — VIT Bhopal</span>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav + active TOC highlighting
+    (function () {
+      var burger = document.getElementById("navBurger");
+      var links = document.getElementById("navLinks");
+      burger.addEventListener("click", function () {
+        var open = links.classList.toggle("is-open");
+        burger.classList.toggle("is-open", open);
+        burger.setAttribute("aria-expanded", String(open));
+      });
+      var toc = document.querySelectorAll(".docs__toc a");
+      var sections = Array.prototype.map.call(toc, function (a) {
+        return document.querySelector(a.getAttribute("href"));
+      });
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            var i = sections.indexOf(e.target);
+            toc.forEach(function (a) { a.classList.remove("is-active"); });
+            if (i > -1) toc[i].classList.add("is-active");
+          }
+        });
+      }, { rootMargin: "-30% 0px -60% 0px" }).observe && sections.forEach(function (s) {
+        if (s) new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              toc.forEach(function (a) { a.classList.remove("is-active"); });
+              var a = document.querySelector('.docs__toc a[href="#' + e.target.id + '"]');
+              if (a) a.classList.add("is-active");
+            }
+          });
+        }, { rootMargin: "-30% 0px -60% 0px" }).observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>
