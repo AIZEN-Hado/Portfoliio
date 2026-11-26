@@ -584,7 +584,7 @@
     var disA = new Float32Array(NC + 1);   // how far each cluster is from taking its shape (index c+1; 0 is the wall)
     var bcx = new Float32Array(NC + 1), bcz = new Float32Array(NC + 1), bcos = new Float32Array(NC + 1), bsin = new Float32Array(NC + 1);
     bcos[0] = 1;   // index 0 is the wall, which never turns
-    var scat = 0, scatV = 0, lastSY = -1, svE = 0;   // how far the figure is scattered, and the scroll speed behind it
+    var scat = 0, scatV = 0, syS = -1, syV = 0, svE = 0;   // how far the figure is scattered, and the scroll speed behind it
     var px = -1, py = -1, pxV = 0, pyV = 0;   // smoothed query position
 
     // per-frame buffers
@@ -717,9 +717,11 @@
 
       // Scroll speed drives the scatter: points leave their shape only while the page is moving, and
       // come back together when it stops. It rises quickly and settles more slowly.
-      if (lastSY < 0) lastSY = scrollY;
-      var sv = Math.abs(scrollY - lastSY) / dt; lastSY = scrollY;
-      svE += (sv - svE) * Math.min(1, dt * 14);
+      // The speed is read from a smoothed copy of the scroll position: scroll messages arrive in uneven steps, and
+      // differencing them directly made the scatter pulse.
+      if (syS < 0) syS = scrollY;
+      s = damp(syS, scrollY, syV, 16, dt); syS = s[0]; syV = s[1];
+      svE += (Math.abs(syV) - svE) * Math.min(1, dt * 14);
       var scTarget = reduced ? 0 : smooth((svE - 240) / 1500);
       s = damp(scat, scTarget, scatV, scTarget > scat ? 15 : 4.4, dt); scat = clamp(s[0], 0, 1); scatV = s[1];
 

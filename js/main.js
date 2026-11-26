@@ -49,7 +49,7 @@
 
   var worker = null, scene = null;
   var W = 0, H = 0, DPR = 1;
-  var docData = { marks: [], edge: 1e9 };
+  var docData = { marks: [], edge: 1e9, h: 1e9 };
 
   function send(m, transfer) {
     if (worker) worker.postMessage(m, transfer || []);
@@ -273,6 +273,7 @@
     m.push([sT - vh * 0.15, sT - vh * 0.15]);                                                           // skills, approaching
     m.push([sT + sH * 0.55 - vh * 0.5, sT + sH * 0.55 - vh * 0.5]);                                     // skills, at the ring
     docData.edge = docTop(contact);
+    docData.h = doc.documentElement.scrollHeight;
     m.push([docData.edge - vh * 0.25, docData.edge - vh * 0.25]);                                       // contact
     for (var i = 0; i < m.length; i++) {
       if (m[i][1] < m[i][0]) m[i][1] = m[i][0];
@@ -287,7 +288,8 @@
   /* ----------------------------------------------------------------- scroll */
   var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
   var cache = { prog: -1 };
-  var et = [], xt = [], ev = [], xv = [], hv = [], sceneVals = [];   // target and shown entering/leaving per scene, and the last --h written
+  var et = [], xt = [], ev = [], xv = [], hv = [], sceneVals = [];
+  var ruleEls = projs.map(function (el) { return el.querySelector('.proj__rule i'); });   // --h goes on the rule itself, so a scroll step does not restyle a whole scene   // target and shown entering/leaving per scene, and the last --h written
   var sceneRaf = 0, sceneLast = 0;
   /* the entering and leaving values run on a clock, not on the scroll: 0.55 s to come in, 0.42 s to go */
   function stepScenes(now) {
@@ -323,12 +325,12 @@
     var capInv = y + vh - 40 > docData.edge;
     if (capInv !== lastCapInv) { caption.classList.toggle('is-inv', capInv); lastCapInv = capInv; }
     // the footer line takes the bottom right at the very end of the page
-    var capOff = y + vh > doc.documentElement.scrollHeight - 120;
+    var capOff = y + vh > docData.h - 120;
     if (capOff !== lastCapOff) { caption.classList.toggle('is-off', capOff); lastCapOff = capOff; }
 
     // page progress line
     if (progress) {
-      var maxY = Math.max(1, doc.documentElement.scrollHeight - vh);
+      var maxY = Math.max(1, docData.h - vh);
       var pr = num(clamp(y / maxY, 0, 1));
       if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
     }
@@ -345,7 +347,7 @@
       et[i] = y >= from ? 1 : 0;
       xt[i] = y >= to ? 1 : 0;
       var h = num(clamp((y - g.top) / g.hold, 0, 1));
-      if (force || h !== hv[i]) { projs[i].style.setProperty('--h', h); hv[i] = h; }
+      if (force || h !== hv[i]) { if (ruleEls[i]) ruleEls[i].style.setProperty('--h', h); hv[i] = h; }
     }
     if (reduceMQ.matches) { for (i = 0; i < geo.length; i++) { et[i] = 1; xt[i] = 0; ev[i] = 1; xv[i] = 0; } }
     kickScenes();
@@ -398,7 +400,7 @@
     clearTimeout(resizeT);
     resizeT = setTimeout(function () { prepareText(true); measure(); }, 160);
   });
-  if (win.ResizeObserver) new ResizeObserver(queueMeasure).observe(doc.querySelector('main'));
+  if (win.ResizeObserver) { var roMeasure = new ResizeObserver(queueMeasure); roMeasure.observe(doc.querySelector('main')); roMeasure.observe(doc.body); }
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { prepareText(true); queueMeasure(); });
 
   /* ---------------------------------------------------------------- pointer */
