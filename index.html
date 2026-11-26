@@ -364,46 +364,83 @@
     <section class="skills" id="skills" data-section="skills">
       <div class="wrap">
         <h2 class="h2 rv"><span>Skills</span></h2>
-        <div class="skills__grid">
+        <div class="skills__grid" id="skillmap">
           <div class="skillset" data-i="10">
             <h3>AI and ML systems</h3>
-            <ul>
-              <li>LangGraph, LlamaIndex</li>
-              <li>Advanced RAG, GraphRAG</li>
-              <li>Multi-agent systems, MCP</li>
-              <li>PyTorch, Transformers</li>
-              <li>Hugging Face, PEFT, LoRA</li>
-              <li>vLLM, Ollama, Agents SDK</li>
+            <ul class="sk-list">
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">LangGraph</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">LlamaIndex</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">Advanced RAG</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">GraphRAG</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">Multi-agent systems</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">MCP</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">PyTorch</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Transformers</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Hugging Face</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">PEFT and LoRA</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">vLLM</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">Ollama</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Agents SDK</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="7">LLM evals</button></li>
             </ul>
           </div>
           <div class="skillset" data-i="11">
             <h3>Backend and APIs</h3>
-            <ul>
-              <li>FastAPI, Spring Boot</li>
-              <li>Node.js, Express</li>
-              <li>PostgreSQL, MongoDB</li>
-              <li>Qdrant, Redis, FAISS</li>
-              <li>REST, JWT auth</li>
+            <ul class="sk-list">
+              <li><button class="sk" type="button" aria-pressed="false" data-used="7">Python</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="5 9">Java</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="1 6">TypeScript</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0 7">FastAPI</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="5 9">Spring Boot</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3 4">Node.js</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3 4">Express</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="9">PostgreSQL</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3 4">MongoDB</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Qdrant</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Redis</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="0">FAISS</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">REST</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3">JWT auth</button></li>
             </ul>
           </div>
           <div class="skillset" data-i="12">
             <h3>Frontend</h3>
-            <ul>
-              <li>React, Vite</li>
-              <li>Tailwind CSS</li>
-              <li>HTML, CSS, JavaScript</li>
-              <li>Responsive layout</li>
+            <ul class="sk-list">
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3 4">React</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="6">React Native</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="4">Vite</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="3 4">Tailwind CSS</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="8">HTML, CSS, JavaScript</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Responsive layout</button></li>
             </ul>
           </div>
           <div class="skillset" data-i="13">
             <h3>Cloud and tools</h3>
-            <ul>
-              <li>Docker, Kubernetes</li>
-              <li>AWS: EC2, VPC, IAM, S3</li>
-              <li>Git, Linux</li>
-              <li>Stripe, OAuth</li>
+            <ul class="sk-list">
+              <li><button class="sk" type="button" aria-pressed="false" data-used="9">Docker</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Kubernetes</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">AWS: EC2, VPC, IAM, S3</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Git</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="">Linux</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="4">Stripe</button></li>
+              <li><button class="sk" type="button" aria-pressed="false" data-used="4">OAuth</button></li>
             </ul>
           </div>
+        </div>
+        <p class="skread" id="skread" aria-live="polite">Pick a skill to see where it shipped, or a project to see what it was built with.</p>
+        <div class="skmap">
+          <ol class="skrail" aria-label="Projects">
+            <li><button class="skp" type="button" aria-pressed="false" data-p="0"><i aria-hidden="true"></i><span>PolicyPilot AI</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="1"><i aria-hidden="true"></i><span>SemiGit</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="2"><i aria-hidden="true"></i><span>ProvChain</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="3"><i aria-hidden="true"></i><span>InterviewIQ</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="4"><i aria-hidden="true"></i><span>ClasslyAI</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="5"><i aria-hidden="true"></i><span>Offline UPI Mesh</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="6"><i aria-hidden="true"></i><span>All-Ears</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="7"><i aria-hidden="true"></i><span>Fisherman</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="8"><i aria-hidden="true"></i><span>LazyForm</span></button></li>
+            <li><button class="skp" type="button" aria-pressed="false" data-p="9"><i aria-hidden="true"></i><span>Dispatch Load Balancer</span></button></li>
+          </ol>
         </div>
       </div>
     </section>

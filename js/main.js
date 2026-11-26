@@ -440,6 +440,90 @@
     el.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') hoverBlur(); });
   });
 
+  /* ------------------------------------------------------------ skills map
+     Each skill lists the projects it shipped in, each project the skills it was built with. Hovering or focusing
+     previews a link, a click or tap keeps it, Escape lets go. */
+  (function () {
+    var grid = doc.getElementById('skillmap'), read = doc.getElementById('skread');
+    if (!grid || !read) return;
+    var map = doc.querySelector('.skmap');
+    var chips = Array.prototype.slice.call(grid.querySelectorAll('.sk'));
+    var dots = Array.prototype.slice.call(map.querySelectorAll('.skp'));
+    var used = chips.map(function (c) {
+      var u = (c.getAttribute('data-used') || '').split(' ').filter(Boolean).map(Number);
+      if (u.length) c.setAttribute('data-n', String(u.length));
+      return u;
+    });
+    var IDLE = read.textContent;
+    var stacks = projs.map(function (pr) {
+      var st = pr.querySelector('.case__stack');
+      return st ? st.textContent.replace(/^Built with\s*/, '').replace(/\.$/, '') : '';
+    });
+    var pinned = null, shown = null;       // {t: 's' | 'p', i}
+
+    function listProjects(frag, ids) {
+      ids.forEach(function (k, n) {
+        if (n) frag.appendChild(doc.createTextNode(n === ids.length - 1 ? ' and ' : ', '));
+        var a = doc.createElement('a'); a.href = '#' + projs[k].id; a.textContent = CLUSTER_NAMES[k]; a.setAttribute('data-go', String(k));
+        frag.appendChild(a);
+      });
+    }
+    function render(sel) {
+      shown = sel;
+      var has = !!sel;
+      grid.classList.toggle('has-sel', has); map.classList.toggle('has-sel', has);
+      var litC = [], litP = [];
+      if (sel && sel.t === 's') litP = used[sel.i];
+      if (sel && sel.t === 'p') chips.forEach(function (c, i) { if (used[i].indexOf(sel.i) >= 0) litC.push(i); });
+      chips.forEach(function (c, i) {
+        var on = sel && ((sel.t === 's' && sel.i === i) || litC.indexOf(i) >= 0);
+        c.classList.toggle('is-lit', !!on);
+        c.setAttribute('aria-pressed', pinned && pinned.t === 's' && pinned.i === i ? 'true' : 'false');
+      });
+      dots.forEach(function (d, k) {
+        var on = sel && ((sel.t === 'p' && sel.i === k) || litP.indexOf(k) >= 0);
+        d.classList.toggle('is-lit', !!on);
+        d.setAttribute('aria-pressed', pinned && pinned.t === 'p' && pinned.i === k ? 'true' : 'false');
+      });
+      var frag = doc.createDocumentFragment(), b;
+      if (!sel) { frag.appendChild(doc.createTextNode(IDLE)); }
+      else if (sel.t === 's') {
+        b = doc.createElement('b'); b.textContent = chips[sel.i].textContent; frag.appendChild(b);
+        if (litP.length) { frag.appendChild(doc.createTextNode(' shipped in ')); listProjects(frag, litP); frag.appendChild(doc.createTextNode('.')); }
+        else frag.appendChild(doc.createTextNode(' is not tied to a project on this page.'));
+      } else {
+        b = doc.createElement('b'); b.textContent = CLUSTER_NAMES[sel.i]; frag.appendChild(b);
+        frag.appendChild(doc.createTextNode(' was built with ' + stacks[sel.i] + '. '));
+        var a = doc.createElement('a'); a.href = '#' + projs[sel.i].id; a.textContent = 'Open the project'; a.setAttribute('data-go', String(sel.i));
+        frag.appendChild(a);
+      }
+      read.textContent = ''; read.appendChild(frag);
+    }
+    function preview(sel) { render(sel); }
+    function restore() { render(pinned); }
+    function toggle(sel) {
+      pinned = pinned && pinned.t === sel.t && pinned.i === sel.i ? null : sel;
+      render(sel);
+    }
+    function wire(el, sel) {
+      el.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') preview(sel); });
+      el.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') restore(); });
+      el.addEventListener('focus', function () { preview(sel); });
+      el.addEventListener('blur', function () { restore(); });
+      el.addEventListener('click', function () { toggle(sel); });
+    }
+    chips.forEach(function (c, i) { wire(c, { t: 's', i: i }); });
+    dots.forEach(function (d, k) { wire(d, { t: 'p', i: k }); });
+    read.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a[data-go]') : null;
+      if (!a) return;
+      e.preventDefault();
+      var k = parseInt(a.getAttribute('data-go'), 10);
+      if (geo[k]) win.scrollTo({ top: geo[k].rest });
+    });
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pinned) { pinned = null; restore(); } });
+  })();
+
   /* ------------------------------------------------------------------- cases */
   function setOpen(proj, v) {
     var i = projs.indexOf(proj);

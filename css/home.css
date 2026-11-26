@@ -223,9 +223,31 @@
 .skillset { border-top: 1px solid var(--rule-strong); padding-top: 1rem; transition: border-color 0.25s ease; }
 .skillset h3 { font-family: var(--sans); font-weight: 650; font-size: 1.2rem; margin-bottom: 0.7rem; transition: color 0.25s ease; }
 .skillset ul { list-style: none; }
-.skillset li { font-size: 1.1rem; line-height: 1.8; }
 .skillset:hover { border-top-color: var(--cobalt); }
 .skillset:hover h3 { color: var(--cobalt); }
+
+/* A skill is a button: it knows which projects it shipped in, and a project knows what it was built with. */
+.sk-list { display: flex; flex-wrap: wrap; gap: 0.1rem 1.15rem; }
+.sk-list li { font-size: 1.1rem; line-height: 1.85; }
+.sk, .skp { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.sk { border-bottom: 1px dotted var(--rule-strong); transition: color 0.2s ease, opacity 0.2s ease, border-color 0.2s ease; }
+.sk[data-n]::after { content: attr(data-n); font-family: var(--sans); font-size: 0.62em; font-weight: 650; vertical-align: 0.55em; margin-left: 0.15em; color: var(--cobalt); }
+.sk:not([data-n]) { border-bottom-color: var(--rule); }
+.skills__grid.has-sel .sk { opacity: 0.3; }
+.skills__grid.has-sel .sk.is-lit { opacity: 1; color: var(--cobalt); border-bottom: 1px solid var(--cobalt); }
+
+.skmap { max-width: 44rem; }
+.skread { margin-top: clamp(2.2rem, 5vh, 3.4rem); border-top: 1px solid var(--rule-strong); padding-top: 1rem; min-height: 4.6em; max-width: 44rem; font-size: 1.08rem; line-height: 1.55; color: var(--ink-2); }
+.skread > * { max-width: 36rem; }
+.skread b { font-family: var(--sans); font-weight: 650; color: var(--ink); }
+.skread a { color: var(--cobalt); text-decoration: underline; text-underline-offset: 0.18em; }
+.skrail { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.9rem 1rem; margin-top: 0.9rem; }
+.skp { display: flex; align-items: flex-start; gap: 0.55rem; font-family: var(--sans); font-size: 0.92rem; font-weight: 520; line-height: 1.3; color: var(--ink-2); transition: color 0.2s ease, opacity 0.2s ease; }
+.skp i { flex: none; width: 0.72rem; height: 0.72rem; margin-top: 0.2em; border-radius: 50%; border: 1.5px solid var(--ink-2); transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.3s ease; }
+.skmap.has-sel .skp { opacity: 0.38; }
+.skmap.has-sel .skp.is-lit { opacity: 1; color: var(--ink); }
+.skmap.has-sel .skp.is-lit i { background: var(--cobalt); border-color: var(--cobalt); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cobalt) 20%, transparent); }
+.skp:hover { color: var(--cobalt); }
 
 /* ---------- Contact ---------- */
 .contact {
@@ -291,9 +313,11 @@
 @media (max-width: 1099px) {
   .caption { display: none; }
   /* no reserved stage here: a light veil keeps text legible where the figure passes behind it */
-  .intro__name, .work__head .h2, .work__lede, .intro__body p, .facts, .principle, .skills .h2, .skillset { background: rgba(233, 235, 240, 0.74); }
+  .intro__name, .work__head .h2, .work__lede, .intro__body p, .facts, .principle, .skills .h2, .skillset, .skmap { background: rgba(233, 235, 240, 0.74); }
+  /* the reading stays at the foot of the screen while the chips above are tapped */
+  .skread { position: sticky; bottom: 0.6rem; z-index: 2; background: rgba(233, 235, 240, 0.96); padding: 0.8rem 0.7rem; margin-inline: -0.7rem; min-height: 0; border: 1px solid var(--rule-strong); }
   /* the veil reaches past the text on every side, and the negative margin keeps the text itself on the gutter */
-  .intro__name, .work__head .h2, .work__lede, .intro__body p, .facts, .principle, .skills .h2, .skillset { padding-inline: 0.7rem; margin-inline: -0.7rem; }
+  .intro__name, .work__head .h2, .work__lede, .intro__body p, .facts, .principle, .skills .h2, .skillset, .skmap { padding-inline: 0.7rem; margin-inline: -0.7rem; }
   .intro__body p, .work__lede { padding-block: 0.35rem; }
   .intro__body .intro__lead { padding-block: 0.55rem; }
   .intro__name { padding-block: 0.12em 0.2em; }
@@ -311,6 +335,7 @@
 @media (max-width: 900px) {
   .case__cols, .principles { grid-template-columns: 1fr; }
   .skills__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .skrail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .proj__title { --fs: clamp(2.7rem, 12.5vw, 5rem); }
   .proj.is-open .proj__title { --fs: clamp(2rem, 8.5vw, 3.2rem); }
   .proj__case .case__cols { gap: 1rem; }
@@ -318,6 +343,7 @@
 }
 @media (max-width: 520px) {
   .skills__grid { grid-template-columns: 1fr; }
+  .skrail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .facts > div { grid-template-columns: 1fr; gap: 0.2rem; }
 }
 /* short screens: leave the case more room */
