@@ -71,16 +71,17 @@
     var lo = 0, hi = 1;
     if (mode === 'photo') {          // auto-levels, so a flat photo still has full range
       var acc = 0, total = sw * sh, a = 0, b = 255;
-      for (a = 0; a < 255 && acc < total * 0.04; a++) acc += hist[a];
+      for (a = 0; a < 255 && acc < total * 0.01; a++) acc += hist[a];
       acc = 0;
-      for (b = 255; b > 0 && acc < total * 0.04; b--) acc += hist[b];
+      for (b = 255; b > 0 && acc < total * 0.01; b--) acc += hist[b];
       lo = a / 255; hi = Math.max(lo + 0.1, b / 255);
     }
     var out = new Float32Array(pts.length / 2);
     for (var k = 0; k < out.length; k++) {
       var sx = clamp(Math.round(pts[k * 2] / W * (sw - 1)), 0, sw - 1);
       var sy = clamp(Math.round(pts[k * 2 + 1] / H * (sh - 1)), 0, sh - 1);
-      var v = 1 - clamp((lum[sy * sw + sx] - lo) / (hi - lo), 0, 1);
+      var v = clamp((lum[sy * sw + sx] - lo) / (hi - lo), 0, 1);
+      if (!(mode === 'photo' && fig.getAttribute('data-tone') === 'light')) v = 1 - v;   // data-tone="light": dots follow the light, for a dark photo
       out[k] = mode === 'photo' ? Math.pow(v, 1.12) : v;
     }
     return out;
@@ -94,7 +95,7 @@
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    var cell = Math.max(5.5, Math.round(W / 58 * 2) / 2);
+    var cell = Math.max(5, Math.round(W / 68 * 2) / 2);
     var rowH = cell * 0.866;
     var cols = Math.ceil(W / cell) + 1, rows = Math.ceil(H / rowH) + 1;
     var pts = new Float32Array(cols * rows * 2), n = 0;
