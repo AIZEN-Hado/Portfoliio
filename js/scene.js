@@ -546,7 +546,7 @@
      Engine
      ========================================================================== */
   var BUCKETS = 6;
-  var B_ALPHA = [0.20, 0.32, 0.52, 0.88, 0.60, 0.30];
+  var B_ALPHA = [0.34, 0.48, 0.68, 0.92, 0.72, 0.44];
   var B_SIZE = [0.85, 0.95, 1.0, 1.0, 1.05, 1.15];
   var STD_HZ = [60, 72, 75, 90, 100, 120, 144, 165, 240];
   var NEIGHBOURS = 14;
@@ -930,7 +930,7 @@
       }
 
       // points, one batched path per (cluster, depth bucket, side)
-      var dim = 1 - 0.38 * maxAct;
+      var dim = 1 - 0.2 * maxAct;
       var aScale = wide ? 1 : 0.7;
       var cursorBase = 0;
       var bokeh = 0;
@@ -938,14 +938,14 @@
         var a2 = cc >= 0 ? act[cc] : 0;
         var colInk = mix(INK, COBALT, a2);
         var colPaper = mix(PAPER, WHITE, a2);
-        var cdim = cc >= 0 ? lerp(dim, 1, a2) : dim * 0.62;
+        var cdim = cc >= 0 ? lerp(dim, 1, a2) : dim * 0.85;
         for (bk = 0; bk < BUCKETS; bk++) {
           for (side = 0; side < 2; side++) for (var bnd = 0; bnd < NB; bnd++) {
             key = (((cc + 1) * BUCKETS + bk) * 2 + side) * NB + bnd;
             var from = counts[key], to = key + 1 <= K - 1 ? counts[key + 1] : counts[K];
             if (to <= from) continue;
             // `counts[key]` was turned into start offsets; end is the next key's start
-            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd] * (bnd < NB - 1 && cc >= 0 ? lerp(0.25, 1, a2) : 1);
+            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd] * (bnd < NB - 1 && cc >= 0 ? lerp(0.5, 1, a2) : 1);
             ctx.fillStyle = rgb(side ? colPaper : colInk);
             ctx.beginPath();
             for (var q2 = from; q2 < to; q2++) {

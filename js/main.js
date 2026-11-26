@@ -283,7 +283,7 @@
 
   /* ----------------------------------------------------------------- scroll */
   var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
-  var cache = { np: -1, prog: -1 };
+  var cache = { prog: -1 };
   var sceneVals = [];           // last written [e, h, x] per scene
   var current = -1, railOn = false;
 
@@ -307,10 +307,6 @@
       var pr = num(clamp(y / maxY, 0, 1));
       if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
     }
-
-    // the name starts condensed and its width axis opens as the page scrolls
-    var np = num(clamp(y / (vh * 1.1), 0, 1));
-    if (force || np !== cache.np) { setVar(introEl, '--np', np); cache.np = np; }
 
     // project scenes
     var best = -1, bestP = 0;
@@ -354,7 +350,26 @@
     else setCaption(sectionKey);
   }
 
+  /* Resting between two scenes would leave a title half hidden. When scrolling stops there, ease on to the nearer
+     resting place: the end of the scene you were in, or the start of the next. Resting anywhere inside a scene is fine. */
+  var snapTimer = 0, touching = false;
+  function snapToScene() {
+    if (reduceMQ.matches || touching || !geo.length) return;
+    var y = win.scrollY, target = null, i;
+    for (i = 0; i < geo.length; i++) {
+      var g = geo[i], endHold = g.top + g.hold, nextTop = i + 1 < geo.length ? geo[i + 1].top : endHold + g.pin;
+      if (i === 0 && y > g.top - g.pin * 0.9 && y < g.top) { target = y - (g.top - g.pin * 0.9) < g.top - y ? g.top - g.pin * 0.9 : g.top; break; }
+      if (y > endHold && y < nextTop) { target = y - endHold < nextTop - y ? endHold : nextTop; break; }
+    }
+    if (target !== null && Math.abs(target - y) > 6) win.scrollTo({ top: target, behavior: 'smooth' });
+  }
+  function queueSnap() { clearTimeout(snapTimer); snapTimer = setTimeout(snapToScene, 170); }
+  win.addEventListener('touchstart', function () { touching = true; clearTimeout(snapTimer); }, { passive: true });
+  win.addEventListener('touchend', function () { touching = false; queueSnap(); }, { passive: true });
+  win.addEventListener('touchcancel', function () { touching = false; queueSnap(); }, { passive: true });
+
   win.addEventListener('scroll', function () {
+    queueSnap();
     send({ type: 'scroll', y: win.scrollY });
     onScrollForFocus();
     if (!scrollQueued) {

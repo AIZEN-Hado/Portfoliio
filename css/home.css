@@ -45,7 +45,7 @@
   font-size: calc(clamp(3.6rem, 12.2vw, 13rem) * var(--fit, 1));
   line-height: 0.86; letter-spacing: -0.035em;
   /* the width axis opens as you scroll through the section */
-  font-variation-settings: "wdth" calc(75 + 25 * var(--np));
+  font-variation-settings: "wdth" 84;
 }
 .intro__name .line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
 .intro__name .line > span { display: inline-block; white-space: nowrap; }
@@ -112,9 +112,9 @@
 /* things that fade and lift in once the title is most of the way up, and leave before it */
 .proj__meta, .proj__line, .proj__actions, .proj__rule {
   --o: 0.6;
-  --in: clamp(0, (var(--e) - var(--o)) * 3, 1);
-  opacity: calc(var(--in) * (1 - clamp(0, var(--x) * 2.6, 1)));
-  transform: translateY(calc((1 - var(--in)) * 26px - clamp(0, var(--x) * 2.6, 1) * 18px));
+  --in: clamp(0, (var(--e) - var(--o)) * 4.5, 1);
+  opacity: calc(var(--in) * (1 - clamp(0, var(--x) * 4, 1)));
+  transform: translateY(calc((1 - var(--in)) * 26px - clamp(0, var(--x) * 4, 1) * 18px));
 }
 .proj__meta { --o: 0.5; display: flex; flex-wrap: wrap; gap: 0.2rem 1.4rem; font-family: var(--sans); font-size: 0.97rem; font-weight: 520; color: var(--ink-2); }
 .proj__year { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 650; }
@@ -124,18 +124,31 @@
   font-family: var(--sans); font-weight: 620;
   font-size: calc(var(--fs) * var(--fit, 1));
   line-height: 0.9; letter-spacing: -0.032em;
-  /* opens from narrow to wide while the scene is held */
-  font-variation-settings: "wdth" calc(75 + 25 * var(--h));
+  font-variation-settings: "wdth" 86;
   transition: font-size 0.7s var(--ease);
 }
-.proj__title .line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.proj__title .line {
+  display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em;
+  /* how far this line has come in (--ti) and gone out (--to), 0 to 1; each project's data-fx says how it moves */
+  --ti: clamp(0, (var(--e) - 0.38 - var(--li, 0) * 0.08) * 2.4, 1);
+  --to: clamp(0, (var(--x) - 0.04 - var(--li, 0) * 0.06) * 2.6, 1);
+}
 .proj__title .line:nth-child(2) { --li: 1; }
 .proj__title .line > span {
   display: inline-block; white-space: nowrap;
-  transform: translateY(calc(
-    (1 - clamp(0, (var(--e) - 0.38 - var(--li, 0) * 0.08) * 2.4, 1)) * 130%
-    - clamp(0, (var(--x) - 0.04 - var(--li, 0) * 0.06) * 2.6, 1) * 130%));
+  transform: translateY(calc((1 - var(--ti)) * 130% - var(--to) * 130%));
 }
+/* one way of arriving per project, chosen to suit it */
+.proj[data-fx="wipe-x"] .proj__title .line > span, .proj[data-fx="wipe-rl"] .proj__title .line > span, .proj[data-fx="wipe-y"] .proj__title .line > span { transform: none; }
+.proj[data-fx="wipe-x"] .proj__title .line > span { clip-path: inset(-0.15em calc((1 - var(--ti)) * 100%) -0.15em calc(var(--to) * 100%)); }   /* printed, left to right */
+.proj[data-fx="wipe-rl"] .proj__title .line > span { clip-path: inset(-0.15em calc(var(--to) * 100%) -0.15em calc((1 - var(--ti)) * 100%)); }  /* right to left */
+.proj[data-fx="wipe-y"] .proj__title .line > span { clip-path: inset(calc(var(--to) * 100%) 0 calc((1 - var(--ti)) * 100%) 0); }                 /* filled in from the top */
+.proj[data-fx="slide-l"] .proj__title .line > span { transform: translateX(calc((1 - var(--ti)) * -110% + var(--to) * 110%)); }
+.proj[data-fx="slide-r"] .proj__title .line > span { transform: translateX(calc((1 - var(--ti)) * 110% - var(--to) * 110%)); }
+.proj[data-fx="drop"] .proj__title .line > span { transform: translateY(calc((1 - var(--ti)) * -130% + var(--to) * 130%)); }
+.proj[data-fx="pop"] .proj__title .line > span { transform-origin: 0 100%; transform: translateY(calc((1 - var(--ti)) * 130% - var(--to) * 130%)) scale(calc(0.88 + 0.12 * var(--ti))); }
+.proj[data-fx="split"] .proj__title .line:nth-child(1) > span { transform: translateX(calc((1 - var(--ti)) * -110% + var(--to) * -110%)); }
+.proj[data-fx="split"] .proj__title .line:nth-child(2) > span { transform: translateX(calc((1 - var(--ti)) * 110% + var(--to) * 110%)); }
 
 /* a line that runs the width of the text column and fills as you read the scene */
 .proj__rule { --o: 0.56; display: block; width: min(100%, 46rem); height: 2px; background: var(--rule); }
@@ -313,9 +326,9 @@
   .js .rv, .js .rv.is-split { visibility: visible; animation: none; }
   .js .rv.is-split:not(.in) .l > span, .js .rv.is-split.in .l > span { transform: none; transition: none; }
   .js .intro__name:not(.in) .line > span, .js .intro__name.in .line > span { transform: none; transition: none; }
-  .intro__name, .proj__title { font-variation-settings: "wdth" 88; }
   .proj { height: auto; min-height: 100vh; min-height: 100svh; }
   .proj__pin { position: relative; height: auto; min-height: inherit; }
+  .proj[data-fx] .proj__title .line > span { transform: none; clip-path: none; }
   .proj__title .line > span, .proj__meta, .proj__line, .proj__actions, .proj__rule { transform: none; opacity: 1; }
   .proj__rule i { transform: none; }
   .proj__case, .proj__title, .proj__case .case__cols > div, .proj__case .case__stack, .rail, .rail a { transition: none; }
