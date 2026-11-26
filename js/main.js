@@ -2,7 +2,7 @@
    main.js — everything on the page that isn't the figure.
    Starts the figure (in a Worker when possible) and feeds it scroll, pointer and layout.
    Drives the pinned project scenes (--e / --h / --x), the project rail, the line-mask
-   reveals, the hero and introduction scroll effects, the caption and the nav colour.
+   reveals, the introduction's scroll effects, the caption and the nav colour.
    The camera marks it sends are built from the same scene geometry that drives the text,
    so the figure and the page are always on the same beat.
    ========================================================================== */
@@ -16,7 +16,7 @@
   var contact = doc.getElementById('contact');
   var projs = Array.prototype.slice.call(doc.querySelectorAll('.proj'));
   var sets = Array.prototype.slice.call(doc.querySelectorAll('.skillset'));
-  var heroEl = doc.getElementById('top'), introEl = doc.getElementById('about'), skillsEl = doc.getElementById('skills');
+  var introEl = doc.getElementById('about'), skillsEl = doc.getElementById('skills');
   var introName = doc.querySelector('.intro__name');
   var rail = doc.getElementById('rail'), railLinks = rail ? Array.prototype.slice.call(rail.querySelectorAll('a')) : [];
   var progress = doc.getElementById('progress');
@@ -28,24 +28,23 @@
     'AI and ML systems', 'Backend and APIs', 'Frontend', 'Cloud and tools'];
 
   var CAPTIONS = {
-    hero: 'More than 10,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.',
-    about: 'The same space from the side. The ten projects wind down a helix.',
-    work: 'Each cluster is one project, and its shape follows what the project does. The camera moves as you scroll.',
-    skills: 'Skills sit in four clusters below the projects.',
+    about: 'About 8,000 points in a three-dimensional space, each one a fragment of my work. The ten projects wind down a helix. Your cursor is a query: its nearest points light up.',
+    work: 'Each shape is one project. Scroll and the points scatter, then settle into the next one.',
+    skills: 'Skills sit in a column below the projects: a network, a database, a browser and a cloud.',
     contact: 'The end of the space. Write to me.'
   };
   // what each project's cluster is drawn as, in the order of the page
   var PROJECT_CAPTIONS = [
-    'PolicyPilot AI, drawn as a graph: hubs of points joined by edges.',
-    'SemiGit, drawn as a tree: a trunk that keeps branching, like a commit history.',
-    'ProvChain, drawn as a drift: a tight line of points that spreads as it moves.',
-    'InterviewIQ, drawn as three stacked layers of points.',
-    'ClasslyAI, drawn as three groups: students, instructors and admins.',
-    'Offline UPI Mesh, drawn as a chain of five devices, hop by hop.',
-    'All-Ears, drawn as a ring with a wavering rim.',
-    'Fisherman, drawn as two strands, baseline and candidate. A few points have regressed.',
-    'LazyForm, drawn as a multi-step form: three pages of fields, filled in order.',
-    'Dispatch Load Balancer, drawn as a depot with five vehicles, each on its own route.'
+    'PolicyPilot AI, drawn as a policy document with a verified badge.',
+    'SemiGit, drawn as a commit graph: two branches leave main and merge back.',
+    'ProvChain, drawn as three blocks, each linked to the one before.',
+    'InterviewIQ, drawn as a question and its answer.',
+    'ClasslyAI, drawn as a graduation cap.',
+    'Offline UPI Mesh, drawn as five phones passing a payment hand to hand.',
+    'All-Ears, drawn as headphones listening to a waveform.',
+    'Fisherman, drawn as a fish and the hook after it.',
+    'LazyForm, drawn as a short form, filled in step by step.',
+    'Dispatch Load Balancer, drawn as requests in, one balancer, four servers sharing the load.'
   ];
 
   var worker = null, scene = null;
@@ -242,7 +241,7 @@
 
   /* ---------------------------------------------------------------- layout */
   var geo = [];                 // per project scene: { top, hold, pin }
-  var layout = { vh: 0, heroH: 0, introTop: 0, introBottom: 0, workTop: 0, first: 0, last: 0 };
+  var layout = { vh: 0, introTop: 0, introBottom: 0, workTop: 0, first: 0, last: 0 };
   var measureQueued = false;
   function queueMeasure() {
     if (measureQueued) return;
@@ -257,8 +256,7 @@
       return { top: docTop(el), hold: Math.max(1, el.offsetHeight - pin), pin: pin };
     });
     layout.vh = vh;
-    layout.heroH = heroEl.offsetHeight;
-    layout.introTop = docTop(introEl); layout.introBottom = layout.introTop + introEl.offsetHeight;
+        layout.introTop = docTop(introEl); layout.introBottom = layout.introTop + introEl.offsetHeight;
     layout.first = geo.length ? geo[0].top : 0;
     layout.last = geo.length ? geo[geo.length - 1].top + geo[geo.length - 1].hold + geo[geo.length - 1].pin : 0;
 
@@ -266,8 +264,7 @@
     // Between one park's end and the next one's start it flies. For the project scenes the park is
     // exactly the pinned range, so the camera arrives as the title finishes rising and leaves when the scene lets go.
     var m = [];
-    m.push([0, vh * 0.12]);                                                                             // hero
-    m.push([layout.introTop - vh * 0.1, Math.max(layout.introTop + vh * 0.3, layout.introBottom - vh * 0.65)]);  // introduction
+    m.push([0, Math.max(vh * 0.3, layout.introBottom - vh * 0.65)]);                                    // introduction, at the top of the page
     geo.forEach(function (g) { m.push([g.top, g.top + g.hold]); });                                     // projects
     var sT = docTop(skillsEl), sH = skillsEl.offsetHeight;
     m.push([sT - vh * 0.15, sT - vh * 0.15]);                                                           // skills, approaching
@@ -286,7 +283,7 @@
 
   /* ----------------------------------------------------------------- scroll */
   var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
-  var cache = { hx: -1, np: -1, prog: -1 };
+  var cache = { np: -1, prog: -1 };
   var sceneVals = [];           // last written [e, h, x] per scene
   var current = -1, railOn = false;
 
@@ -311,12 +308,8 @@
       if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
     }
 
-    // hero leaves with the camera
-    var hx = num(clamp((y - vh * 0.1) / (vh * 0.62), 0, 1));
-    if (force || hx !== cache.hx) { setVar(heroEl, '--hx', hx); cache.hx = hx; }
-
-    // the width axis of the name opens through the introduction
-    var np = num(clamp((y - (layout.introTop - vh * 0.5)) / (vh * 1.15), 0, 1));
+    // the name starts condensed and its width axis opens as the page scrolls
+    var np = num(clamp(y / (vh * 1.1), 0, 1));
     if (force || np !== cache.np) { setVar(introEl, '--np', np); cache.np = np; }
 
     // project scenes
@@ -474,7 +467,7 @@
   }
 
   /* ---------------------------------------------------------------- caption */
-  var capText = caption.querySelector('.caption__t'), capKey = 'hero', capTimer = 0, sectionKey = 'hero';
+  var capText = caption.querySelector('.caption__t'), capKey = 'about', capTimer = 0, sectionKey = 'about';
   function setCaption(key, text) {
     var t = text || CAPTIONS[key];
     if (!t || key === capKey) return;

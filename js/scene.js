@@ -50,48 +50,55 @@
 
   /* ==========================================================================
      World
+
+     Every cluster is drawn as a recognisable object, not a cloud: its outline
+     is sampled at an even spacing, joined by hairlines, and a few interior dots
+     give it body. Shapes are authored in their own frame (x right, y up, z
+     toward the viewer) and placed so that frame faces the camera's parked view.
      ========================================================================== */
   var CLUSTERS = [
-    { name: 'PolicyPilot AI', shape: 'graph', n: 760 },
-    { name: 'SemiGit', shape: 'tree', n: 700 },
-    { name: 'ProvChain', shape: 'drift', n: 700 },
-    { name: 'InterviewIQ', shape: 'stacks', n: 640 },
-    { name: 'ClasslyAI', shape: 'trio', n: 720 },
-    { name: 'Offline UPI Mesh', shape: 'chain', n: 640 },
-    { name: 'All-Ears', shape: 'ring', n: 700 },
-    { name: 'Fisherman', shape: 'pairs', n: 640 },
-    { name: 'LazyForm', shape: 'grid', n: 620 },
-    { name: 'Dispatch Load Balancer', shape: 'routes', n: 640 },
-    { name: 'AI and ML systems', shape: 'shell', n: 520, sx: 1.0, sy: 1.0, sz: 1.0 },
-    { name: 'Backend and APIs', shape: 'shell', n: 460, sx: 1.5, sy: 0.7, sz: 1.0 },
-    { name: 'Frontend', shape: 'shell', n: 380, sx: 0.8, sy: 1.3, sz: 0.8 },
-    { name: 'Cloud and tools', shape: 'shell', n: 420, sx: 1.3, sy: 0.9, sz: 1.2 }
+    { name: 'PolicyPilot AI', shape: 'doc' },
+    { name: 'SemiGit', shape: 'git' },
+    { name: 'ProvChain', shape: 'cubes' },
+    { name: 'InterviewIQ', shape: 'bubbles' },
+    { name: 'ClasslyAI', shape: 'cap' },
+    { name: 'Offline UPI Mesh', shape: 'mesh' },
+    { name: 'All-Ears', shape: 'phones' },
+    { name: 'Fisherman', shape: 'fish' },
+    { name: 'LazyForm', shape: 'form' },
+    { name: 'Dispatch Load Balancer', shape: 'balancer' },
+    { name: 'AI and ML systems', shape: 'net' },
+    { name: 'Backend and APIs', shape: 'db' },
+    { name: 'Frontend', shape: 'browser' },
+    { name: 'Cloud and tools', shape: 'cloud' }
   ];
-  var HAZE = 2200;
   var NPROJ = 10;
+  var WALL_R = 58, WALL_RINGS = 17, WALL_N = 48;
 
-  // Cluster centres: projects wind down a helix, skills sit in a ring below it.
-  var SKY = -63.5;   // height of the skills ring
+  // Projects wind down a helix; the four skills are stacked in a column below it, facing the camera.
+  var SKY = -63.5;   // height of the skills column
   (function placeClusters() {
-    for (var i = 0; i < NPROJ; i++) {
+    var i, k;
+    for (i = 0; i < NPROJ; i++) {
       var a = i * 0.92 + 0.4;
       CLUSTERS[i].c = [17 * Math.cos(a), 20 - i * 6.5, 17 * Math.sin(a)];
       CLUSTERS[i].out = [Math.cos(a), 0, Math.sin(a)];
+      CLUSTERS[i].right = [Math.sin(a), 0, -Math.cos(a)];
     }
-    for (var k = 0; k < 4; k++) {
-      var b = k * TAU / 4 + 0.6;
-      CLUSTERS[NPROJ + k].c = [12 * Math.cos(b), SKY + Math.sin(k * 2.1) * 2.5, 12 * Math.sin(b)];
-      CLUSTERS[NPROJ + k].out = [Math.cos(b), 0, Math.sin(b)];
+    var ys = [9.6, 3.2, -3.2, -9.6];
+    for (k = 0; k < 4; k++) {
+      CLUSTERS[NPROJ + k].c = [0, SKY + ys[k], 0];
+      CLUSTERS[NPROJ + k].out = [0, 0, 1];
+      CLUSTERS[NPROJ + k].right = [1, 0, 0];
     }
   })();
 
-  // Camera stations, in page order: hero, introduction, ten projects, skills (two), contact.
+  // Camera stations, in page order: introduction, ten projects, skills (two), contact.
   // While a station is parked (the page holds its content still) the camera keeps moving a little:
   //   orb   how far it swings around the target over the whole park, in radians
   //   dolly how much closer it ends than it began, as a fraction of the distance
   var STATIONS = (function () {
-    var s = [{ p: [8, 44, 62], t: [0, -3, 0], orb: 0, dolly: 0 }];
-    s.push({ p: [-52, -3, 46], t: [0, -9, 0], orb: 0.6, dolly: 0 });    // introduction: the whole helix from the side, turning slowly
+    var s = [{ p: [-50, 26, 94], t: [0, -9, 0], orb: 0.5, dolly: 0 }];   // introduction: the whole helix, turning slowly
     for (var i = 0; i < NPROJ; i++) {
       var c = CLUSTERS[i];
       s.push({
@@ -100,219 +107,418 @@
         orb: 0.2, dolly: 0.12
       });
     }
-    s.push({ p: [6, SKY + 6, 52], t: [0, SKY, 0], orb: 0, dolly: 0 });    // skills, approaching the ring
-    s.push({ p: [-7, SKY + 2, 40], t: [0, SKY, 0], orb: 0, dolly: 0 });   // skills, at the ring
+    s.push({ p: [0, SKY + 4, 58], t: [0, SKY, 0], orb: 0, dolly: 0 });    // skills, approaching the column
+    s.push({ p: [0, SKY + 1, 46], t: [0, SKY, 0], orb: 0, dolly: 0 });    // skills, in front of it
     s.push({ p: [38, 16, 84], t: [0, -14, 0], orb: 0, dolly: 0 });        // contact: pull back
     return s;
   })();
 
+  /* ---- shape-drawing helpers ---- */
+  function cr(a, b, c, d, t) {
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+  }
+  function v3(p, z) { return [p[0], p[1], p.length > 2 ? p[2] : (z || 0)]; }
+  function len3(a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]); }
+  function lerp3(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  // even samples along a dense path
+  function resample(path, step, closed) {
+    var pts = closed ? path.concat([path[0]]) : path, cum = [0], i;
+    for (i = 1; i < pts.length; i++) cum.push(cum[i - 1] + len3(pts[i - 1], pts[i]));
+    var L = cum[cum.length - 1], n = Math.max(closed ? 3 : 2, Math.round(L / step)), out = [], seg = 1;
+    for (var j = 0; j < n; j++) {
+      var s = closed ? L * j / n : L * j / (n - 1);
+      while (seg < cum.length - 1 && cum[seg] < s) seg++;
+      out.push(lerp3(pts[seg - 1], pts[seg], clamp((s - cum[seg - 1]) / ((cum[seg] - cum[seg - 1]) || 1), 0, 1)));
+    }
+    return out;
+  }
+  function spline(ctrl, closed, per) {
+    var out = [], n = ctrl.length, segs = closed ? n : n - 1;
+    for (var s = 0; s < segs; s++) {
+      var p0 = ctrl[closed ? (s - 1 + n) % n : Math.max(0, s - 1)], p1 = ctrl[s], p2 = ctrl[(s + 1) % n], p3 = ctrl[closed ? (s + 2) % n : Math.min(n - 1, s + 2)];
+      for (var j = 0; j < per; j++) {
+        var t = j / per;
+        out.push([cr(p0[0], p1[0], p2[0], p3[0], t), cr(p0[1], p1[1], p2[1], p3[1], t), cr(p0[2], p1[2], p2[2], p3[2], t)]);
+      }
+    }
+    if (!closed) out.push(ctrl[n - 1].slice());
+    return out;
+  }
+  function bezier(p0, p1, p2, p3, n) {
+    var out = [];
+    for (var i = 0; i <= n; i++) {
+      var t = i / n, u = 1 - t, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+      out.push([a * p0[0] + b * p1[0] + c * p2[0] + d * p3[0], a * p0[1] + b * p1[1] + c * p2[1] + d * p3[1], a * p0[2] + b * p1[2] + c * p2[2] + d * p3[2]]);
+    }
+    return out;
+  }
+  function circlePath(cx, cy, z, r, step) {
+    var n = Math.max(8, Math.round(TAU * r / step)), out = [];
+    for (var i = 0; i < n; i++) out.push([cx + r * Math.cos(TAU * i / n), cy + r * Math.sin(TAU * i / n), z]);
+    return out;
+  }
+  function arcPath(cx, cy, z, r, a0, a1, step) {
+    var n = Math.max(2, Math.round(Math.abs(a1 - a0) * r / step)), out = [];
+    for (var i = 0; i <= n; i++) { var a = a0 + (a1 - a0) * i / n; out.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z]); }
+    return out;
+  }
+  // rounded rectangle, counter-clockwise from the bottom edge, with an optional speech-bubble tail on it
+  function rrPath(cx, cy, z, w, h, r, step, tail) {
+    var L = cx - w / 2, Rt = cx + w / 2, B = cy - h / 2, T = cy + h / 2, p = [];
+    r = Math.min(r, w / 2, h / 2);
+    var seg = Math.max(2, Math.round(r * Math.PI / 2 / step));
+    function corner(ox, oy, a0) {
+      for (var i = 0; i <= seg; i++) { var a = a0 + (Math.PI / 2) * i / seg; p.push([ox + r * Math.cos(a), oy + r * Math.sin(a), z]); }
+    }
+    p.push([L + r, B, z]);
+    if (tail) { p.push([tail.x - 0.5, B, z]); p.push([tail.x + tail.dx, B - tail.dy, z]); p.push([tail.x + 0.4, B, z]); }
+    p.push([Rt - r, B, z]);
+    corner(Rt - r, B + r, -Math.PI / 2);
+    corner(Rt - r, T - r, 0);
+    corner(L + r, T - r, Math.PI / 2);
+    corner(L + r, B + r, Math.PI);
+    p.pop();   // the last point repeats the first
+    return p;
+  }
+
   function buildWorld() {
     var R = rng(20260611);
-    var P = [];        // [x, y, z, cluster]
-    var E = [];        // structural edges as [a, b] in generation order
+    var P = [];        // [x, y, z, cluster, has an edge]
+    var E = [];        // edges as [a, b, cluster] in generation order
     var meta = [];
 
-    function rotator() {
-      var ay = R() * TAU, ax = (R() - 0.5) * 1.2;
-      var cy = Math.cos(ay), sy = Math.sin(ay), cx = Math.cos(ax), sx = Math.sin(ax);
-      return function (p) {
-        var x = p[0] * cy + p[2] * sy, z = -p[0] * sy + p[2] * cy, y = p[1];
-        var y2 = y * cx - z * sx, z2 = y * sx + z * cx;
-        return [x, y2, z2];
+    /* One shape's drawing kit. Points that carry an edge are placed once even when two strokes meet. */
+    function Kit() {
+      var pts = [], edges = [], at = {};
+      var kit = {
+        pts: pts, edges: edges,
+        add: function (x, y, z, e) {
+          if (e) {
+            var key = Math.round(x * 40) + ',' + Math.round(y * 40) + ',' + Math.round(z * 40);
+            if (at[key] !== undefined) return at[key];
+            at[key] = pts.length;
+          }
+          pts.push([x, y, z, e ? 1 : 0]);
+          return pts.length - 1;
+        },
+        join: function (a, b) { if (a !== b) edges.push([a, b]); },
+        chain: function (samples, closed) {
+          var idx = [], i;
+          for (i = 0; i < samples.length; i++) idx.push(kit.add(samples[i][0], samples[i][1], samples[i][2], true));
+          for (i = 1; i < idx.length; i++) kit.join(idx[i - 1], idx[i]);
+          if (closed && idx.length > 2) kit.join(idx[idx.length - 1], idx[0]);
+          return idx;
+        },
+        // a polyline with its corners kept exactly, sampled every `step`
+        poly: function (path, z, step, closed) {
+          var n = path.length, segs = closed ? n : n - 1, out = [], s, j;
+          for (s = 0; s < segs; s++) {
+            var a = v3(path[s], z), b = v3(path[(s + 1) % n], z), m = Math.max(1, Math.round(len3(a, b) / step));
+            for (j = 0; j < m; j++) out.push(lerp3(a, b, j / m));
+          }
+          if (!closed) out.push(v3(path[n - 1], z));
+          return kit.chain(out, closed);
+        },
+        // a smooth path, resampled to an even spacing
+        curve: function (dense, step, closed) { return kit.chain(resample(dense, step, closed), closed); },
+        line: function (a, b, z, step) { return kit.poly([a, b], z, step, false); },
+        dot: function (x, y, z) { return kit.add(x, y, z, true); },
+        // hex lattice of loose dots inside a region
+        fill: function (test, x0, x1, y0, y1, z, step) {
+          var dy = step * 0.866, row = 0;
+          for (var y = y0; y <= y1; y += dy, row++) {
+            for (var x = x0 + ((row & 1) ? step / 2 : 0); x <= x1; x += step) if (test(x, y)) pts.push([x, y, z, 2]);
+          }
+        }
       };
+      return kit;
     }
 
-    function shape(kind, n, def, out, edges) {
-      var i;
-      if (kind === 'graph') {
-        var hubs = [];
-        for (i = 0; i < 16; i++) hubs.push([gauss(R) * 3.4, gauss(R) * 2.8, gauss(R) * 3.4]);
-        for (i = 0; i < n; i++) {
-          if (R() < 0.62) {
-            var h = hubs[(R() * 16) | 0];
-            out.push([h[0] + gauss(R) * 0.9, h[1] + gauss(R) * 0.9, h[2] + gauss(R) * 0.9]);
-          } else out.push([gauss(R) * 3.6, gauss(R) * 3.0, gauss(R) * 3.6]);
+    var S = 0.2;     // outline spacing, in world units
+
+    var SHAPES = {};
+
+    // PolicyPilot AI: a policy document, a sheet behind it, and a check that it was verified
+    SHAPES.doc = function (k) {
+      k.poly([[-2.65, 3.8], [-2.65, 4.25], [1.95, 4.25], [3.75, 2.45], [3.75, -3.55], [3.2, -3.55]], -1.2, S, false);
+      k.poly([[3.2, -4], [-3.2, -4], [-3.2, 3.8], [1.4, 3.8], [3.2, 2], [3.2, -4]], 0, S, false);
+      k.poly([[1.4, 3.8], [1.4, 2], [3.2, 2]], 0, S, false);
+      k.line([-2.2, 2.8], [0.4, 2.8], 0, S);
+      k.line([-2.3, 1.2], [2.3, 1.2], 0, S);
+      k.line([-2.3, 0.2], [2.3, 0.2], 0, S);
+      k.line([-2.3, -0.8], [2.3, -0.8], 0, S);
+      k.line([-2.3, -1.8], [0.9, -1.8], 0, S);
+      k.poly(circlePath(3, -3, 1, 1.4, S), 1, S, true);
+      k.poly([[2.2, -3], [2.75, -3.65], [3.9, -2.3]], 1, S, false);
+    };
+
+    // SemiGit: a commit graph. Two branches leave main and merge back.
+    SHAPES.git = function (k) {
+      var G = 0.5;   // gap left around a commit
+      function commit(x, y, z) {
+        k.poly(circlePath(x, y, z, 0.36, 0.18), z, 0.18, true);
+        k.dot(x, y, z);
+      }
+      function lane(xs, y, z) { for (var i = 0; i < xs.length - 1; i++) k.line([xs[i] + G, y], [xs[i + 1] - G, y], z, S); }
+      function connector(x0, y0, z0, x1, y1, z1) {
+        var dx = (x1 - x0) * 0.55;
+        k.curve(bezier([x0, y0, z0], [x0 + dx, y0, z0], [x1 - dx, y1, z1], [x1, y1, z1], 28), S, false);
+      }
+      var main = [-4.6, -2.6, -0.6, 2.6, 4.0];
+      lane(main, 0, 0);
+      main.forEach(function (x) { commit(x, 0, 0); });
+      // branch A, above
+      connector(-2.6 + G, 0, 0, -1.3, 2.4, 0.8);
+      k.line([-1.3, 2.4], [0 - G, 2.4], 0.8, S); commit(0, 2.4, 0.8);
+      k.line([G, 2.4], [1.5, 2.4], 0.8, S);
+      connector(1.5, 2.4, 0.8, 2.6 - G, 0, 0);
+      // branch B, below
+      connector(-0.6 + G, 0, 0, 0.6, -2.4, -0.8);
+      k.line([0.6, -2.4], [1.4 - G, -2.4], -0.8, S); commit(1.4, -2.4, -0.8);
+      lane([1.4, 2.6], -2.4, -0.8); commit(2.6, -2.4, -0.8);
+      k.line([2.6 + G, -2.4], [3.0, -2.4], -0.8, S);
+      connector(3.0, -2.4, -0.8, 4.0 - G, 0, 0);
+    };
+
+    // ProvChain: blocks chained one to the next
+    SHAPES.cubes = function (k) {
+      var ry = 0.62, rx = 0.42, cy = Math.cos(ry), sy = Math.sin(ry), cx = Math.cos(rx), sx = Math.sin(rx);
+      function cube(ox, oy, oz, s) {
+        var h = s / 2, V = [], i, j;
+        for (i = 0; i < 8; i++) {
+          var x = (i & 1) ? h : -h, y = (i & 2) ? h : -h, z = (i & 4) ? h : -h;
+          var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+          V.push([ox + x1, oy + y * cx - z1 * sx, oz + y * sx + z1 * cx]);
         }
-      } else if (kind === 'tree') {
-        var queue = [{ p: [0, -4.5, 0], d: [0, 1, 0], len: 3.4, depth: 0 }];
-        var made = 0;
-        while (queue.length && made < n) {
-          var s = queue.shift();
-          var m = Math.max(6, Math.round(s.len * 9)), prev = -1;
-          for (var k = 0; k < m && made < n; k++) {
-            var t = k / m;
-            var idx = out.length;
-            out.push([
-              s.p[0] + s.d[0] * s.len * t + gauss(R) * 0.09,
-              s.p[1] + s.d[1] * s.len * t + gauss(R) * 0.09,
-              s.p[2] + s.d[2] * s.len * t + gauss(R) * 0.09
-            ]);
-            if (prev >= 0) edges.push([prev, idx]);
-            prev = idx; made++;
-          }
-          if (s.depth < 5) {
-            var end = [s.p[0] + s.d[0] * s.len, s.p[1] + s.d[1] * s.len, s.p[2] + s.d[2] * s.len];
-            var kids = s.depth < 2 ? 3 : 2;
-            for (var q = 0; q < kids; q++) {
-              var d = [s.d[0] + gauss(R) * 0.75, s.d[1] + 0.25 + Math.abs(gauss(R)) * 0.3, s.d[2] + gauss(R) * 0.75];
-              var L = Math.hypot(d[0], d[1], d[2]) || 1;
-              queue.push({ p: end, d: [d[0] / L, d[1] / L, d[2] / L], len: s.len * 0.72, depth: s.depth + 1 });
-            }
-          }
-        }
-        while (made < n) { out.push([gauss(R) * 3, gauss(R) * 3 + 1, gauss(R) * 3]); made++; }
-      } else if (kind === 'drift') {
-        for (i = 0; i < n; i++) {
-          var tt = Math.pow(R(), 1.2), sg = lerp(0.35, 2.4, tt);
-          out.push([-6 + 12 * tt + gauss(R) * 0.3, gauss(R) * sg, gauss(R) * sg]);
-        }
-      } else if (kind === 'stacks') {
-        var lens = [11, 8, 9.5], ys = [-2.6, 0, 2.6];
-        for (i = 0; i < n; i++) {
-          var b = (R() * 3) | 0;
-          out.push([-lens[b] / 2 + lens[b] * R(), ys[b] + gauss(R) * 0.28, gauss(R) * 0.7]);
-        }
-      } else if (kind === 'trio') {
-        for (i = 0; i < n; i++) {
-          var v = (R() * 3) | 0, an = v * TAU / 3 + 0.5;
-          out.push([Math.cos(an) * 3.2 + gauss(R) * 1.7, Math.sin(an) * 3.2 + gauss(R) * 1.7, gauss(R) * 1.7]);
-        }
-      } else if (kind === 'chain') {
-        var nodes = [], nodeIdx = [];
-        for (i = 0; i < 5; i++) nodes.push([-8 + 4 * i, Math.sin(i * 1.3) * 3, Math.cos(i * 0.9) * 2]);
-        for (i = 0; i < n; i++) {
-          var r0 = R();
-          if (r0 < 0.7) {
-            var nd = nodes[(R() * 5) | 0];
-            out.push([nd[0] + gauss(R) * 0.9, nd[1] + gauss(R) * 0.9, nd[2] + gauss(R) * 0.9]);
-          } else {
-            var sgm = (R() * 4) | 0, tq = R();
-            var A = nodes[sgm], B = nodes[sgm + 1];
-            out.push([lerp(A[0], B[0], tq) + gauss(R) * 0.15, lerp(A[1], B[1], tq) + gauss(R) * 0.15, lerp(A[2], B[2], tq) + gauss(R) * 0.15]);
-          }
-        }
-        for (i = 0; i < 5; i++) {
-          nodeIdx.push(out.length);
-          out.push([nodes[i][0], nodes[i][1], nodes[i][2]]);
-        }
-        for (i = 0; i < 4; i++) edges.push([nodeIdx[i], nodeIdx[i + 1]]);
-      } else if (kind === 'ring') {
-        for (i = 0; i < n; i++) {
-          var th = R() * TAU;
-          var rr = 5 + 1.6 * Math.sin(7 * th) * (0.6 + 0.4 * Math.sin(3 * th + 1)) + gauss(R) * 0.18;
-          out.push([rr * Math.cos(th), rr * Math.sin(th), gauss(R) * 0.35]);
-        }
-      } else if (kind === 'pairs') {
-        // Two strands, baseline and candidate, sampled at the same places. A paired test compares them point by point.
-        var A0 = [], B0 = [], np = (n / 2) | 0;
-        for (i = 0; i < np; i++) {
-          var tp = R(), xp = lerp(-6, 6, tp), yp = 2.4 * Math.sin(tp * 5.2 + 0.4) + gauss(R) * 0.22;
-          A0.push([xp, yp, -1.7 + gauss(R) * 0.25]);
-          var flip = R() < 0.14 ? 1.1 : 0.12;           // a few points have regressed
-          B0.push([xp + gauss(R) * 0.08, yp + gauss(R) * flip, 1.7 + gauss(R) * 0.25]);
-        }
-        for (i = 0; i < np; i++) { out.push(A0[i]); out.push(B0[i]); }
-        for (i = 0; i < 18; i++) {                       // anchor pairs joined by an edge
-          var u = i / 17, xa = lerp(-6, 6, u), ya = 2.4 * Math.sin(u * 5.2 + 0.4);
-          var ia = out.length;
-          out.push([xa, ya, -1.7]); out.push([xa, ya, 1.7]);
-          edges.push([ia, ia + 1]);
-        }
-      } else if (kind === 'grid') {
-        // A multi-step form: three pages of fields, filled in a serpentine order, step after step.
-        var slots = [], gl, gj, gi;
-        for (gl = 0; gl < 3; gl++) for (gj = 0; gj < 3; gj++) for (gi = 0; gi < 4; gi++) {
-          var colg = ((gj + gl * 3) % 2) ? 3 - gi : gi;
-          slots.push([-4.2 + colg * 2.8, 2.8 - gj * 2.8, (gl - 1) * 3.6]);
-        }
-        for (i = 0; i < n - slots.length; i++) {
-          var sl = slots[(R() * slots.length) | 0];
-          out.push([sl[0] + gauss(R) * 0.6, sl[1] + gauss(R) * 0.32, sl[2] + gauss(R) * 0.32]);
-        }
-        var gBase = out.length;
-        for (i = 0; i < slots.length; i++) out.push(slots[i]);
-        for (i = 0; i < slots.length - 1; i++) edges.push([gBase + i, gBase + i + 1]);
-      } else if (kind === 'routes') {
-        // A depot with five vehicles, each driving its own route.
-        var depot = out.length;
-        out.push([0, 0, 0]);
-        var stopsAll = [];
-        for (var rt = 0; rt < 5; rt++) {
-          var dir = [gauss(R), gauss(R) * 0.5, gauss(R)], dl = Math.hypot(dir[0], dir[1], dir[2]) || 1;
-          var cur = [0, 0, 0], path = [];
-          for (var sp = 0; sp < 6; sp++) {
-            var jd = [dir[0] / dl + gauss(R) * 0.45, dir[1] / dl + gauss(R) * 0.35, dir[2] / dl + gauss(R) * 0.45];
-            var jl = Math.hypot(jd[0], jd[1], jd[2]) || 1, st = 1.6 + R() * 1.1;
-            cur = [cur[0] + jd[0] / jl * st, cur[1] + jd[1] / jl * st, cur[2] + jd[2] / jl * st];
-            path.push(cur);
-          }
-          stopsAll.push(path);
-        }
-        var perLeg = ((n - 31) / 30) | 0;
-        for (var r2 = 0; r2 < 5; r2++) {
-          var prevP = [0, 0, 0];
-          for (var s3 = 0; s3 < 6; s3++) {
-            var nxt = stopsAll[r2][s3];
-            for (var q2 = 0; q2 < perLeg; q2++) {
-              var tq2 = R();
-              out.push([lerp(prevP[0], nxt[0], tq2) + gauss(R) * 0.14, lerp(prevP[1], nxt[1], tq2) + gauss(R) * 0.14, lerp(prevP[2], nxt[2], tq2) + gauss(R) * 0.14]);
-            }
-            prevP = nxt;
-          }
-        }
-        for (var r3 = 0; r3 < 5; r3++) {
-          var last = depot;
-          for (var s4 = 0; s4 < 6; s4++) {
-            var idxS = out.length; out.push(stopsAll[r3][s4]);
-            edges.push([last, idxS]); last = idxS;
-          }
-        }
-      } else { // shell
-        for (i = 0; i < n; i++) {
-          var dx = gauss(R), dy = gauss(R), dz = gauss(R);
-          var Ln = Math.hypot(dx, dy, dz) || 1;
-          var rad = 4.2 * (0.55 + 0.45 * Math.cbrt(R()));
-          out.push([dx / Ln * rad * def.sx, dy / Ln * rad * def.sy, dz / Ln * rad * def.sz]);
+        for (i = 0; i < 8; i++) for (j = i + 1; j < 8; j++) {
+          var d = i ^ j;
+          if (d === 1 || d === 2 || d === 4) k.poly([V[i], V[j]], 0, 0.26, false);
         }
       }
-    }
+      var xs = [-3.7, 0, 3.7], ys = [1.0, 0, -1.0];
+      for (var i = 0; i < 3; i++) cube(xs[i], ys[i], 0, 2.1);
+      for (i = 0; i < 2; i++) {
+        var mx = (xs[i] + xs[i + 1]) / 2, my = (ys[i] + ys[i + 1]) / 2;
+        k.poly(rrPath(mx, my, 0, 0.8, 0.36, 0.18, 0.16), 0, 0.16, true);
+      }
+    };
 
-    // Clusters
+    // InterviewIQ: a question and an answer
+    SHAPES.bubbles = function (k) {
+      k.poly(rrPath(-0.9, 2.2, 0.6, 6.6, 3.4, 1.0, S, { x: -3.0, dx: -0.2, dy: 0.95 }), 0.6, S, true);
+      k.line([-3.8, 3.0], [1.6, 3.0], 0.6, S);
+      k.line([-3.8, 2.0], [0.2, 2.0], 0.6, S);
+      k.poly(rrPath(1.5, -1.7, -0.6, 6.4, 3.0, 1.0, S, { x: 3.2, dx: 0.2, dy: 0.95 }), -0.6, S, true);
+      for (var i = 0; i < 3; i++) {
+        var cxd = 0.3 + i * 1.2;
+        k.poly(circlePath(cxd + 0.9, -1.7, -0.6, 0.3, 0.16), -0.6, 0.16, true);
+        k.dot(cxd + 0.9, -1.7, -0.6);
+      }
+    };
+
+    // ClasslyAI: a graduation cap
+    SHAPES.cap = function (k) {
+      k.curve(spline([[-2.9, -0.2, -0.4], [-2.9, -1.5, -0.4], [-1.6, -2.7, -0.4], [0, -3.2, -0.4], [1.6, -2.7, -0.4], [2.9, -1.5, -0.4], [2.9, -0.2, -0.4]], false, 10), S, false);
+      k.poly([[-5, 0.9], [0, 3.4], [5, 0.9], [0, -1.6]], 0.5, S, true);
+      k.fill(function (x, y) { return Math.abs(x) / 5 + Math.abs(y - 0.9) / 2.5 < 0.86; }, -5, 5, -1.7, 3.5, 0.5, 0.5);
+      k.poly(circlePath(0, 0.9, 0.5, 0.28, 0.14), 0.5, 0.14, true);
+      k.curve(bezier([0, 0.9, 0.5], [2.2, 1.0, 0.6], [4.4, 1.0, 0.6], [4.4, -1.0, 0.6], 24), S, false);
+      k.poly(circlePath(4.4, -1.5, 0.6, 0.45, 0.16), 0.6, 0.16, true);
+      for (var i = -1; i <= 1; i++) k.line([4.4 + i * 0.28, -1.9], [4.4 + i * 0.38, -3.4], 0.6, S);
+    };
+
+    // Offline UPI Mesh: five phones passing a payment from hand to hand
+    SHAPES.mesh = function (k) {
+      var ph = [[-4.1, -0.6, 0.8], [-2.0, 1.9, -0.4], [0.1, -1.2, 0.6], [2.2, 1.6, -0.6], [4.3, -0.9, 0.8]];
+      var hw = 0.64, hh = 1.18;
+      ph.forEach(function (p, i) {
+        k.poly(rrPath(p[0], p[1], p[2], hw * 2, hh * 2, 0.3, S), p[2], S, true);
+        k.line([p[0] - 0.25, p[1] - hh + 0.28], [p[0] + 0.25, p[1] - hh + 0.28], p[2], 0.16);
+        if (i === 0 || i === 4) k.fill(function (x, y) { return true; }, p[0] - 0.4, p[0] + 0.4, p[1] - 0.8, p[1] + 0.9, p[2], 0.3);
+      });
+      var links = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 2], [2, 4], [1, 3]];
+      links.forEach(function (l) {
+        var a = ph[l[0]], b = ph[l[1]], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy);
+        var te = Math.min(hw / Math.max(Math.abs(dx / d), 1e-6), hh / Math.max(Math.abs(dy / d), 1e-6)) + 0.16;
+        var ux = dx / d, uy = dy / d;
+        k.line([a[0] + ux * te, a[1] + uy * te, a[2]], [b[0] - ux * te, b[1] - uy * te, b[2]], 0, 0.24);
+      });
+    };
+
+    // All-Ears: headphones, with the sound they are listening to
+    SHAPES.phones = function (k) {
+      k.curve(arcPath(0, 0.4, 0, 3.7, 0, Math.PI, S), S, false);
+      k.curve(arcPath(0, 0.4, 0, 3.2, 0.12, Math.PI - 0.12, S), S, false);
+      [-1, 1].forEach(function (sd) {
+        k.poly(rrPath(sd * 3.7, -1.3, 0.4, 1.8, 3.4, 0.7, S), 0.4, S, true);
+        k.fill(function () { return true; }, sd * 3.7 - 0.45, sd * 3.7 + 0.45, -2.5, -0.1, 0.4, 0.3);
+      });
+      var wave = [];
+      for (var i = 0; i <= 90; i++) {
+        var t = i / 90, x = -2.3 + 4.6 * t;
+        wave.push([x, -1.3 + 1.35 * Math.sin(Math.PI * t) * Math.sin(t * Math.PI * 7), 0]);
+      }
+      k.curve(wave, 0.17, false);
+    };
+
+    // Fisherman: a fish and the hook that is after it
+    SHAPES.fish = function (k) {
+      var dx = 0.45;
+      var body = [[2.4, 0.45], [1.2, 1.2], [-0.4, 1.95], [-2.2, 1.85], [-3.6, 1.05], [-4.5, 0], [-3.6, -1.05], [-2.2, -1.65], [-0.4, -1.85], [1.2, -1.1], [2.4, -0.45]].map(function (p) { return [p[0] + 0.3 + dx, p[1], 0]; });
+      k.curve(spline(body, false, 12), S, false);
+      k.poly([[2.7 + dx, 0.45], [4.4 + dx, 1.9], [3.8 + dx, 0], [4.4 + dx, -1.9], [2.7 + dx, -0.45]], 0, S, false);
+      k.poly([[-0.5 + dx, 1.9], [0.5 + dx, 3.1], [1.6 + dx, 1.4]], -0.3, S, false);
+      k.poly([[-0.6 + dx, -1.8], [0.2 + dx, -2.7], [0.9 + dx, -1.3]], -0.3, S, false);
+      k.curve(arcPath(-2.5 + dx, 0, 0, 1.5, -0.8, 0.8, S), S, false);
+      k.poly(circlePath(-3.5 + dx, 0.5, 0.3, 0.26, 0.14), 0.3, 0.14, true);
+      k.dot(-3.5 + dx, 0.5, 0.3);
+      k.line([-4.2 + dx, -0.35], [-3.6 + dx, -0.3], 0, 0.16);
+      k.fill(function (x, y) { var a = (x - 0.4 - dx) / 1.6, b = y / 1.25; return a * a + b * b < 1; }, -1.4 + dx, 2.2 + dx, -1.3, 1.3, 0, 0.42);
+      // the hook: a line from above that ends in a barb at the fish's lip
+      k.line([-5.1, 4.2], [-5.1, -1.0], 0, S);
+      k.curve(arcPath(-4.65, -1.0, 0, 0.45, Math.PI, 2 * Math.PI, 0.16), 0.16, false);
+      k.line([-4.2, -1.0], [-4.2, -0.5], 0, 0.16);
+      k.line([-4.2, -0.5], [-4.45, -0.72], 0, 0.14);
+    };
+
+    // LazyForm: a short form, filled in step by step
+    SHAPES.form = function (k) {
+      k.poly(rrPath(0, -0.1, 0, 7.4, 8.2, 0.5, S), 0, S, true);
+      var sx = [-2.2, 0, 2.2];
+      sx.forEach(function (x, i) {
+        k.poly(circlePath(x, 2.9, 0.3, 0.42, 0.16), 0.3, 0.16, true);
+        if (i === 0) k.fill(function () { return true; }, x - 0.2, x + 0.2, 2.7, 3.1, 0.3, 0.2);
+        if (i === 1) k.dot(x, 2.9, 0.3);
+        if (i < 2) k.line([x + 0.56, 2.9], [sx[i + 1] - 0.56, 2.9], 0.3, 0.2);
+      });
+      k.line([-3.0, 1.6], [-1.4, 1.6], 0.3, 0.2);
+      k.poly(rrPath(0, 0.6, 0.3, 6.0, 0.95, 0.28, S), 0.3, S, true);
+      k.line([-2.6, 0.6], [-0.6, 0.6], 0.3, 0.2);
+      k.line([-0.2, 0.3], [-0.2, 0.9], 0.3, 0.15);
+      k.line([-3.0, -0.6], [-1.0, -0.6], 0.3, 0.2);
+      k.poly(rrPath(0, -1.6, 0.3, 6.0, 0.95, 0.28, S), 0.3, S, true);
+      k.line([-2.6, -1.6], [0.9, -1.6], 0.3, 0.2);
+      k.poly(rrPath(0, -3.2, 0.3, 3.6, 1.0, 0.5, S), 0.3, S, true);
+      k.fill(function () { return true; }, -1.3, 1.3, -3.5, -2.9, 0.3, 0.3);
+    };
+
+    // Dispatch Load Balancer: requests in, one balancer, four servers sharing the load
+    SHAPES.balancer = function (k) {
+      var hx = -1.6;
+      var hexp = [];
+      for (var i = 0; i < 6; i++) hexp.push([hx + 1.3 * Math.cos(i * Math.PI / 3 + Math.PI), 1.3 * Math.sin(i * Math.PI / 3 + Math.PI)]);
+      k.poly(hexp, 0.3, S, true);
+      k.fill(function (x, y) { return Math.hypot(x - hx, y) < 0.95; }, hx - 1, hx + 1, -1, 1, 0.3, 0.3);
+      [-1.4, 0, 1.4].forEach(function (y) {
+        k.curve(bezier([-5.0, y * 1.35, 0], [-3.9, y * 1.35, 0], [-3.7, 0, 0], [hx - 1.4, 0, 0], 24), 0.2, false);
+      });
+      var ysv = [3.0, 1.0, -1.0, -3.0], load = [0.62, 0.58, 0.66, 0.6];
+      ysv.forEach(function (y, i) {
+        k.poly(rrPath(3.1, y, 0, 3.2, 1.45, 0.25, S), 0, S, true);
+        k.line([1.8, y], [1.8 + 2.0 * load[i], y], 0, 0.2);
+        k.dot(4.15, y + 0.3, 0); k.dot(4.15, y - 0.3, 0);
+        k.curve(bezier([hx + 1.4, 0, 0], [0.7, 0, 0], [0.5, y, 0], [1.5, y, 0], 24), 0.2, false);
+      });
+    };
+
+    // AI and ML systems: a small network
+    SHAPES.net = function (k) {
+      var layers = [[-2.8, [-1.2, 0, 1.2]], [0, [-1.8, -0.6, 0.6, 1.8]], [2.8, [-1.2, 0, 1.2]]], nodes = [];
+      layers.forEach(function (L) { nodes.push(L[1].map(function (y) { return [L[0], y]; })); });
+      for (var l = 0; l < 2; l++) nodes[l].forEach(function (a) { nodes[l + 1].forEach(function (b) {
+        var dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy), g = 0.3 / d;
+        k.line([a[0] + dx * g, a[1] + dy * g], [b[0] - dx * g, b[1] - dy * g], 0, 0.5);
+      }); });
+      nodes.forEach(function (col) { col.forEach(function (n) {
+        k.poly(circlePath(n[0], n[1], 0.2, 0.3, 0.16), 0.2, 0.16, true);
+      }); });
+    };
+
+    // Backend and APIs: a database, with a request going out
+    SHAPES.db = function (k) {
+      var rx = 2.0, ry = 0.55;
+      function ell(y, a0, a1) {
+        var d = [];
+        for (var i = 0; i <= 40; i++) { var a = a0 + (a1 - a0) * i / 40; d.push([rx * Math.cos(a) - 0.8, y + ry * Math.sin(a), 0]); }
+        return d;
+      }
+      k.curve(ell(1.5, 0, TAU - 0.0001), 0.2, true);
+      [0.5, -0.5, -1.5].forEach(function (y) { k.curve(ell(y, Math.PI, TAU), 0.2, false); });
+      k.line([-0.8 - rx, 1.5], [-0.8 - rx, -1.5], 0, S);
+      k.line([-0.8 + rx, 1.5], [-0.8 + rx, -1.5], 0, S);
+      [1.0, 0, -1.0].forEach(function (y) { k.dot(0.7 - 0.8, y - 0.55, 0); });
+      k.line([1.5, 0], [4.2, 0], 0, S);
+      k.poly([[3.7, 0.45], [4.25, 0], [3.7, -0.45]], 0, 0.14, false);
+    };
+
+    // Frontend: a browser window
+    SHAPES.browser = function (k) {
+      k.poly(rrPath(0, 0, 0, 6.6, 4.6, 0.35, S), 0, S, true);
+      k.line([-3.3, 1.2], [3.3, 1.2], 0, S);
+      [-2.7, -2.25, -1.8].forEach(function (x) { k.poly(circlePath(x, 1.75, 0.2, 0.12, 0.1), 0.2, 0.1, true); });
+      k.poly(rrPath(0.9, 1.75, 0.2, 3.6, 0.5, 0.25, 0.16), 0.2, 0.16, true);
+      k.poly(rrPath(-1.7, -0.35, 0.2, 2.3, 1.9, 0.15, 0.2), 0.2, 0.2, true);
+      k.fill(function () { return true; }, -2.55, -0.85, -1.1, 0.4, 0.2, 0.32);
+      k.line([0.3, 0.5], [2.7, 0.5], 0.2, 0.2);
+      k.line([0.3, -0.2], [2.7, -0.2], 0.2, 0.2);
+      k.line([0.3, -0.9], [1.7, -0.9], 0.2, 0.2);
+    };
+
+    // Cloud and tools: a cloud with an upload arrow
+    SHAPES.cloud = function (k) {
+      var circles = [[-1.7, -0.5, 1.0], [-0.6, 0.5, 1.4], [0.9, 0.3, 1.2], [2.0, -0.5, 1.0]], O = [0.1, -0.4], floor = -1.5, dense = [], i, j;
+      for (i = 0; i < 360; i++) {
+        var a = TAU * i / 360, dx = Math.cos(a), dy = Math.sin(a), best = 0;
+        for (j = 0; j < circles.length; j++) {
+          var c = circles[j], ox = O[0] - c[0], oy = O[1] - c[1], b = ox * dx + oy * dy, cc = ox * ox + oy * oy - c[2] * c[2], disc = b * b - cc;
+          if (disc >= 0) { var t = -b + Math.sqrt(disc); if (t > best) best = t; }
+        }
+        if (dy < 0) best = Math.min(best, (floor - O[1]) / dy);
+        dense.push([O[0] + dx * best - 0.1, O[1] + dy * best, 0]);
+      }
+      k.curve(dense, 0.2, true);
+      k.line([0, -0.9], [0, 0.45], 0, S);
+      k.poly([[-0.5, 0.0], [0, 0.55], [0.5, 0.0]], 0, 0.16, false);
+    };
+
+    /* ---- place every cluster in the world ---- */
     CLUSTERS.forEach(function (def, ci) {
-      var local = [], ledges = [];
-      shape(def.shape, def.n, def, local, ledges);
-      var rot = rotator();
-      var base = P.length;
-      var maxR = 0;
-      for (var i = 0; i < local.length; i++) {
-        var q = rot(local[i]);
-        P.push([q[0] + def.c[0], q[1] + def.c[1], q[2] + def.c[2], ci]);
-        maxR = Math.max(maxR, Math.hypot(q[0], q[1], q[2]));
+      var k = Kit();
+      SHAPES[def.shape](k);
+      var base = P.length, maxR = 0, top = 0, o = def.out, r = def.right;
+      for (var i = 0; i < k.pts.length; i++) {
+        var q = k.pts[i];
+        var wx = def.c[0] + q[0] * r[0] + q[2] * o[0], wy = def.c[1] + q[1], wz = def.c[2] + q[0] * r[2] + q[2] * o[2];
+        P.push([wx, wy, wz, ci, q[3]]);
+        maxR = Math.max(maxR, Math.hypot(wx - def.c[0], wy - def.c[1], wz - def.c[2]));
+        top = Math.max(top, q[1]);
       }
-      for (var e = 0; e < ledges.length; e++) E.push([base + ledges[e][0], base + ledges[e][1], ci]);
-      meta.push({ base: base, count: local.length, radius: maxR });
+      for (var e = 0; e < k.edges.length; e++) E.push([base + k.edges[e][0], base + k.edges[e][1], ci]);
+      meta.push({ base: base, count: k.pts.length, radius: maxR, top: top });
     });
 
-    // Haze: sparse points that give the space depth.
-    for (var h = 0; h < HAZE; h++) {
-      var x, y, z, tries = 0;
-      do {
-        x = (R() * 2 - 1); y = (R() * 2 - 1); z = (R() * 2 - 1); tries++;
-      } while (x * x + y * y + z * z > 1 && tries < 20);
-      P.push([x * 48, y * 54 - 12, z * 48, -1]);
+    // The wall: a faint lattice of rings around everything. It gives the camera something to travel past.
+    for (var rj = 0; rj < WALL_RINGS; rj++) {
+      for (var rn = 0; rn < WALL_N; rn++) {
+        var wa = TAU * rn / WALL_N;
+        P.push([WALL_R * Math.cos(wa), 36 - rj * 8, WALL_R * Math.sin(wa), -1, 0]);
+      }
     }
 
-    var M = P.length;
-    // Shuffle so any prefix of the arrays is a uniform sample (for quality scaling).
-    var slot = new Uint32Array(M), i2;
-    for (i2 = 0; i2 < M; i2++) slot[i2] = i2;
-    for (i2 = M - 1; i2 > 0; i2--) {
-      var j = (R() * (i2 + 1)) | 0, tmp = slot[i2]; slot[i2] = slot[j]; slot[j] = tmp;
-    }
+    var M = P.length, i2;
+    // Points that carry an edge come first, so thinning the cloud on a slow device never breaks an outline.
+    var vi = [], fi = [], oi = [];
+    for (i2 = 0; i2 < M; i2++) (P[i2][4] === 1 ? vi : P[i2][4] === 2 ? fi : oi).push(i2);
+    function shuffle(a) { for (var n = a.length - 1; n > 0; n--) { var j = (R() * (n + 1)) | 0, t = a[n]; a[n] = a[j]; a[j] = t; } }
+    shuffle(vi); shuffle(fi); shuffle(oi);
+    var order = vi.concat(fi, oi), slot = new Uint32Array(M);
+    for (i2 = 0; i2 < M; i2++) slot[order[i2]] = i2;
+
     var w = {
-      M: M,
+      M: M, nV: vi.length,
       hx: new Float32Array(M), hy: new Float32Array(M), hz: new Float32Array(M),
-      cl: new Int8Array(M), ph: new Float32Array(M), jit: new Float32Array(M),
+      cl: new Int8Array(M), jit: new Float32Array(M),
       ox: new Float32Array(M), oy: new Float32Array(M), oz: new Float32Array(M),
       delay: new Float32Array(M),
       members: [], edges: [], meta: meta
@@ -320,41 +526,19 @@
     for (i2 = 0; i2 < M; i2++) {
       var s2 = slot[i2], p = P[i2];
       w.hx[s2] = p[0]; w.hy[s2] = p[1]; w.hz[s2] = p[2]; w.cl[s2] = p[3];
-      w.ph[s2] = R(); w.jit[s2] = 0.75 + R() * 0.7;
-      var od = [gauss(R), gauss(R), gauss(R)], oL = Math.hypot(od[0], od[1], od[2]) || 1, oR = 30 + R() * 70;
+      w.jit[s2] = 0.92 + R() * 0.2;
+      // where this point flies to when the page is scrolled: a direction and a distance
+      var od = [gauss(R), gauss(R), gauss(R)], oL = Math.hypot(od[0], od[1], od[2]) || 1, oR = 4 + R() * 10;
       w.ox[s2] = od[0] / oL * oR; w.oy[s2] = od[1] / oL * oR; w.oz[s2] = od[2] / oL * oR;
       w.delay[s2] = R() * 0.6;
     }
-    for (var c = 0; c < CLUSTERS.length; c++) w.members.push([]);
+    for (var c = 0; c < CLUSTERS.length; c++) { w.members.push([]); w.edges.push([]); }
     for (i2 = 0; i2 < M; i2++) if (w.cl[i2] >= 0) w.members[w.cl[i2]].push(i2);
-
-    // Edges per cluster: structural ones plus each point's two nearest neighbours.
-    for (var cc = 0; cc < CLUSTERS.length; cc++) {
-      var seen = new Set(), list = [];
-      function add(a, b) {
-        if (a === b) return;
-        var lo = a < b ? a : b, hi = a < b ? b : a, key = lo * M + hi;
-        if (seen.has(key)) return;
-        seen.add(key); list.push(lo, hi);
-      }
-      for (var e2 = 0; e2 < E.length; e2++) if (E[e2][2] === cc) add(slot[E[e2][0]], slot[E[e2][1]]);
-      var mem = w.members[cc];
-      var cap = 520;
-      for (var a = 0; a < mem.length && list.length < cap * 2; a++) {
-        var ia = mem[a], b1 = -1, b2 = -1, d1 = 1e9, d2 = 1e9;
-        for (var b = 0; b < mem.length; b++) {
-          if (b === a) continue;
-          var ib = mem[b];
-          var ddx = w.hx[ia] - w.hx[ib], ddy = w.hy[ia] - w.hy[ib], ddz = w.hz[ia] - w.hz[ib];
-          var dd = ddx * ddx + ddy * ddy + ddz * ddz;
-          if (dd < d1) { d2 = d1; b2 = b1; d1 = dd; b1 = ib; }
-          else if (dd < d2) { d2 = dd; b2 = ib; }
-        }
-        if (b1 >= 0) add(ia, b1);
-        if (b2 >= 0 && (a & 1) === 0) add(ia, b2);
-      }
-      w.edges.push(new Uint32Array(list));
+    for (var e2 = 0; e2 < E.length; e2++) {
+      var ea = slot[E[e2][0]], eb = slot[E[e2][1]];
+      w.edges[E[e2][2]].push(ea < eb ? ea : eb, ea < eb ? eb : ea);
     }
+    for (c = 0; c < CLUSTERS.length; c++) w.edges[c] = new Uint32Array(w.edges[c]);
     return w;
   }
 
@@ -397,6 +581,9 @@
     var focusW = 0, focusWV = 0, focusIdx = -1;
     var act = new Float32Array(NC), actV = new Float32Array(NC);
     var camSpeed = 0;
+    var bcx = new Float32Array(NC + 1), bcz = new Float32Array(NC + 1), bcos = new Float32Array(NC + 1), bsin = new Float32Array(NC + 1);
+    bcos[0] = 1;   // index 0 is the wall, which never turns
+    var scat = 0, scatV = 0, lastSY = -1, svE = 0;   // how far the figure is scattered, and the scroll speed behind it
     var px = -1, py = -1, pxV = 0, pyV = 0;   // smoothed query position
 
     // per-frame buffers
@@ -527,6 +714,14 @@
         s = damp(focusW, focus >= 0 ? 1 : 0, focusWV, 5.0, dt); focusW = s[0]; focusWV = s[1];
       }
 
+      // Scroll speed drives the scatter: points leave their shape only while the page is moving, and
+      // come back together when it stops. It rises quickly and settles more slowly.
+      if (lastSY < 0) lastSY = scrollY;
+      var sv = Math.abs(scrollY - lastSY) / dt; lastSY = scrollY;
+      svE += (sv - svE) * Math.min(1, dt * 14);
+      var scTarget = reduced ? 0 : smooth((svE - 240) / 1500);
+      s = damp(scat, scTarget, scatV, scTarget > scat ? 15 : 4.4, dt); scat = clamp(s[0], 0, 1); scatV = s[1];
+
       var P = stationAt(uS, 'p'), T = stationAt(uS, 't');
       if (focusIdx >= 0 && focusW > 0.001) {
         var cdef = CLUSTERS[focusIdx];
@@ -554,7 +749,7 @@
       // basis
       var fx = T[0] - P[0], fy = T[1] - P[1], fz = T[2] - P[2];
       var fl = Math.hypot(fx, fy, fz) || 1; fx /= fl; fy /= fl; fz /= fl;
-      var rx = fz, ry = 0, rz = -fx;                      // forward × up(0,1,0)
+      var rx = -fz, ry = 0, rz = fx;                      // forward × up(0,1,0), so the picture is not turned around
       var rl = Math.hypot(rx, rz) || 1; rx /= rl; rz /= rl;
       var ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx;
 
@@ -573,7 +768,7 @@
       var streakLen = clamp(camSpeed * 0.035, 0, 0.09);
 
       // activity per cluster follows where the camera is looking
-      var maxAct = 0, nearest = -1, nearestD = 8;
+      var maxAct = 0, nearest = -1, nearestD = 2.5;   // a cluster is active only when the camera is aimed at it
       for (var c = 0; c < NC; c++) {
         var cd0 = CLUSTERS[c];
         var d0 = Math.hypot(T[0] - cd0.c[0], T[1] - cd0.c[1], T[2] - cd0.c[2]);
@@ -585,6 +780,13 @@
         if (reduced) { act[c] = near; }
         else { s = damp(act[c], near, actV[c], 7, dt); act[c] = clamp(s[0], 0, 1); actV[c] = s[1]; }
         if (act[c] > maxAct) maxAct = act[c];
+      }
+
+      // Every shape turns about its own vertical axis to face the camera, so none is ever seen edge-on.
+      for (c = 0; c < NC; c++) {
+        var cb = CLUSTERS[c], tc = Math.atan2(P[2] - cb.c[2], P[0] - cb.c[0]) - Math.atan2(cb.out[2], cb.out[0]);
+        tc = Math.atan2(Math.sin(tc), Math.cos(tc)) * 0.9;
+        bcx[c + 1] = cb.c[0]; bcz[c + 1] = cb.c[2]; bcos[c + 1] = Math.cos(tc); bsin[c + 1] = Math.sin(tc);
       }
 
       // query position, smoothed
@@ -613,29 +815,33 @@
       }
       var bandEdge = W * 0.72, bandK = (NB - 1) / bandEdge;
       var Nq = Math.max(400, (M * quality) | 0);
-      Nq = Math.min(Nq, M);
+      Nq = Math.min(Math.max(Nq, world.nV), M);   // outline points are never thinned
       counts.fill(0);
       nStreaks = 0; nNear = 0;
       var worst = QUERY_RADIUS * QUERY_RADIUS;
-      var hx = world.hx, hy = world.hy, hz = world.hz, cl = world.cl, ph = world.ph, jit = world.jit;
+      var hx = world.hx, hy = world.hy, hz = world.hz, cl = world.cl, jit = world.jit;
       var ox = world.ox, oy = world.oy, oz = world.oz, dl = world.delay;
       var dF = dist;
-      var driftOn = !reduced;
-      var ts = t * 0.4;
+      var scatOn = scat > 0.002;
       var NEAR = 0.8;
       var introOn = intro < 1;
       var i, p0, p1, p2, zz, k2, bk, sc, rad, key, side, kk;
 
       for (i = 0; i < Nq; i++) {
         p0 = hx[i]; p1 = hy[i]; p2 = hz[i];
-        if (driftOn) {
-          var a = ts + ph[i] * TAU;
-          var sa = Math.sin(a), ca = Math.cos(a);
-          p0 += sa * 0.22; p1 += ca * 0.22; p2 += sa * ca * 0.18;
+        var cb1 = cl[i] + 1, tdx = p0 - bcx[cb1], tdz = p2 - bcz[cb1];
+        p0 = bcx[cb1] + tdx * bcos[cb1] - tdz * bsin[cb1]; p2 = bcz[cb1] + tdx * bsin[cb1] + tdz * bcos[cb1];
+        if (scatOn) {
+          var lc = (scat - dl[i] * 0.5) / 0.7;
+          if (lc > 0) {
+            if (lc > 1) lc = 1;
+            lc = lc * lc * (3 - 2 * lc);
+            p0 += ox[i] * lc; p1 += oy[i] * lc; p2 += oz[i] * lc;
+          }
         }
         if (introOn) {
           var k = easeOut((tin - dl[i] * introDur * 0.6) / (introDur * 0.55));
-          var inv = 1 - k;
+          var inv = (1 - k) * 6.5;
           p0 += ox[i] * inv; p1 += oy[i] * inv; p2 += oz[i] * inv;
         }
         var ddx = p0 - P[0], ddy = p1 - P[1], ddz = p2 - P[2];
@@ -707,11 +913,12 @@
       }
 
       // edges of active clusters
-      ctx.lineWidth = 0.8;
+      ctx.lineWidth = 0.9;
+      var edgeFade = clamp(1 - scat * 2.6, 0, 1);
       for (c = 0; c < NC; c++) {
-        if (act[c] < 0.03) continue;
+        if (act[c] < 0.03 || edgeFade < 0.02) continue;
         var edgesC = world.edges[c], eN = edgesC.length;
-        ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',' + (0.42 * act[c]).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',' + (0.5 * act[c] * edgeFade).toFixed(3) + ')';
         ctx.beginPath();
         for (kk = 0; kk < eN; kk += 2) {
           var ea = edgesC[kk], eb = edgesC[kk + 1];
@@ -738,7 +945,7 @@
             var from = counts[key], to = key + 1 <= K - 1 ? counts[key + 1] : counts[K];
             if (to <= from) continue;
             // `counts[key]` was turned into start offsets; end is the next key's start
-            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd];
+            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd] * (bnd < NB - 1 && cc >= 0 ? lerp(0.25, 1, a2) : 1);
             ctx.fillStyle = rgb(side ? colPaper : colInk);
             ctx.beginPath();
             for (var q2 = from; q2 < to; q2++) {
@@ -801,14 +1008,11 @@
         var lsc = focal / lzz;
         var LX = cx + (lx * rx + ly * ry + lz * rz) * lsc;
         var LY = cy - (lx * ux + ly * uy + lz * uz) * lsc;
-        var rr3 = world.meta[c].radius * lsc * 0.55;
-        var ax = LX + rr3 * 0.7, ay = LY - rr3 * 0.7;
-        ax = Math.min(ax, W - lb.w - 16); ay = Math.max(ay, lb.h + 76);
+        var tp = world.meta[c].top * lsc;
+        var ax = Math.min(Math.max(LX - lb.w * 0.5, 16), W - lb.w - 16), ay = Math.max(LY - tp - 16, lb.h + 76);
         ctx.globalAlpha = act[c];
         ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',0.7)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(LX, LY); ctx.lineTo(ax, ay); ctx.stroke();
-        ctx.fillStyle = 'rgb(' + COBALT.join(',') + ')';
-        ctx.beginPath(); ctx.arc(LX, LY, 2.6, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(LX, ay + 2); ctx.lineTo(LX, ay + 12); ctx.stroke();
         ctx.drawImage(lb.bitmap, ax, ay - lb.h, lb.w, lb.h);
         ctx.globalAlpha = 1;
       }
