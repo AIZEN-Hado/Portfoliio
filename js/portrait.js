@@ -4,9 +4,7 @@
    A hex lattice of dots; each dot's size follows the tone of a source picture, so the
    picture is made of the same kind of points as the figure behind the page. The dots fly in
    from the right (from the figure) when the portrait scrolls into view, settle on springs,
-   and part around the cursor, turning cobalt where they are disturbed. Only the person is drawn
-   (the source has a paper-white background), so there is no frame. At rest the dots keep drifting,
-   lean toward the cursor by depth, and a few free particles orbit the figure.
+   and part around the cursor, turning cobalt where they are disturbed.
 
    Source: if the <figure id="portrait"> has data-src, that photo is used. Otherwise, or if
    the photo fails to load, a monogram of the initials is drawn instead.
@@ -28,8 +26,6 @@
   var mode = 'monogram', image = null;
   var vis = false, raf = 0, last = 0, t0 = 0, assembled = false, settled = false;
   var ptr = { x: -1e4, y: -1e4, cx: -1e4, cy: -1e4, on: false };
-  var par = { x: 0, y: 0 };                 // the field leans toward the cursor, near dots more than far ones
-  var NS = 150, so = null;                  // free particles that orbit the figure
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function smooth(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
@@ -86,11 +82,7 @@
       var sy = clamp(Math.round(pts[k * 2 + 1] / H * (sh - 1)), 0, sh - 1);
       var v = clamp((lum[sy * sw + sx] - lo) / (hi - lo), 0, 1);
       if (!(mode === 'photo' && fig.getAttribute('data-tone') === 'light')) v = 1 - v;   // data-tone="light": dots follow the light, for a dark photo
-      if (mode === 'photo') {
-        // the figure dissolves toward the bottom and sides of its frame instead of ending on a line
-        var fy = 1 - smooth((sy / (sh - 1) - 0.74) / 0.24), fx = smooth(Math.min(sx, sw - 1 - sx) / (sw * 0.07));
-        out[k] = Math.pow(v, 1.12) * fy * fx;
-      } else out[k] = v;
+      out[k] = mode === 'photo' ? Math.pow(v, 1.12) : v;
     }
     return out;
   }
@@ -130,24 +122,12 @@
       }
       wait[j] = (1 - hx[j] / W) * 0.3 + hash(j + 4000) * 0.55;
     }
-    so = new Float32Array(NS * 6);
-    for (var m = 0; m < NS; m++) {
-      so[m * 6] = 0.34 + hash(m + 100) * 0.3;          // x radius, as a share of the width
-      so[m * 6 + 1] = 0.36 + hash(m + 200) * 0.3;      // y radius
-      so[m * 6 + 2] = hash(m + 300) * TAU;             // phase
-      so[m * 6 + 3] = (0.05 + hash(m + 400) * 0.12) * (hash(m + 450) < 0.5 ? -1 : 1);   // speed
-      so[m * 6 + 4] = 0.9 + hash(m + 500) * 1.5;       // radius
-      so[m * 6 + 5] = hash(m + 600);                   // colour pick
-    }
     settled = false;
     draw(performance.now());
   }
 
   /* ------------------------------------------------------------------- draw */
   var BREATH = 0.1;
-  // where a dot rests: its place in the picture, a slow drift of its own, and a lean toward the cursor
-  function ax0(i, tt) { return reduceMQ.matches ? 0 : Math.sin(tt * 0.9 + hy[i] * 0.031 + hx[i] * 0.012) * 1.3 + par.x * (0.3 + 0.7 * tone[i]); }
-  function ay0(i, tt) { return reduceMQ.matches ? 0 : Math.cos(tt * 0.8 + hx[i] * 0.027 + hy[i] * 0.009) * 1.3 + par.y * (0.3 + 0.7 * tone[i]); }
   function draw(now) {
     var tt = now / 1000, still = reduceMQ.matches;
     ctx.clearRect(0, 0, W, H);
@@ -163,43 +143,23 @@
       if (!still) rr *= 1 + BREATH * Math.sin(tt * 1.5 + hx[i] * 0.045 + hy[i] * 0.032);
       var dx = x[i] - ptr.cx, dy = y[i] - ptr.cy;
       var near = ptr.on && dx * dx + dy * dy < R2;
-      var mx = x[i] - hx[i] - ax0(i, tt), my = y[i] - hy[i] - ay0(i, tt);
-      var moved = mx * mx + my * my > 9 && age > 1.6;
+      var moved = (x[i] - hx[i]) * (x[i] - hx[i]) + (y[i] - hy[i]) * (y[i] - hy[i]) > 9 && age > 1.6;
       var path = (near || moved) ? blue : ink;
       path.moveTo(x[i] + rr, y[i]);
       path.arc(x[i], y[i], rr, 0, TAU);
     }
     ctx.fillStyle = INK; ctx.fill(ink);
     ctx.fillStyle = COBALT; ctx.fill(blue);
-    if (so && !still && age0 > 1.2) {
-      var sa = smooth((age0 - 1.2) / 1.6), cxm = W * 0.5, cym = H * 0.5;
-      var sInk = new Path2D(), sBlue = new Path2D();
-      for (var m = 0; m < NS; m++) {
-        var a = so[m * 6 + 2] + tt * so[m * 6 + 3];
-        var px = cxm + Math.cos(a) * so[m * 6] * W + Math.sin(tt * 0.31 + m) * 6;
-        var py = cym + Math.sin(a * 1.3 + m) * so[m * 6 + 1] * H + Math.cos(tt * 0.27 + m * 2) * 6;
-        var sr = so[m * 6 + 4] * sa;
-        var pth = so[m * 6 + 5] < 0.3 ? sBlue : sInk;
-        pth.moveTo(px + sr, py); pth.arc(px, py, sr, 0, TAU);
-      }
-      ctx.globalAlpha = 0.55; ctx.fillStyle = INK; ctx.fill(sInk);
-      ctx.globalAlpha = 0.9; ctx.fillStyle = COBALT; ctx.fill(sBlue);
-      ctx.globalAlpha = 1;
-    }
   }
 
   function step(dt, now) {
     var age0 = (now - t0) / 1000;
     var K = 24, C = 8.4;
     var R = 86, F = 1900;
-    var allHome = true, tt = now / 1000;
-    // the lean follows the cursor across the portrait, easing in and out
-    var lx = ptr.on ? clamp((ptr.cx / W - 0.5) * 2, -1.2, 1.2) * 7 : 0, ly = ptr.on ? clamp((ptr.cy / H - 0.5) * 2, -1.2, 1.2) * 7 : 0;
-    par.x += (lx - par.x) * Math.min(1, dt * 3); par.y += (ly - par.y) * Math.min(1, dt * 3);
+    var allHome = true;
     for (var i = 0; i < N; i++) {
       if (!assembled && age0 - wait[i] < 0) { allHome = false; continue; }
-      var tx = hx[i] + ax0(i, tt), ty = hy[i] + ay0(i, tt);
-      var ax = (tx - x[i]) * K - vx[i] * C, ay = (ty - y[i]) * K - vy[i] * C;
+      var ax = (hx[i] - x[i]) * K - vx[i] * C, ay = (hy[i] - y[i]) * K - vy[i] * C;
       if (ptr.on) {
         var dx = x[i] - ptr.cx, dy = y[i] - ptr.cy, d2 = dx * dx + dy * dy;
         if (d2 < R * R && d2 > 0.01) {
@@ -209,7 +169,7 @@
       }
       vx[i] += ax * dt; vy[i] += ay * dt;
       x[i] += vx[i] * dt; y[i] += vy[i] * dt;
-      if (allHome && (Math.abs(x[i] - tx) > 3.5 || Math.abs(y[i] - ty) > 3.5)) allHome = false;
+      if (allHome && (Math.abs(x[i] - hx[i]) > 0.3 || Math.abs(y[i] - hy[i]) > 0.3 || Math.abs(vx[i]) > 2 || Math.abs(vy[i]) > 2)) allHome = false;
     }
     if (!assembled && age0 > 2.4 && allHome) assembled = true;
   }
