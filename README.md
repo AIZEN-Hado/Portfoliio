@@ -1,16 +1,41 @@
-# Yashsingh Chauhan — Portfolio
+# Yashsingh Chauhan, portfolio
 
-> **Building Intelligent Systems That Ship**  
-> AI Engineer specializing in LLM systems, Generative AI, multi-agent workflows, and scalable production backends.
+AI engineer. LLM agents, retrieval, fine-tuning and the backends that carry them. Live at [portfoliio-jet.vercel.app](https://portfoliio-jet.vercel.app).
 
-[![Live Site](https://img.shields.io/badge/Live-Portfolio-brightgreen?style=flat-square)](https://aizen-hado.github.io/Portfoliio)
-[![VIT Bhopal](https://img.shields.io/badge/VIT%20Bhopal-CS%20'26-blue?style=flat-square)](#)
-[![Made with](https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=flat-square)](#)
+## What the site is
 
----
+One long page with a single figure behind it. The figure is a field of about 8,800 points drawn on a 2D canvas with its own perspective projection, so it reads as 3D without WebGL. Each project is a cluster whose shape follows what the project does: a graph, a tree, a drift from tight to diffuse, a chain, a waveform ring. Scrolling flies the camera between clusters. Pointing at a project row, or opening it, flies the camera to that project's cluster.
 
-## Overview
+## How it is built
 
-A zero-dependency, hand-crafted portfolio site built entirely in Vanilla JS, HTML5, and CSS3 — no frameworks, no bundlers, no build step. Every visual detail is intentional: a canvas starfield with scroll-warp physics, scramble-decode hero text, 3D glass-tilt demo panels, a WebAudio ambient drone, and a lagging reticle cursor.
+Plain HTML, CSS and JavaScript. No framework, no bundler, no build step.
 
-The site documents 7 engineering projects spanning AI systems, full-stack development, mobile apps, and cryptographic backend.............
+| File | Role |
+| --- | --- |
+| `index.html` | The page and all copy |
+| `css/site.css` | Tokens, fonts, nav, shared components |
+| `css/home.css` | Home page layout and type |
+| `css/docs.css` | Layout for the per-project docs in `docs/` |
+| `js/scene.js` | The figure: projection, camera, depth of field, batching |
+| `js/main.js` | Boot, scroll and pointer wiring, project rows, captions |
+| `fonts/` | Bricolage Grotesque and Newsreader, self-hosted variable fonts |
+
+### Rendering notes
+
+- The scene runs in a Web Worker on an `OffscreenCanvas`, so scrolling and text never wait on the canvas. Browsers without it fall back to the same code on the main thread.
+- Motion is time-based and uses critically damped springs, so it looks the same at 60, 120 or 240 Hz. The refresh rate is measured at startup.
+- Points are sorted into depth buckets and drawn in batched paths. A quality governor lowers the point count, then the pixel scale, if frames run long.
+- With reduced motion on, the scene draws on demand and does not drift.
+- The canvas can only run as fast as the display refreshes. On a 120 Hz screen it targets 120 fps.
+
+## Run it locally
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+## Docs
+
+Longer write-ups for each project live in `docs/`.

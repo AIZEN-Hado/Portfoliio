@@ -5,21 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InterviewIQ — Docs — Yashsingh Chauhan</title>
   <meta name="description" content="InterviewIQ documentation: a full-stack AI-driven interview platform — features, setup guide, environment configuration, and troubleshooting.">
-  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
-  <link href="https://fonts.cdnfonts.com/css/d-din" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23E9EBF0%27/%3E%3Cg fill=%27%232C3EF5%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%274%27/%3E%3Ccircle cx=%277%27 cy=%279%27 r=%272%27/%3E%3Ccircle cx=%2725%27 cy=%2712%27 r=%272.4%27/%3E%3Ccircle cx=%2721%27 cy=%2726%27 r=%272%27/%3E%3Ccircle cx=%279%27 cy=%2724%27 r=%271.8%27/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/site.css">
   <link rel="stylesheet" href="../css/docs.css">
 </head>
 <body>
 
   <nav class="nav is-solid">
-    <a href="../index.html" class="nav__wordmark">YASHSINGH&nbsp;CHAUHAN</a>
-    <button class="nav__burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav__links" id="navLinks">
-      <li><a href="../index.html#projects">Projects</a></li>
-      <li><a href="../index.html#skills">Skills</a></li>
+    <a href="../index.html" class="nav__wordmark">Yashsingh Chauhan</a>
+    <ul class="nav__links">
+      <li><a href="../index.html#work">Work</a></li>
       <li><a href="../index.html#contact">Contact</a></li>
     </ul>
   </nav>
@@ -28,7 +23,7 @@
 
     <!-- ============ SIDEBAR ============ -->
     <aside class="docs__side">
-      <p class="eyebrow">Project Docs</p>
+      <p class="eyebrow">Docs</p>
       <h2 class="docs__sidetitle">InterviewIQ</h2>
       <nav class="docs__toc">
         <a href="#overview">Overview</a>
@@ -44,7 +39,7 @@
       </nav>
       <a class="btn-ghost btn-ghost--sm docs__back" href="https://interviewiq-vm8j.onrender.com" target="_blank" rel="noopener">Live Site</a>
       <a class="btn-ghost btn-ghost--sm docs__back" href="https://github.com/AIZEN-Hado/3.interviewIQ" target="_blank" rel="noopener">GitHub Repo</a>
-      <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-interviewiq">&larr; Back to Portfolio</a>
+      <a class="btn-ghost btn-ghost--sm docs__back" href="../index.html#p-interviewiq">&larr; Back to the work</a>
     </aside>
 
     <!-- ============ BODY ============ -->
@@ -228,20 +223,13 @@ OPENAI_API_KEY=your_api_key   <span class="c"># if used</span></code></pre>
 
   <footer class="footer">
     <div class="container footer__grid">
-      <span class="footer__mark">YASHSINGH CHAUHAN</span>
+      <span class="footer__mark">Yashsingh Chauhan</span>
       <span class="footer__legal">© 2026 Yashsingh Chauhan — VIT Bhopal</span>
     </div>
   </footer>
 
   <script>
     (function () {
-      var burger = document.getElementById("navBurger");
-      var links = document.getElementById("navLinks");
-      burger.addEventListener("click", function () {
-        var open = links.classList.toggle("is-open");
-        burger.classList.toggle("is-open", open);
-        burger.setAttribute("aria-expanded", String(open));
-      });
       var toc = document.querySelectorAll(".docs__toc a");
       toc.forEach(function (a) {
         var s = document.querySelector(a.getAttribute("href"));
