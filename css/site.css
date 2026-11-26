@@ -88,6 +88,12 @@ a { color: inherit; }
   transition: background 0.35s ease;
 }
 .nav.is-inv { color: var(--paper); --nb: 44, 62, 245; }
+/* how far down the page you are; main.js sets the scale directly */
+.nav__progress {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px; z-index: 1; pointer-events: none;
+  background: var(--cobalt); transform-origin: 0 50%; transform: scaleX(0);
+}
+.nav.is-inv .nav__progress { background: var(--paper); }
 .nav.is-solid { background: var(--paper); border-bottom: 1px solid var(--rule); }
 .nav__mark, .nav__wordmark {
   font-stretch: 80%; font-weight: 650; font-size: 1.2rem; letter-spacing: -0.01em;
@@ -115,8 +121,20 @@ a { color: inherit; }
   text-decoration: none;
   transition: background-color 0.25s ease, transform 0.25s var(--ease);
 }
-.btn:hover { background: var(--cobalt); }
+.btn:hover, .btn:focus-visible { background: var(--cobalt); }
 .btn:active { transform: translateY(1px); }
+
+/* Text roll: the label slides up and a copy of it takes its place. The copy comes from data-label. */
+.btn.roll { padding: 0; }
+.roll { position: relative; overflow: hidden; border: 0; cursor: pointer; line-height: 1.25; }
+.roll > span { display: block; padding: 0.95em 1.55em; transition: transform 0.55s var(--ease); }
+.roll::after {
+  content: attr(data-label); position: absolute; inset: 0;
+  display: grid; place-items: center;
+  transform: translateY(105%); transition: transform 0.55s var(--ease);
+}
+.roll:hover > span, .roll:focus-visible > span { transform: translateY(-105%); }
+.roll:hover::after, .roll:focus-visible::after { transform: none; }
 
 .link {
   font-family: var(--sans); font-weight: 600; font-size: 1rem;
@@ -138,3 +156,16 @@ a { color: inherit; }
 .footer { border-top: 1px solid var(--rule); margin-top: 4rem; }
 .footer__grid { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 2rem; font-family: var(--sans); font-size: 0.92rem; color: var(--ink-2); }
 .footer__mark { font-weight: 650; color: var(--ink); font-stretch: 80%; }
+
+/* ---------- Page transitions: the home page and the project docs hand over with a curtain ---------- */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vt-out 0.5s cubic-bezier(0.65, 0, 0.35, 1) both; }
+::view-transition-new(root) { animation: vt-in 0.8s var(--ease) both; }
+@keyframes vt-out { to { opacity: 0.35; transform: translateY(-3vh) scale(0.985); } }
+@keyframes vt-in { from { clip-path: inset(100% 0 0 0); transform: translateY(4vh); } to { clip-path: inset(0); transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .roll > span, .roll::after { transition: none; }
+  .roll:hover > span, .roll:focus-visible > span { transform: none; }
+  .roll::after { display: none; }
+}

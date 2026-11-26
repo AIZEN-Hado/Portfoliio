@@ -1,7 +1,10 @@
 /* ============================================================================
    main.js — everything on the page that isn't the figure.
-   Starts the figure (in a Worker when possible), feeds it scroll, pointer and
-   layout, and runs the project rows, the caption and the nav colour.
+   Starts the figure (in a Worker when possible) and feeds it scroll, pointer and layout.
+   Drives the pinned project scenes (--e / --h / --x), the project rail, the line-mask
+   reveals, the hero and introduction scroll effects, the caption and the nav colour.
+   The camera marks it sends are built from the same scene geometry that drives the text,
+   so the figure and the page are always on the same beat.
    ========================================================================== */
 (function () {
   'use strict';
@@ -11,8 +14,12 @@
   var nav = doc.getElementById('nav');
   var caption = doc.getElementById('caption');
   var contact = doc.getElementById('contact');
-  var rows = Array.prototype.slice.call(doc.querySelectorAll('.row'));
+  var projs = Array.prototype.slice.call(doc.querySelectorAll('.proj'));
   var sets = Array.prototype.slice.call(doc.querySelectorAll('.skillset'));
+  var heroEl = doc.getElementById('top'), introEl = doc.getElementById('about'), skillsEl = doc.getElementById('skills');
+  var introName = doc.querySelector('.intro__name');
+  var rail = doc.getElementById('rail'), railLinks = rail ? Array.prototype.slice.call(rail.querySelectorAll('a')) : [];
+  var progress = doc.getElementById('progress');
   var reduceMQ = win.matchMedia('(prefers-reduced-motion: reduce)');
   var coarse = win.matchMedia('(pointer: coarse)').matches;
 
@@ -22,11 +29,24 @@
 
   var CAPTIONS = {
     hero: 'More than 10,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.',
-    work: 'Each cluster is one project, and its shape follows what the project does: a graph, a tree, a drift, a mesh.',
-    about: 'The same space from the side. The projects wind down a helix.',
+    about: 'The same space from the side. The ten projects wind down a helix.',
+    work: 'Each cluster is one project, and its shape follows what the project does. The camera moves as you scroll.',
     skills: 'Skills sit in four clusters below the projects.',
     contact: 'The end of the space. Write to me.'
   };
+  // what each project's cluster is drawn as, in the order of the page
+  var PROJECT_CAPTIONS = [
+    'PolicyPilot AI, drawn as a graph: hubs of points joined by edges.',
+    'SemiGit, drawn as a tree: a trunk that keeps branching, like a commit history.',
+    'ProvChain, drawn as a drift: a tight line of points that spreads as it moves.',
+    'InterviewIQ, drawn as three stacked layers of points.',
+    'ClasslyAI, drawn as three groups: students, instructors and admins.',
+    'Offline UPI Mesh, drawn as a chain of five devices, hop by hop.',
+    'All-Ears, drawn as a ring with a wavering rim.',
+    'Fisherman, drawn as two strands, baseline and candidate. A few points have regressed.',
+    'LazyForm, drawn as a multi-step form: three pages of fields, filled in order.',
+    'Dispatch Load Balancer, drawn as a depot with five vehicles, each on its own route.'
+  ];
 
   var worker = null, scene = null;
   var W = 0, H = 0, DPR = 1;
@@ -143,7 +163,86 @@
     })).catch(function () { return []; });
   }
 
+  /* ---------------------------------------------------------------- helpers */
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+  function docTop(el) { return el.getBoundingClientRect().top + win.scrollY; }
+  function num(v) { return Math.round(v * 1000) / 1000; }
+
+  /* ---------------------------------------------------- text: line masks, fit */
+  /* .rv text is split into its visual lines, and each line rises out of its own mask when it scrolls in. */
+  var rvEls = Array.prototype.slice.call(doc.querySelectorAll('.rv'));
+  var rvWidth = new Map();
+  function splitLines(el) {
+    var text = el.getAttribute('data-rv');
+    if (text === null) { text = el.textContent.replace(/\s+/g, ' ').trim(); el.setAttribute('data-rv', text); }
+    var words = text.split(' ');
+    el.textContent = '';
+    var ws = words.map(function (w, i) {
+      var s = doc.createElement('span');
+      s.textContent = w; s.style.display = 'inline-block';
+      el.appendChild(s);
+      if (i < words.length - 1) el.appendChild(doc.createTextNode(' '));
+      return s;
+    });
+    var lines = [], top = null;
+    ws.forEach(function (s, i) {
+      var tp = s.offsetTop;
+      if (top === null || Math.abs(tp - top) > 3) { lines.push([]); top = tp; }
+      lines[lines.length - 1].push(words[i]);
+    });
+    el.textContent = '';
+    lines.forEach(function (l, i) {
+      var outer = doc.createElement('span'), inner = doc.createElement('span');
+      outer.className = 'l'; outer.style.setProperty('--li', i);
+      inner.textContent = l.join(' ');
+      outer.appendChild(inner); el.appendChild(outer);
+    });
+    el.classList.add('is-split');
+    rvWidth.set(el, el.clientWidth);
+  }
+  function prepareText(onlyIfNarrower) {
+    rvEls.forEach(function (el) {
+      if (onlyIfNarrower && rvWidth.get(el) === el.clientWidth) return;
+      splitLines(el);
+    });
+    fitTitles();
+  }
+
+  /* Titles are set big and open from narrow to wide as you scroll. Measure each at its widest and shrink it, if it must, so it never reaches the stage. */
+  function fitOne(el, scopeEl, varName, varVal, container) {
+    el.style.setProperty('--fit', '1');
+    var prev = scopeEl.style.getPropertyValue(varName);
+    scopeEl.style.setProperty(varName, varVal);
+    var widest = 0;
+    Array.prototype.forEach.call(el.querySelectorAll('.line > span'), function (s) { widest = Math.max(widest, s.offsetWidth); });
+    var cs = win.getComputedStyle(container);
+    var avail = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (prev) scopeEl.style.setProperty(varName, prev); else scopeEl.style.removeProperty(varName);
+    el.style.setProperty('--fit', widest > avail && widest > 0 ? String(num(avail / widest * 0.985)) : '1');
+  }
+  function fitTitles() {
+    projs.forEach(function (p) {
+      var el = p.querySelector('.proj__title'), inner = p.querySelector('.proj__inner');
+      var wasOpen = p.classList.contains('is-open');
+      if (wasOpen) p.classList.remove('is-open');
+      fitOne(el, p, '--h', '1', inner);
+      if (wasOpen) p.classList.add('is-open');
+    });
+    if (introName) fitOne(introName, introEl, '--np', '1', introName.parentNode);
+  }
+
+  if (win.IntersectionObserver) {
+    var rvIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); rvIO.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -9% 0px' });
+    rvEls.concat(introName ? [introName] : []).forEach(function (el) { rvIO.observe(el); });
+  } else {
+    rvEls.concat(introName ? [introName] : []).forEach(function (el) { el.classList.add('in'); });
+  }
+
   /* ---------------------------------------------------------------- layout */
+  var geo = [];                 // per project scene: { top, hold, pin }
+  var layout = { vh: 0, heroH: 0, introTop: 0, introBottom: 0, workTop: 0, first: 0, last: 0 };
   var measureQueued = false;
   function queueMeasure() {
     if (measureQueued) return;
@@ -151,58 +250,142 @@
     win.requestAnimationFrame(function () { measureQueued = false; measure(); });
   }
 
-  function docTop(el) { return el.getBoundingClientRect().top + win.scrollY; }
-
   function measure() {
     var vh = win.innerHeight, sy = win.scrollY;
-    var marks = [0];
-    rows.forEach(function (row) {
-      var r = row.querySelector('.row__head').getBoundingClientRect();
-      marks.push(r.top + sy + r.height / 2 - vh * 0.5);
+    geo = projs.map(function (el) {
+      var pin = el.querySelector('.proj__pin').offsetHeight;
+      return { top: docTop(el), hold: Math.max(1, el.offsetHeight - pin), pin: pin };
     });
-    var about = doc.getElementById('about'), skills = doc.getElementById('skills');
-    marks.push(docTop(about) + Math.min(about.offsetHeight * 0.4, 520) - vh * 0.5);
-    marks.push(docTop(skills) - vh * 0.1);
-    marks.push(docTop(skills) + skills.offsetHeight * 0.55 - vh * 0.5);
+    layout.vh = vh;
+    layout.heroH = heroEl.offsetHeight;
+    layout.introTop = docTop(introEl); layout.introBottom = layout.introTop + introEl.offsetHeight;
+    layout.first = geo.length ? geo[0].top : 0;
+    layout.last = geo.length ? geo[geo.length - 1].top + geo[geo.length - 1].hold + geo[geo.length - 1].pin : 0;
+
+    // Camera marks: [start, end] of the scroll range where the camera is parked on each station.
+    // Between one park's end and the next one's start it flies. For the project scenes the park is
+    // exactly the pinned range, so the camera arrives as the title finishes rising and leaves when the scene lets go.
+    var m = [];
+    m.push([0, vh * 0.12]);                                                                             // hero
+    m.push([layout.introTop - vh * 0.1, Math.max(layout.introTop + vh * 0.3, layout.introBottom - vh * 0.65)]);  // introduction
+    geo.forEach(function (g) { m.push([g.top, g.top + g.hold]); });                                     // projects
+    var sT = docTop(skillsEl), sH = skillsEl.offsetHeight;
+    m.push([sT - vh * 0.15, sT - vh * 0.15]);                                                           // skills, approaching
+    m.push([sT + sH * 0.55 - vh * 0.5, sT + sH * 0.55 - vh * 0.5]);                                     // skills, at the ring
     docData.edge = docTop(contact);
-    marks.push(docData.edge - vh * 0.25);
-    for (var i = 1; i < marks.length; i++) if (marks[i] < marks[i - 1] + 60) marks[i] = marks[i - 1] + 60;
-    docData.marks = marks;
-    send({ type: 'layout', marks: marks, edge: docData.edge });
-    paintChrome();
+    m.push([docData.edge - vh * 0.25, docData.edge - vh * 0.25]);                                       // contact
+    for (var i = 0; i < m.length; i++) {
+      if (m[i][1] < m[i][0]) m[i][1] = m[i][0];
+      if (i > 0 && m[i][0] < m[i - 1][1] + 40) { m[i][0] = m[i - 1][1] + 40; if (m[i][1] < m[i][0]) m[i][1] = m[i][0]; }
+    }
+    docData.marks = m;
+    send({ type: 'layout', marks: m, edge: docData.edge });
+    win.__page = { marks: m, geo: geo, layout: layout };
+    paint(true);
   }
 
   /* ----------------------------------------------------------------- scroll */
-  var scrollQueued = false, lastInv = null, lastCapInv = null;
-  function paintChrome() {
-    var y = win.scrollY;
+  var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
+  var cache = { hx: -1, np: -1, prog: -1 };
+  var sceneVals = [];           // last written [e, h, x] per scene
+  var current = -1, railOn = false;
+
+  function setVar(el, name, v) { el.style.setProperty(name, v); }
+
+  function paint(force) {
+    var y = win.scrollY, vh = win.innerHeight;
+
+    // nav colour and caption colour on the blue end of the page
     var inv = y + 36 > docData.edge;
     if (inv !== lastInv) { nav.classList.toggle('is-inv', inv); lastInv = inv; }
-    var capInv = y + win.innerHeight - 40 > docData.edge;
+    var capInv = y + vh - 40 > docData.edge;
     if (capInv !== lastCapInv) { caption.classList.toggle('is-inv', capInv); lastCapInv = capInv; }
+    // the footer line takes the bottom right at the very end of the page
+    var capOff = y + vh > doc.documentElement.scrollHeight - 120;
+    if (capOff !== lastCapOff) { caption.classList.toggle('is-off', capOff); lastCapOff = capOff; }
+
+    // page progress line
+    if (progress) {
+      var maxY = Math.max(1, doc.documentElement.scrollHeight - vh);
+      var pr = num(clamp(y / maxY, 0, 1));
+      if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
+    }
+
+    // hero leaves with the camera
+    var hx = num(clamp((y - vh * 0.1) / (vh * 0.62), 0, 1));
+    if (force || hx !== cache.hx) { setVar(heroEl, '--hx', hx); cache.hx = hx; }
+
+    // the width axis of the name opens through the introduction
+    var np = num(clamp((y - (layout.introTop - vh * 0.5)) / (vh * 1.15), 0, 1));
+    if (force || np !== cache.np) { setVar(introEl, '--np', np); cache.np = np; }
+
+    // project scenes
+    var best = -1, bestP = 0;
+    for (var i = 0; i < geo.length; i++) {
+      var g = geo[i];
+      var e = num(clamp((y - (g.top - g.pin)) / g.pin, 0, 1));
+      var h = num(clamp((y - g.top) / g.hold, 0, 1));
+      var x = num(clamp((y - (g.top + g.hold)) / g.pin, 0, 1));
+      var sv = sceneVals[i];
+      if (force || !sv || sv[0] !== e || sv[1] !== h || sv[2] !== x) {
+        var el = projs[i];
+        el.style.setProperty('--e', e); el.style.setProperty('--h', h); el.style.setProperty('--x', x);
+        sceneVals[i] = [e, h, x];
+      }
+      var pres = Math.min(e, 1 - x);
+      if (pres > bestP + 1e-6) { bestP = pres; best = i; }
+    }
+    if (bestP < 0.35) best = -1;
+    if (best !== current) setCurrent(best);
+
+    // the rail is on from just before the first scene to just after the last
+    var on = geo.length > 0 && y > layout.first - vh * 0.6 && y < layout.last - vh * 0.4;
+    if (on !== railOn && rail) { rail.classList.toggle('is-on', on); railOn = on; }
   }
+
+  function projectName(i) { return CLUSTER_NAMES[i]; }
+  function railLabel(i) { return (i + 1 < 10 ? '0' : '') + (i + 1) + ' / 10   ' + projectName(i); }
+  function setCurrent(i) {
+    var prev = current;
+    current = i;
+    if (rail) {
+      railLinks.forEach(function (a, k) {
+        if (k === i) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+        a.classList.toggle('is-past', i >= 0 && k < i);
+      });
+      if (i >= 0) rail.setAttribute('data-now', railLabel(i));
+    }
+    // a case left open stays with its scene: closing it as you move on keeps the camera from sitting in close on an old project
+    if (prev >= 0 && projs[prev].classList.contains('is-open')) setOpen(projs[prev], false);
+    if (i >= 0) setCaption('p' + i, PROJECT_CAPTIONS[i]);
+    else setCaption(sectionKey);
+  }
+
   win.addEventListener('scroll', function () {
     send({ type: 'scroll', y: win.scrollY });
     onScrollForFocus();
     if (!scrollQueued) {
       scrollQueued = true;
-      win.requestAnimationFrame(function () { scrollQueued = false; paintChrome(); });
+      win.requestAnimationFrame(function () { scrollQueued = false; paint(); });
     }
   }, { passive: true });
 
-  var resizeQueued = false;
+  var resizeQueued = false, resizeT = 0;
   win.addEventListener('resize', function () {
-    if (resizeQueued) return;
-    resizeQueued = true;
-    win.requestAnimationFrame(function () {
-      resizeQueued = false;
-      viewport();
-      send({ type: 'size', w: W, h: H, dpr: DPR });
-      measure();
-    });
+    if (!resizeQueued) {
+      resizeQueued = true;
+      win.requestAnimationFrame(function () {
+        resizeQueued = false;
+        viewport();
+        send({ type: 'size', w: W, h: H, dpr: DPR });
+        measure();
+      });
+    }
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function () { prepareText(true); measure(); }, 160);
   });
   if (win.ResizeObserver) new ResizeObserver(queueMeasure).observe(doc.querySelector('main'));
-  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(queueMeasure);
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { prepareText(true); queueMeasure(); });
 
   /* ---------------------------------------------------------------- pointer */
   var pend = false, px = 0, py = 0;
@@ -216,84 +399,97 @@
   root.addEventListener('mouseleave', function () { send({ type: 'pointer', x: -1, y: -1, on: false }); });
   win.addEventListener('blur', function () { send({ type: 'pointer', x: -1, y: -1, on: false }); });
 
-  /* ------------------------------------------------- focus: rows and skills */
-  var focusTimer = 0, focusSent = -1;
+  /* ------------------------------------------------- focus: cases and skills */
+  /* Opening a project's case moves the camera in on its cluster. Hovering a skill group does the same for that group,
+     but only once scrolling has been still for a moment: skill groups slide under a resting cursor while you scroll,
+     and each would otherwise send the camera somewhere else mid-scroll. */
+  var focusTimer = 0, focusSent = -1, caseFocus = -1;
   function sendFocus(i) { if (i === focusSent) return; focusSent = i; send({ type: 'focus', i: i }); }
   function setFocus(i) { clearTimeout(focusTimer); sendFocus(i); }
-  function clearFocus() { clearTimeout(focusTimer); focusTimer = setTimeout(function () { sendFocus(-1); }, 90); }
+  function clearFocus() { clearTimeout(focusTimer); focusTimer = setTimeout(function () { if (caseFocus < 0) sendFocus(-1); }, 90); }
 
-  /* Rows and skill groups slide under a resting cursor while you scroll. Each one would fire a hover and send
-     the camera off to a different cluster mid-scroll, which reads as erratic motion. So hover focus is held back
-     until scrolling has been still for a moment, and only applied if the cursor is still over that element. */
   var lastScrollAt = 0, settleTimer = 0, hoverEl = null, hoverIdx = -1;
   function scrolling() { return performance.now() - lastScrollAt < 170; }
-  function hoverFocus(el, i) { hoverEl = el; hoverIdx = i; if (!scrolling()) setFocus(i); }
+  function hoverFocus(el, i) { hoverEl = el; hoverIdx = i; if (caseFocus < 0 && !scrolling()) setFocus(i); }
   function hoverBlur() { hoverEl = null; hoverIdx = -1; clearFocus(); }
   function onScrollForFocus() {
     lastScrollAt = performance.now();
-    if (focusSent >= 0 && !(doc.activeElement && doc.activeElement.classList && doc.activeElement.classList.contains('row__head'))) {
-      clearTimeout(focusTimer); sendFocus(-1);
-    }
+    if (focusSent >= 0 && caseFocus < 0) { clearTimeout(focusTimer); sendFocus(-1); }
     clearTimeout(settleTimer);
     settleTimer = setTimeout(function () {
-      if (hoverEl && hoverEl.matches(':hover')) setFocus(hoverIdx);
+      if (caseFocus < 0 && hoverEl && hoverEl.matches(':hover')) setFocus(hoverIdx);
     }, 190);
   }
-
-  rows.forEach(function (row, i) {
-    var head = row.querySelector('.row__head');
-    row.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') hoverFocus(row, i); });
-    row.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') hoverBlur(); });
-    head.addEventListener('focus', function () { setFocus(i); });
-    head.addEventListener('blur', clearFocus);
-    head.addEventListener('click', function () { toggle(row); });
-  });
   sets.forEach(function (el) {
     var i = parseInt(el.getAttribute('data-i'), 10);
     el.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') hoverFocus(el, i); });
     el.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') hoverBlur(); });
   });
 
-  function setOpen(row, v) {
-    row.classList.toggle('is-open', v);
-    row.querySelector('.row__head').setAttribute('aria-expanded', v ? 'true' : 'false');
+  /* ------------------------------------------------------------------- cases */
+  function setOpen(proj, v) {
+    var i = projs.indexOf(proj);
+    proj.classList.toggle('is-open', v);
+    var b = proj.querySelector('.proj__open');
+    b.setAttribute('aria-expanded', v ? 'true' : 'false');
+    if (!b._closed) b._closed = b.getAttribute('data-label');
+    var label = v ? b.getAttribute('data-label-open') : b._closed;
+    b.setAttribute('data-label', label);
+    b.firstElementChild.textContent = label;
+    if (v) { caseFocus = i; setFocus(i); }
+    else if (caseFocus === i) { caseFocus = -1; clearTimeout(focusTimer); sendFocus(-1); }
   }
-  function toggle(row) {
-    var willOpen = !row.classList.contains('is-open');
-    rows.forEach(function (r) { setOpen(r, false); });
-    if (!willOpen) return;
-    setOpen(row, true);
-    setTimeout(function () {
-      var r = row.getBoundingClientRect(), vh = win.innerHeight, nav = 80;
-      var behavior = reduceMQ.matches ? 'auto' : 'smooth';
-      if (r.bottom > vh - 20) win.scrollBy({ top: Math.min(r.bottom - vh + 40, r.top - nav - 8), behavior: behavior });
-      else if (r.top < nav) win.scrollBy({ top: r.top - nav - 8, behavior: behavior });
-    }, reduceMQ.matches ? 0 : 640);
+  projs.forEach(function (proj, i) {
+    proj.querySelector('.proj__open').addEventListener('click', function () {
+      var willOpen = !proj.classList.contains('is-open');
+      projs.forEach(function (p) { if (p !== proj && p.classList.contains('is-open')) setOpen(p, false); });
+      setOpen(proj, willOpen);
+    });
+    // reaching a scene by keyboard: bring it to its resting place so it is read, not half-risen
+    proj.addEventListener('focusin', function () {
+      var g = geo[i];
+      if (!g) return;
+      var y = win.scrollY;
+      if (y < g.top - 2 || y > g.top + g.hold + 2) win.scrollTo({ top: clamp(y, g.top, g.top + g.hold), behavior: 'instant' });
+    });
+  });
+
+  // the rail: hover names a project, click goes to its scene
+  if (rail) {
+    railLinks.forEach(function (a, k) {
+      a.addEventListener('pointerenter', function () { rail.setAttribute('data-now', railLabel(k)); });
+      a.addEventListener('focus', function () { rail.setAttribute('data-now', railLabel(k)); });
+      a.addEventListener('pointerleave', function () { if (current >= 0) rail.setAttribute('data-now', railLabel(current)); });
+      a.addEventListener('blur', function () { if (current >= 0) rail.setAttribute('data-now', railLabel(current)); });
+    });
   }
 
-  // Deep links from the docs pages (index.html#p-semigit) open the row.
+  // Deep links from the docs pages (index.html#p-semigit) land on the scene, at the point where its camera has just arrived.
   function openFromHash() {
     var h = win.location.hash;
     if (h.indexOf('#p-') !== 0) return;
-    var row = doc.querySelector(h);
-    if (row && row.classList.contains('row')) {
-      setOpen(row, true);
-      row.scrollIntoView({ block: 'center', behavior: 'instant' });
-    }
+    var el = doc.querySelector(h);
+    var i = projs.indexOf(el);
+    if (i >= 0 && geo[i]) win.scrollTo({ top: geo[i].top, behavior: 'instant' });
   }
 
   /* ---------------------------------------------------------------- caption */
-  var capText = caption.querySelector('.caption__t'), capKey = 'hero', capTimer = 0;
-  function setCaption(key) {
-    if (!CAPTIONS[key] || key === capKey) return;
+  var capText = caption.querySelector('.caption__t'), capKey = 'hero', capTimer = 0, sectionKey = 'hero';
+  function setCaption(key, text) {
+    var t = text || CAPTIONS[key];
+    if (!t || key === capKey) return;
     capKey = key;
     caption.classList.add('is-swap');
     clearTimeout(capTimer);
-    capTimer = setTimeout(function () { capText.textContent = CAPTIONS[key]; caption.classList.remove('is-swap'); }, 190);
+    capTimer = setTimeout(function () { capText.textContent = t; caption.classList.remove('is-swap'); }, 190);
   }
   if (win.IntersectionObserver) {
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) setCaption(e.target.getAttribute('data-section')); });
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        sectionKey = e.target.getAttribute('data-section');
+        if (sectionKey !== 'work' || current < 0) setCaption(sectionKey);
+      });
     }, { rootMargin: '-50% 0px -50% 0px' });
     doc.querySelectorAll('[data-section]').forEach(function (s) { io.observe(s); });
   }
@@ -306,7 +502,15 @@
   /* ------------------------------------------------------------------ start */
   function fontsThenBoot() {
     var done = false;
-    function go() { if (done) return; done = true; openFromHash(); boot(); }
+    function go() {
+      if (done) return;
+      done = true;
+      prepareText(false);
+      measure();
+      openFromHash();
+      paint(true);
+      boot();
+    }
     if (doc.fonts && doc.fonts.load) {
       Promise.all([doc.fonts.load('600 1em "Bricolage Grotesque"'), doc.fonts.load('1em Newsreader')]).then(go, go);
       setTimeout(go, 1800);

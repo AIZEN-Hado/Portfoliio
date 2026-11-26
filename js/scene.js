@@ -85,20 +85,24 @@
     }
   })();
 
-  // Camera stations: hero, ten projects, about, skills (two), contact.
+  // Camera stations, in page order: hero, introduction, ten projects, skills (two), contact.
+  // While a station is parked (the page holds its content still) the camera keeps moving a little:
+  //   orb   how far it swings around the target over the whole park, in radians
+  //   dolly how much closer it ends than it began, as a fraction of the distance
   var STATIONS = (function () {
-    var s = [{ p: [8, 44, 62], t: [0, -3, 0] }];
+    var s = [{ p: [8, 44, 62], t: [0, -3, 0], orb: 0, dolly: 0 }];
+    s.push({ p: [-52, -3, 46], t: [0, -9, 0], orb: 0.6, dolly: 0 });    // introduction: the whole helix from the side, turning slowly
     for (var i = 0; i < NPROJ; i++) {
       var c = CLUSTERS[i];
       s.push({
         p: [c.c[0] + c.out[0] * 30, c.c[1] + 3, c.c[2] + c.out[2] * 30],
-        t: [c.c[0], c.c[1], c.c[2]]
+        t: [c.c[0], c.c[1], c.c[2]],
+        orb: 0.2, dolly: 0.12
       });
     }
-    s.push({ p: [-52, -3, 46], t: [0, -9, 0] });       // about: the whole helix from the side
-    s.push({ p: [6, SKY + 6, 52], t: [0, SKY, 0] });   // skills, approaching the ring
-    s.push({ p: [-7, SKY + 2, 40], t: [0, SKY, 0] });  // skills, at the ring
-    s.push({ p: [38, 16, 84], t: [0, -14, 0] });       // contact: pull back
+    s.push({ p: [6, SKY + 6, 52], t: [0, SKY, 0], orb: 0, dolly: 0 });    // skills, approaching the ring
+    s.push({ p: [-7, SKY + 2, 40], t: [0, SKY, 0], orb: 0, dolly: 0 });   // skills, at the ring
+    s.push({ p: [38, 16, 84], t: [0, -14, 0], orb: 0, dolly: 0 });        // contact: pull back
     return s;
   })();
 
@@ -388,6 +392,7 @@
 
     // springs
     var uS = 0, uV = 0;                 // station parameter
+    var drS = 0, drV = 0;               // progress through the current park (see scrollToU)
     var yawS = 0, yawV = 0, pitS = 0, pitV = 0;
     var focusW = 0, focusWV = 0, focusIdx = -1;
     var act = new Float32Array(NC), actV = new Float32Array(NC);
@@ -465,15 +470,26 @@
       return [crom(a[0], b[0], c[0], d[0], t), crom(a[1], b[1], c[1], d[1], t), crom(a[2], b[2], c[2], d[2], t)];
     }
 
+    /* Where the camera should be for a scroll position. marks[k] = [start, end]: the camera is parked on
+       station k for scrollY in that range, and flies to station k+1 between end and the next start.
+       Returns [u, dr]: u is the position along the stations, dr a sawtooth that rises 0 → 1 through a park
+       and falls 1 → 0 during the flight after it, so the slow drift inside a park never jumps. */
+    var uOut = [0, 0];
+    function fly(t) { return lerp(t, smooth(t), 0.7); }
     function scrollToU(y) {
-      if (!marks || marks.length !== STATIONS.length) return 0;
-      var n = marks.length;
-      if (y <= marks[0]) return 0;
-      if (y >= marks[n - 1]) return n - 1;
+      var n = STATIONS.length;
+      if (!marks || marks.length !== n) { uOut[0] = 0; uOut[1] = 0; return uOut; }
+      if (y <= marks[0][0]) { uOut[0] = 0; uOut[1] = 0; return uOut; }
       var k = 0;
-      while (k < n - 2 && y >= marks[k + 1]) k++;
-      var span = marks[k + 1] - marks[k] || 1;
-      return k + smooth((y - marks[k]) / span);
+      while (k < n - 1 && y >= marks[k + 1][0]) k++;
+      var s0 = marks[k][0], e0 = marks[k][1];
+      if (k === n - 1 || y <= e0) {
+        uOut[0] = k; uOut[1] = (e0 > s0 && k < n - 1) ? clamp((y - s0) / (e0 - s0), 0, 1) : 0;
+        return uOut;
+      }
+      var tt = clamp((y - e0) / ((marks[k + 1][0] - e0) || 1), 0, 1), te = fly(tt);
+      uOut[0] = k + te; uOut[1] = 1 - te;
+      return uOut;
     }
 
     /* ---- the frame ---- */
@@ -494,13 +510,15 @@
       var introE = easeOut(intro);
 
       // --- camera state ---
-      var uTarget = scrollToU(scrollY);
+      var tgt = scrollToU(scrollY), uTarget = tgt[0], drTarget = tgt[1];
       var s;
       if (reduced) {
-        uS = uTarget; uV = 0; yawS = pitS = 0; yawV = pitV = 0;
+        uS = uTarget; uV = 0; drS = drTarget; drV = 0; yawS = pitS = 0; yawV = pitV = 0;
         focusW = focus >= 0 ? 1 : 0; focusIdx = focus >= 0 ? focus : focusIdx;
       } else {
-        s = damp(uS, uTarget, uV, 6.2, dt); uS = s[0]; uV = s[1];
+        // quick enough that the camera is where the content says it should be, soft enough to take the steps out of a wheel
+        s = damp(uS, uTarget, uV, 10.5, dt); uS = s[0]; uV = s[1];
+        s = damp(drS, drTarget, drV, 8, dt); drS = s[0]; drV = s[1];
         var yawT = pointer.on ? (pointer.x / W - 0.5) * 0.30 : 0;
         var pitT = pointer.on ? (pointer.y / H - 0.5) * -0.16 : 0;
         s = damp(yawS, yawT, yawV, 3.2, dt); yawS = s[0]; yawV = s[1];
@@ -512,7 +530,8 @@
       var P = stationAt(uS, 'p'), T = stationAt(uS, 't');
       if (focusIdx >= 0 && focusW > 0.001) {
         var cdef = CLUSTERS[focusIdx];
-        var fp = [cdef.c[0] + cdef.out[0] * 26, cdef.c[1] + 2.5, cdef.c[2] + cdef.out[2] * 26];
+        var fd = focusIdx < NPROJ ? 24 : 26;     // a project's case opening moves the camera in closer than a skill hover does
+        var fp = [cdef.c[0] + cdef.out[0] * fd, cdef.c[1] + 2.2, cdef.c[2] + cdef.out[2] * fd];
         var w8 = smooth(focusW);
         P = [lerp(P[0], fp[0], w8), lerp(P[1], fp[1], w8), lerp(P[2], fp[2], w8)];
         T = [lerp(T[0], cdef.c[0], w8), lerp(T[1], cdef.c[1], w8), lerp(T[2], cdef.c[2], w8)];
@@ -524,9 +543,11 @@
       var horiz = Math.hypot(vx, vz);
       var az = Math.atan2(vz, vx), el = Math.atan2(vy, horiz);
       var idle = reduced ? 0 : Math.sin(t * 0.11) * 0.06 + t * 0.0;
-      az += yawS + idle + (1 - introE) * 0.9;
+      var kk = clamp(Math.floor(uS), 0, STATIONS.length - 2), ff = clamp(uS - kk, 0, 1);
+      var orbA = lerp(STATIONS[kk].orb, STATIONS[kk + 1].orb, ff), dolA = lerp(STATIONS[kk].dolly, STATIONS[kk + 1].dolly, ff);
+      az += yawS + idle + (1 - introE) * 0.9 + orbA * (drS - 0.5);
       el = clamp(el + pitS + (1 - introE) * 0.18, -1.2, 1.2);
-      dist *= 1 - (1 - introE) * 0.45;
+      dist *= (1 - (1 - introE) * 0.45) * (1 - dolA * drS);
       var ce = Math.cos(el);
       P = [T[0] + dist * ce * Math.cos(az), T[1] + dist * Math.sin(el), T[2] + dist * ce * Math.sin(az)];
 
@@ -889,7 +910,7 @@
         case 'start':
           if (!started) {
             started = true; startT = (performance.now() / 1000);
-            uS = scrollToU(scrollY); uV = 0;
+            var g0 = scrollToU(scrollY); uS = g0[0]; uV = 0; drS = g0[1]; drV = 0;
             if (reduced) startT -= 10;
             schedule();
           }

@@ -27,12 +27,26 @@
   <header class="nav" id="nav">
     <a class="nav__mark" href="#top">Yashsingh Chauhan</a>
     <nav class="nav__links" aria-label="Sections">
-      <a href="#work">Work</a>
       <a href="#about">About</a>
+      <a href="#work">Work</a>
       <a href="#skills">Skills</a>
       <a href="#contact" class="nav__contact">Contact</a>
     </nav>
+    <span class="nav__progress" id="progress" aria-hidden="true"></span>
   </header>
+
+  <nav class="rail" id="rail" aria-label="Projects">
+    <a href="#p-policypilot" data-i="0"><span>PolicyPilot AI</span></a>
+    <a href="#p-semigit" data-i="1"><span>SemiGit</span></a>
+    <a href="#p-provchain" data-i="2"><span>ProvChain</span></a>
+    <a href="#p-interviewiq" data-i="3"><span>InterviewIQ</span></a>
+    <a href="#p-classlyai" data-i="4"><span>ClasslyAI</span></a>
+    <a href="#p-upimesh" data-i="5"><span>Offline UPI Mesh</span></a>
+    <a href="#p-allears" data-i="6"><span>All-Ears</span></a>
+    <a href="#p-fisherman" data-i="7"><span>Fisherman</span></a>
+    <a href="#p-lazyform" data-i="8"><span>LazyForm</span></a>
+    <a href="#p-loadbalancer" data-i="9"><span>Dispatch Load Balancer</span></a>
+  </nav>
 
   <main>
     <!-- ========================== HERO ========================== -->
@@ -46,263 +60,31 @@
         <div class="hero__foot">
           <p class="hero__lede">I’m Yashsingh Chauhan, an AI engineer working on LLM agents, retrieval and fine-tuning. I finish computer science at VIT Bhopal in 2026.</p>
           <p class="hero__actions">
-            <a class="btn" href="#work">See the work</a>
-            <a class="link" href="mailto:yashchahan2905@gmail.com">Email me</a>
+            <a class="btn roll" href="#work" data-label="See the work"><span>See the work</span></a>
+            <a class="link" href="mailto:yashchauhan2905@gmail.com">Email me</a>
           </p>
         </div>
       </div>
     </section>
 
-    <!-- ========================== WORK ========================== -->
-    <section class="work" id="work" data-section="work">
-      <span id="projects" class="anchor"></span>
+    <!-- ========================== INTRODUCTION ========================== -->
+    <section class="intro" id="about" data-section="about">
       <div class="wrap">
-        <h2 class="h2">Selected work</h2>
-        <p class="intro">Ten projects. Each one is a cluster in the figure behind this page. Point at a row to fly to it, or open it to read the case.</p>
+        <h2 class="intro__name" aria-label="Yashsingh Chauhan"><span class="line"><span>Yashsingh</span></span><span class="line"><span>Chauhan</span></span></h2>
       </div>
-
-      <ol class="rows" id="rows">
-
-        <li class="row" id="p-policypilot" data-i="0">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-0">
-              <span class="row__title">PolicyPilot AI</span>
-              <span class="row__line">Insurance claim reviews cut from hours to seconds at 95%+ decision consistency.</span>
-              <span class="row__year">2025</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-0"><div class="row__clip"><div class="case">
-            <p class="case__role">Enterprise insurance claims decision platform. AI systems engineer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Claim reviews took hours of manual reading across 10,000+ policy clauses, and coverage decisions varied from person to person.</p></div>
-              <div><h4>Approach</h4><p>An adjudication platform that combines RAG, knowledge graphs, rule engines and multi-agent workflows, with a document pipeline for OCR, clause extraction and semantic indexing across 100,000+ documents.</p></div>
-              <div><h4>Result</h4><p>Review time went from hours to seconds at 95%+ decision consistency, with real-time clause retrieval at scale.</p></div>
-            </div>
-            <p class="case__stack">Built with FastAPI, LangGraph, FAISS, Ollama and Llama, RAG, knowledge graphs, multi-agent workflows.</p>
-            <p class="case__links"><a href="docs/policypilot.html">Read the docs</a></p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-semigit" data-i="1">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-1">
-              <span class="row__title">SemiGit</span>
-              <span class="row__line">A VS Code extension that decides when a commit is due and writes it. Fully offline by default.</span>
-              <span class="row__year">2025</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-1"><div class="row__clip"><div class="case">
-            <p class="case__role">AI-powered semantic commit generation. Creator and architect.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Git history is noisy (“wip”, “fix”, “final2”) because commits happen when a developer feels done, not when a unit of work is. Existing tools format messages; none decide when a commit should happen or what it represents.</p></div>
-              <div><h4>Approach</h4><p>A local-first extension that watches your session, diffs code structurally with the TypeScript Compiler API, scores feature-level milestones and writes the Conventional Commit. Five optional AI providers (OpenAI, Claude, Gemini, DeepSeek, Ollama) sit behind one interface.</p></div>
-              <div><h4>Result</h4><p>One universal .vsix with SQLite in WebAssembly and no native modules, 90+ tests on a three-OS CI matrix, and output quality measured against real git history by a backtest harness.</p></div>
-            </div>
-            <p class="case__stack">Built with TypeScript, VS Code extension API, TypeScript Compiler API, multi-provider LLM, SQLite on WASM, Conventional Commits.</p>
-            <p class="case__links"><a href="docs/semigit.html">Read the docs</a></p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-provchain" data-i="2">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-2">
-              <span class="row__title">ProvChain</span>
-              <span class="row__line">Audits AI-generated code against 200+ live CVEs and cuts manual security review by 80%.</span>
-              <span class="row__year">2025</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-2"><div class="row__clip"><div class="case">
-            <p class="case__role">AI code provenance and drift intelligence. ML systems engineer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>AI-generated code enters codebases unaudited and carries vulnerable patterns that manual review can’t catch at scale.</p></div>
-              <div><h4>Approach</h4><p>A provenance engine that checks generated code against 200+ live CVE records. A multi-signal risk score combines drift detection, CVSS severity and semantic similarity, and an embeddings-based retrieval step writes the explanation and the fix.</p></div>
-              <div><h4>Result</h4><p>Manual security review effort down by 80%, with explainable risk classification wired into CI/CD.</p></div>
-            </div>
-            <p class="case__stack">Built with ML risk scoring, CVE and CVSS data, drift detection, embeddings, CI/CD security.</p>
-            <p class="case__links"><a href="docs/provchain.html">Read the docs</a></p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-interviewiq" data-i="3">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-3">
-              <span class="row__title">InterviewIQ</span>
-              <span class="row__line">Writes interview questions from a resume and scores the answers in real time.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-3"><div class="row__clip"><div class="case">
-            <p class="case__role">AI-powered interview platform. Full-stack developer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Hiring pipelines lean on slow, subjective screening. Interviews are inconsistent and feedback arrives late or never.</p></div>
-              <div><h4>Approach</h4><p>A full-stack platform that generates questions from resume data and job requirements, evaluates candidate responses in real time and shows performance analytics, on a modular async backend built for low-latency evaluation.</p></div>
-              <div><h4>Result</h4><p>An automated pipeline from interview creation to structured candidate assessment, with real-time scoring dashboards.</p></div>
-            </div>
-            <p class="case__stack">Built with React, Tailwind CSS, Node.js, Express, MongoDB, JWT, LLM integration.</p>
-            <p class="case__links">
-              <a href="https://interviewiq-vm8j.onrender.com" target="_blank" rel="noopener">Live site</a>
-              <a href="docs/interviewiq.html">Read the docs</a>
-              <a href="https://github.com/AIZEN-Hado/3.interviewIQ" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-classlyai" data-i="4">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-4">
-              <span class="row__title">ClasslyAI</span>
-              <span class="row__line">One platform for courses, payments and AI study tools, for students, instructors and admins.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-4"><div class="row__clip"><div class="case">
-            <p class="case__role">AI-powered LMS and course marketplace. Full-stack developer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Teaching, course sales, student engagement and AI-assisted learning live in separate tools, so instructors and students juggle fragmented platforms.</p></div>
-              <div><h4>Approach</h4><p>A unified LMS where students browse, pay (Stripe) and learn, instructors publish and analyze course performance, and admins monitor the platform. AI tools handle notes, quizzes and answer checking; sign-in is by Google.</p></div>
-              <div><h4>Result</h4><p>A full three-role workflow with payments, progress tracking, quizzes, analytics and AI assistance in one product.</p></div>
-            </div>
-            <p class="case__stack">Built with React 19, Vite, Tailwind CSS, Node.js, Express, MongoDB, Stripe, Google OAuth.</p>
-            <p class="case__links">
-              <a href="https://classlyai-1.onrender.com" target="_blank" rel="noopener">Live site</a>
-              <a href="docs/classlyai.html">Read the docs</a>
-              <a href="https://github.com/AIZEN-Hado/CLASSLYAI" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-upimesh" data-i="5">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-5">
-              <span class="row__title">Offline UPI Mesh</span>
-              <span class="row__line">Payments that survive losing the network: encrypted packets hop device to device until one reaches the internet.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-5"><div class="row__clip"><div class="case">
-            <p class="case__role">Secure offline payment simulation over mesh networking. Backend engineer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Digital payments fail completely without internet access, a real gap in low-connectivity regions.</p></div>
-              <div><h4>Approach</h4><p>A Spring Boot backend that simulates offline UPI payments. Each transaction is encrypted (RSA and AES-GCM), wrapped in a TTL-bound mesh packet and gossiped device to device until a bridge device with internet relays it to the server for settlement.</p></div>
-              <div><h4>Result</h4><p>An end-to-end, cryptographically secure payment flow that survives total network loss on the sender’s side, with gossip-based packet propagation.</p></div>
-            </div>
-            <p class="case__stack">Built with Java, Spring Boot, RSA and AES-GCM, mesh networking, gossip protocol.</p>
-            <p class="case__links">
-              <a href="docs/upimesh.html">Read the docs</a>
-              <a href="https://github.com/AIZEN-Hado/Offline_upi" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-allears" data-i="6">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-6">
-              <span class="row__title">All-Ears</span>
-              <span class="row__line">A music streaming app with listener, artist and admin roles. My first Android app, shipped end to end.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-6"><div class="row__clip"><div class="case">
-            <p class="case__role">Spotify-inspired streaming app. Mobile developer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>A real music platform means solving auth, roles, playback, uploads, moderation and analytics together. It’s a full product, not a tutorial app.</p></div>
-              <div><h4>Approach</h4><p>A React Native and Expo app with Google sign-in and role-based access for listeners, artists and admins. Playback has queue, shuffle and repeat; artists upload tracks with cover art; admins approve content and manage users. Everything runs on Firebase.</p></div>
-              <div><h4>Result</h4><p>My first Android app, shipped end to end: authentication, audio playback and queue management, role-based navigation, and a larger React Native codebase kept in order.</p></div>
-            </div>
-            <p class="case__stack">Built with React Native, Expo 54, TypeScript, Expo Router, NativeWind, Firebase, Expo AV.</p>
-            <p class="case__links">
-              <a href="docs/allears.html">Read the docs</a>
-              <a href="https://github.com/AIZEN-Hado/ALL-EARS" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-fisherman" data-i="7">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-7">
-              <span class="row__title">Fisherman</span>
-              <span class="row__line">CI for LLM agents. It tells a real regression from noise before you merge.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-7"><div class="row__clip"><div class="case">
-            <p class="case__role">Regression gate for AI agents. Creator and maintainer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Agents break silently. Changing a prompt, swapping a model or editing a tool can shift behaviour, and unit tests can’t say whether things got worse because agent behaviour is probabilistic and multi-turn.</p></div>
-              <div><h4>Approach</h4><p>Replay the same eval suite on the old and new version, then let statistics decide. McNemar’s exact test sets the verdict and a paired bootstrap reports the effect size. Cases mix deterministic rules with an LLM judge that is itself scored against a human-labelled set. Simulated users with hidden goals, including adversarial ones, test multi-turn behaviour.</p></div>
-              <div><h4>Result</h4><p>A merge gate that exits 2 on a significant regression, runs in GitHub Actions and works with any LiteLLM provider. Runs are traced with OpenTelemetry into SQLite, a read-only dashboard computes the same verdict as CI, and an offline suite of 359 tests needs no API keys.</p></div>
-            </div>
-            <p class="case__stack">Built with Python, OpenTelemetry, SQLite, LiteLLM, FastAPI, McNemar and bootstrap statistics, GitHub Actions.</p>
-            <p class="case__links">
-              <a href="https://github.com/AIZEN-Hado/Fisherman" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-lazyform" data-i="8">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-8">
-              <span class="row__title">LazyForm</span>
-              <span class="row__line">A Chrome extension that fills job applications from a profile you save once.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-8"><div class="row__clip"><div class="case">
-            <p class="case__role">Autofill for job portals. Solo developer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Every job portal asks for the same name, work history and “Are you authorized to work?” answer, and every portal words and lays them out differently.</p></div>
-              <div><h4>Approach</h4><p>You save a profile once. On an application the extension reads each question from its label, ARIA text, placeholder and section heading, works out what it asks, and fills it. Auto-apply mode carries on through every step and page until you press Stop. It never submits, never ticks consent boxes and never overwrites what you typed.</p></div>
-              <div><h4>Result</h4><p>A Manifest V3 extension where all data stays in the browser, with no server and no network calls. 111 Playwright checks run the real extension in Chromium against Greenhouse-, Lever- and React-style forms, multi-step pages and a hostile page.</p></div>
-            </div>
-            <p class="case__stack">Built with JavaScript, Chrome Manifest V3, chrome.storage, Playwright.</p>
-            <p class="case__links">
-              <a href="https://github.com/AIZEN-Hado/LazyForm" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-        <li class="row" id="p-loadbalancer" data-i="9">
-          <h3 class="row__h">
-            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-9">
-              <span class="row__title">Dispatch Load Balancer</span>
-              <span class="row__line">A REST service that assigns delivery orders to vehicles by priority and capacity, and plans short routes.</span>
-              <span class="row__year">2026</span>
-              <span class="row__icon" aria-hidden="true"></span>
-            </button>
-          </h3>
-          <div class="row__case" id="case-9"><div class="row__clip"><div class="case">
-            <p class="case__role">Priority-aware fleet allocation. Solo developer.</p>
-            <div class="case__cols">
-              <div><h4>Problem</h4><p>Orders have priorities and weights, vehicles have capacities and positions, and the fleet can’t carry everything. Higher-priority orders must win, and nothing may exceed a vehicle’s capacity.</p></div>
-              <div><h4>Approach</h4><p>Orders are placed HIGH, then MEDIUM, then LOW onto the vehicle and route position that adds the least Haversine distance. A bounded swap pass trades one order for unassigned ones that fit, and 2-opt shortens each route. The optimizer is pure and deterministic, so the same data always gives the same plan.</p></div>
-              <div><h4>Result</h4><p>On the official 30 orders and 5 vehicles it places all 12 HIGH, all 8 MEDIUM and 4 of 10 LOW orders, filling every vehicle to capacity, and lists the 6 it can’t carry with a reason. 16 unit and 6 PostgreSQL integration tests pass.</p></div>
-            </div>
-            <p class="case__stack">Built with Java 21, Spring Boot 3.5, PostgreSQL 16, Flyway, springdoc (Swagger UI), JUnit 5, Docker Compose.</p>
-            <p class="case__links">
-              <a href="https://github.com/AIZEN-Hado/LoadBALANCER" target="_blank" rel="noopener">Source on GitHub</a>
-            </p>
-          </div></div></div>
-        </li>
-
-      </ol>
-    </section>
-
-    <!-- ========================== ABOUT ========================== -->
-    <section class="about" id="about" data-section="about">
-      <div class="wrap about__grid">
-        <h2 class="h2 about__lead">I build AI systems that leave the notebook and reach production.</h2>
-        <div class="about__text">
+      <div class="wrap intro__grid">
+        <figure class="portrait" id="portrait" data-src="" data-alt="Monogram of the initials Y and C, drawn as a field of dots">
+          <canvas class="portrait__cv" aria-hidden="true"></canvas>
+        </figure>
+        <div class="intro__body">
+          <p class="intro__lead rv"><span>I’m an AI engineer. I take language-model systems out of the notebook and into production, then measure what they do.</span></p>
           <p>My work covers LLM applications, retrieval-augmented generation, GraphRAG, multi-agent orchestration and the distributed backends that keep them running. I care about the whole stack: the model, the retrieval layer, the API and the infrastructure underneath.</p>
           <p>Whether it’s a claims engine that adjudicates in seconds or a commit generator that works without the cloud, I design for latency, consistency and reliability, and I report what I measured.</p>
+          <dl class="facts">
+            <div><dt>Studying</dt><dd>Computer science at VIT Bhopal, class of 2026</dd></div>
+            <div><dt>Building</dt><dd>LLM agents, retrieval and fine-tuning</dd></div>
+            <div><dt>Open to</dt><dd>AI systems, applied AI and backend roles</dd></div>
+          </dl>
         </div>
       </div>
       <div class="wrap principles">
@@ -321,10 +103,279 @@
       </div>
     </section>
 
+    <!-- ========================== WORK ========================== -->
+    <section class="work" id="work" data-section="work">
+      <span id="projects" class="anchor"></span>
+      <div class="wrap work__head">
+        <h2 class="h2 rv"><span>Selected work</span></h2>
+        <p class="work__lede">Ten projects, one at a time. Each is a cluster in the figure behind this page, and the camera stays on it while you read.</p>
+      </div>
+
+      <ol class="projects" id="rows">
+
+        <li class="proj" id="p-policypilot" data-i="0">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2025</span><span class="proj__role">Enterprise insurance claims decision platform. AI systems engineer.</span></p>
+              <h3 class="proj__title" aria-label="PolicyPilot AI"><span class="line"><span>PolicyPilot AI</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">Insurance claim reviews cut from hours to seconds at 95%+ decision consistency.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-0" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="docs/policypilot.html">Read the docs</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-0"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Claim reviews took hours of manual reading across 10,000+ policy clauses, and coverage decisions varied from person to person.</p></div>
+                  <div><h4>Approach</h4><p>An adjudication platform that combines RAG, knowledge graphs, rule engines and multi-agent workflows, with a document pipeline for OCR, clause extraction and semantic indexing across 100,000+ documents.</p></div>
+                  <div><h4>Result</h4><p>Review time went from hours to seconds at 95%+ decision consistency, with real-time clause retrieval at scale.</p></div>
+                </div>
+                <p class="case__stack">Built with FastAPI, LangGraph, FAISS, Ollama and Llama, RAG, knowledge graphs, multi-agent workflows.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-semigit" data-i="1">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2025</span><span class="proj__role">AI-powered semantic commit generation. Creator and architect.</span></p>
+              <h3 class="proj__title" aria-label="SemiGit"><span class="line"><span>SemiGit</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">A VS Code extension that decides when a commit is due and writes it. Fully offline by default.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-1" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="docs/semigit.html">Read the docs</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-1"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Git history is noisy (“wip”, “fix”, “final2”) because commits happen when a developer feels done, not when a unit of work is. Existing tools format messages; none decide when a commit should happen or what it represents.</p></div>
+                  <div><h4>Approach</h4><p>A local-first extension that watches your session, diffs code structurally with the TypeScript Compiler API, scores feature-level milestones and writes the Conventional Commit. Five optional AI providers (OpenAI, Claude, Gemini, DeepSeek, Ollama) sit behind one interface.</p></div>
+                  <div><h4>Result</h4><p>One universal .vsix with SQLite in WebAssembly and no native modules, 90+ tests on a three-OS CI matrix, and output quality measured against real git history by a backtest harness.</p></div>
+                </div>
+                <p class="case__stack">Built with TypeScript, VS Code extension API, TypeScript Compiler API, multi-provider LLM, SQLite on WASM, Conventional Commits.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-provchain" data-i="2">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2025</span><span class="proj__role">AI code provenance and drift intelligence. ML systems engineer.</span></p>
+              <h3 class="proj__title" aria-label="ProvChain"><span class="line"><span>ProvChain</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">Audits AI-generated code against 200+ live CVEs and cuts manual security review by 80%.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-2" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="docs/provchain.html">Read the docs</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-2"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>AI-generated code enters codebases unaudited and carries vulnerable patterns that manual review can’t catch at scale.</p></div>
+                  <div><h4>Approach</h4><p>A provenance engine that checks generated code against 200+ live CVE records. A multi-signal risk score combines drift detection, CVSS severity and semantic similarity, and an embeddings-based retrieval step writes the explanation and the fix.</p></div>
+                  <div><h4>Result</h4><p>Manual security review effort down by 80%, with explainable risk classification wired into CI/CD.</p></div>
+                </div>
+                <p class="case__stack">Built with ML risk scoring, CVE and CVSS data, drift detection, embeddings, CI/CD security.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-interviewiq" data-i="3">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">AI-powered interview platform. Full-stack developer.</span></p>
+              <h3 class="proj__title" aria-label="InterviewIQ"><span class="line"><span>InterviewIQ</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">Writes interview questions from a resume and scores the answers in real time.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-3" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="https://interviewiq-vm8j.onrender.com" target="_blank" rel="noopener">Live site</a>
+                <a href="docs/interviewiq.html">Read the docs</a>
+                <a href="https://github.com/AIZEN-Hado/3.interviewIQ" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-3"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Hiring pipelines lean on slow, subjective screening. Interviews are inconsistent and feedback arrives late or never.</p></div>
+                  <div><h4>Approach</h4><p>A full-stack platform that generates questions from resume data and job requirements, evaluates candidate responses in real time and shows performance analytics, on a modular async backend built for low-latency evaluation.</p></div>
+                  <div><h4>Result</h4><p>An automated pipeline from interview creation to structured candidate assessment, with real-time scoring dashboards.</p></div>
+                </div>
+                <p class="case__stack">Built with React, Tailwind CSS, Node.js, Express, MongoDB, JWT, LLM integration.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-classlyai" data-i="4">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">AI-powered LMS and course marketplace. Full-stack developer.</span></p>
+              <h3 class="proj__title" aria-label="ClasslyAI"><span class="line"><span>ClasslyAI</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">One platform for courses, payments and AI study tools, for students, instructors and admins.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-4" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="https://classlyai-1.onrender.com" target="_blank" rel="noopener">Live site</a>
+                <a href="docs/classlyai.html">Read the docs</a>
+                <a href="https://github.com/AIZEN-Hado/CLASSLYAI" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-4"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Teaching, course sales, student engagement and AI-assisted learning live in separate tools, so instructors and students juggle fragmented platforms.</p></div>
+                  <div><h4>Approach</h4><p>A unified LMS where students browse, pay (Stripe) and learn, instructors publish and analyze course performance, and admins monitor the platform. AI tools handle notes, quizzes and answer checking; sign-in is by Google.</p></div>
+                  <div><h4>Result</h4><p>A full three-role workflow with payments, progress tracking, quizzes, analytics and AI assistance in one product.</p></div>
+                </div>
+                <p class="case__stack">Built with React 19, Vite, Tailwind CSS, Node.js, Express, MongoDB, Stripe, Google OAuth.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-upimesh" data-i="5">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">Secure offline payment simulation over mesh networking. Backend engineer.</span></p>
+              <h3 class="proj__title" aria-label="Offline UPI Mesh"><span class="line"><span>Offline UPI Mesh</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">Payments that survive losing the network: encrypted packets hop device to device until one reaches the internet.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-5" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="docs/upimesh.html">Read the docs</a>
+                <a href="https://github.com/AIZEN-Hado/Offline_upi" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-5"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Digital payments fail completely without internet access, a real gap in low-connectivity regions.</p></div>
+                  <div><h4>Approach</h4><p>A Spring Boot backend that simulates offline UPI payments. Each transaction is encrypted (RSA and AES-GCM), wrapped in a TTL-bound mesh packet and gossiped device to device until a bridge device with internet relays it to the server for settlement.</p></div>
+                  <div><h4>Result</h4><p>An end-to-end, cryptographically secure payment flow that survives total network loss on the sender’s side, with gossip-based packet propagation.</p></div>
+                </div>
+                <p class="case__stack">Built with Java, Spring Boot, RSA and AES-GCM, mesh networking, gossip protocol.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-allears" data-i="6">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">Spotify-inspired streaming app. Mobile developer.</span></p>
+              <h3 class="proj__title" aria-label="All-Ears"><span class="line"><span>All-Ears</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">A music streaming app with listener, artist and admin roles. My first Android app, shipped end to end.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-6" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="docs/allears.html">Read the docs</a>
+                <a href="https://github.com/AIZEN-Hado/ALL-EARS" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-6"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>A real music platform means solving auth, roles, playback, uploads, moderation and analytics together. It’s a full product, not a tutorial app.</p></div>
+                  <div><h4>Approach</h4><p>A React Native and Expo app with Google sign-in and role-based access for listeners, artists and admins. Playback has queue, shuffle and repeat; artists upload tracks with cover art; admins approve content and manage users. Everything runs on Firebase.</p></div>
+                  <div><h4>Result</h4><p>My first Android app, shipped end to end: authentication, audio playback and queue management, role-based navigation, and a larger React Native codebase kept in order.</p></div>
+                </div>
+                <p class="case__stack">Built with React Native, Expo 54, TypeScript, Expo Router, NativeWind, Firebase, Expo AV.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-fisherman" data-i="7">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">Regression gate for AI agents. Creator and maintainer.</span></p>
+              <h3 class="proj__title" aria-label="Fisherman"><span class="line"><span>Fisherman</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">CI for LLM agents. It tells a real regression from noise before you merge.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-7" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="https://github.com/AIZEN-Hado/Fisherman" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-7"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Agents break silently. Changing a prompt, swapping a model or editing a tool can shift behaviour, and unit tests can’t say whether things got worse because agent behaviour is probabilistic and multi-turn.</p></div>
+                  <div><h4>Approach</h4><p>Replay the same eval suite on the old and new version, then let statistics decide. McNemar’s exact test sets the verdict and a paired bootstrap reports the effect size. Cases mix deterministic rules with an LLM judge that is itself scored against a human-labelled set. Simulated users with hidden goals, including adversarial ones, test multi-turn behaviour.</p></div>
+                  <div><h4>Result</h4><p>A merge gate that exits 2 on a significant regression, runs in GitHub Actions and works with any LiteLLM provider. Runs are traced with OpenTelemetry into SQLite, a read-only dashboard computes the same verdict as CI, and an offline suite of 359 tests needs no API keys.</p></div>
+                </div>
+                <p class="case__stack">Built with Python, OpenTelemetry, SQLite, LiteLLM, FastAPI, McNemar and bootstrap statistics, GitHub Actions.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-lazyform" data-i="8">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">Autofill for job portals. Solo developer.</span></p>
+              <h3 class="proj__title" aria-label="LazyForm"><span class="line"><span>LazyForm</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">A Chrome extension that fills job applications from a profile you save once.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-8" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="https://github.com/AIZEN-Hado/LazyForm" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-8"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Every job portal asks for the same name, work history and “Are you authorized to work?” answer, and every portal words and lays them out differently.</p></div>
+                  <div><h4>Approach</h4><p>You save a profile once. On an application the extension reads each question from its label, ARIA text, placeholder and section heading, works out what it asks, and fills it. Auto-apply mode carries on through every step and page until you press Stop. It never submits, never ticks consent boxes and never overwrites what you typed.</p></div>
+                  <div><h4>Result</h4><p>A Manifest V3 extension where all data stays in the browser, with no server and no network calls. 111 Playwright checks run the real extension in Chromium against Greenhouse-, Lever- and React-style forms, multi-step pages and a hostile page.</p></div>
+                </div>
+                <p class="case__stack">Built with JavaScript, Chrome Manifest V3, chrome.storage, Playwright.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+        <li class="proj" id="p-loadbalancer" data-i="9">
+          <div class="proj__pin">
+            <div class="wrap proj__inner">
+              <p class="proj__meta"><span class="proj__year">2026</span><span class="proj__role">Priority-aware fleet allocation. Solo developer.</span></p>
+              <h3 class="proj__title" aria-label="Dispatch Load Balancer"><span class="line"><span>Dispatch Load</span></span><span class="line"><span>Balancer</span></span></h3>
+              <span class="proj__rule" aria-hidden="true"><i></i></span>
+              <p class="proj__line">A REST service that assigns delivery orders to vehicles by priority and capacity, and plans short routes.</p>
+              <p class="proj__actions">
+                <button class="btn roll proj__open" type="button" aria-expanded="false" aria-controls="case-9" data-label="Read the case" data-label-open="Close the case"><span>Read the case</span></button>
+                <span class="proj__links">
+                <a href="https://github.com/AIZEN-Hado/LoadBALANCER" target="_blank" rel="noopener">Source on GitHub</a>
+                </span>
+              </p>
+              <div class="proj__case" id="case-9"><div class="proj__clip">
+                <div class="case__cols">
+                  <div><h4>Problem</h4><p>Orders have priorities and weights, vehicles have capacities and positions, and the fleet can’t carry everything. Higher-priority orders must win, and nothing may exceed a vehicle’s capacity.</p></div>
+                  <div><h4>Approach</h4><p>Orders are placed HIGH, then MEDIUM, then LOW onto the vehicle and route position that adds the least Haversine distance. A bounded swap pass trades one order for unassigned ones that fit, and 2-opt shortens each route. The optimizer is pure and deterministic, so the same data always gives the same plan.</p></div>
+                  <div><h4>Result</h4><p>On the official 30 orders and 5 vehicles it places all 12 HIGH, all 8 MEDIUM and 4 of 10 LOW orders, filling every vehicle to capacity, and lists the 6 it can’t carry with a reason. 16 unit and 6 PostgreSQL integration tests pass.</p></div>
+                </div>
+                <p class="case__stack">Built with Java 21, Spring Boot 3.5, PostgreSQL 16, Flyway, springdoc (Swagger UI), JUnit 5, Docker Compose.</p>
+              </div></div>
+            </div>
+          </div>
+        </li>
+
+      </ol>
+    </section>
+
     <!-- ========================== SKILLS ========================== -->
     <section class="skills" id="skills" data-section="skills">
       <div class="wrap">
-        <h2 class="h2">Skills</h2>
+        <h2 class="h2 rv"><span>Skills</span></h2>
         <div class="skills__grid">
           <div class="skillset" data-i="10">
             <h3>AI and ML systems</h3>
@@ -373,12 +424,11 @@
     <section class="contact" id="contact" data-section="contact">
       <div class="contact__bg" aria-hidden="true"></div>
       <div class="wrap contact__inner">
-        <h2 class="h2 contact__title">Hiring for AI systems, applied AI or backend work? Write to me.</h2>
-        <a class="contact__mail" href="mailto:yashchahan2905@gmail.com">yashchahan2905@gmail.com</a>
+        <h2 class="h2 contact__title rv"><span>Hiring for AI systems, applied AI or backend work? Write to me.</span></h2>
+        <a class="contact__mail" href="mailto:yashchauhan2905@gmail.com">yashchauhan2905@gmail.com</a>
         <p class="contact__links">
           <a href="https://github.com/AIZEN-Hado" target="_blank" rel="noopener">GitHub</a>
           <a href="https://linkedin.com/in/aizen29" target="_blank" rel="noopener">LinkedIn</a>
-          <a href="assets/resume.pdf" target="_blank" rel="noopener">Résumé (PDF)</a>
         </p>
       </div>
       <footer class="foot wrap">
@@ -392,6 +442,7 @@
   <p class="caption" id="caption" aria-hidden="true"><b>Figure.</b> <span class="caption__t">More than 10,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.</span></p>
 
   <noscript><style>.hero__title .line > span { transform: none; } .hero__foot { opacity: 1; }</style></noscript>
+  <script src="js/portrait.js" defer></script>
   <script src="js/main.js" defer></script>
 </body>
 </html>
