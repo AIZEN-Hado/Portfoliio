@@ -85,11 +85,15 @@
 
 .projects { position: relative; list-style: none; margin: 0; padding: 0; }
 .proj {
-  --hold: 80vh; --e: 1; --h: 0; --x: 0;
-  position: relative; height: calc(100vh + var(--hold));
+  /* Scenes overlap: the next one starts while this one is still pinned, so the two swap in place over --z of scrolling
+     and nothing physically slides past. --hold is the scroll each scene owns. */
+  --hold: 110vh; --z: 50vh; --e: 1; --h: 0; --x: 0;
+  position: relative; height: calc(100vh + var(--hold) + var(--z));
+  margin-bottom: calc(-100vh - var(--z));
   scroll-margin-top: calc(var(--nav-h) * -1);
 }
-@supports (height: 100svh) { .proj { --hold: 80svh; height: calc(100svh + var(--hold)); } }
+.proj:last-child { margin-bottom: 0; }
+@supports (height: 100svh) { .proj { --hold: 110svh; --z: 50svh; height: calc(100svh + var(--hold) + var(--z)); margin-bottom: calc(-100svh - var(--z)); } }
 .proj__pin {
   position: sticky; top: 0; z-index: 3;
   height: 100vh; height: 100svh;
@@ -97,6 +101,8 @@
   pointer-events: none;
 }
 .proj__pin a, .proj__pin button { pointer-events: auto; }
+/* scenes overlap, so only the one being read takes clicks */
+.proj:not(.is-cur) .proj__pin a, .proj:not(.is-cur) .proj__pin button { pointer-events: none; }
 .proj__inner {
   width: 100%; max-height: 100%;
   display: flex; flex-direction: column; align-items: flex-start; gap: 1.15rem;
@@ -128,7 +134,7 @@
   transition: font-size 0.7s var(--ease);
 }
 .proj__title .line {
-  display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em;
+  display: block; width: fit-content; max-width: 100%; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em;
   /* how far this line has come in (--ti) and gone out (--to), 0 to 1; each project's data-fx says how it moves */
   --ti: clamp(0, (var(--e) - 0.38 - var(--li, 0) * 0.08) * 2.4, 1);
   --to: clamp(0, (var(--x) - 0.04 - var(--li, 0) * 0.06) * 2.6, 1);
@@ -294,6 +300,7 @@
   .work__head .h2, .skills .h2 { padding-block: 0.15em; }
   .proj__pin::before {
     content: ""; position: absolute; inset: auto 0 0 0; height: 66%; z-index: -1; pointer-events: none;
+    opacity: calc(var(--e) * (1 - var(--x)));
     background: linear-gradient(to top, rgba(233, 235, 240, 0.95) 38%, rgba(233, 235, 240, 0));
   }
   .proj__case .case__cols { background: rgba(233, 235, 240, 0.9); padding: 1.2rem 1rem; margin-top: 0.6rem; }
@@ -326,7 +333,8 @@
   .js .rv, .js .rv.is-split { visibility: visible; animation: none; }
   .js .rv.is-split:not(.in) .l > span, .js .rv.is-split.in .l > span { transform: none; transition: none; }
   .js .intro__name:not(.in) .line > span, .js .intro__name.in .line > span { transform: none; transition: none; }
-  .proj { height: auto; min-height: 100vh; min-height: 100svh; }
+  .proj { height: auto; min-height: 100vh; min-height: 100svh; margin-bottom: 0; }
+  .proj:not(.is-cur) .proj__pin a, .proj:not(.is-cur) .proj__pin button { pointer-events: auto; }
   .proj__pin { position: relative; height: auto; min-height: inherit; }
   .proj[data-fx] .proj__title .line > span { transform: none; clip-path: none; }
   .proj__title .line > span, .proj__meta, .proj__line, .proj__actions, .proj__rule { transform: none; opacity: 1; }

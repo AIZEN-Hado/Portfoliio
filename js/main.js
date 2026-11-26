@@ -253,19 +253,22 @@
     var vh = win.innerHeight, sy = win.scrollY;
     geo = projs.map(function (el) {
       var pin = el.querySelector('.proj__pin').offsetHeight;
-      return { top: docTop(el), hold: Math.max(1, el.offsetHeight - pin), pin: pin };
+      var z = reduceMQ.matches ? 0 : pin * 0.5;       // the swap between scenes (see --z in home.css)
+      var hold = Math.max(1, el.offsetHeight - pin - z);
+      var top = docTop(el);
+      return { top: top, hold: hold, pin: pin, z: z, rest: top + (el === projs[0] ? 0 : z) };
     });
     layout.vh = vh;
         layout.introTop = docTop(introEl); layout.introBottom = layout.introTop + introEl.offsetHeight;
     layout.first = geo.length ? geo[0].top : 0;
-    layout.last = geo.length ? geo[geo.length - 1].top + geo[geo.length - 1].hold + geo[geo.length - 1].pin : 0;
+    layout.last = geo.length ? geo[geo.length - 1].top + geo[geo.length - 1].hold + geo[geo.length - 1].z + geo[geo.length - 1].pin : 0;
 
     // Camera marks: [start, end] of the scroll range where the camera is parked on each station.
     // Between one park's end and the next one's start it flies. For the project scenes the park is
     // exactly the pinned range, so the camera arrives as the title finishes rising and leaves when the scene lets go.
     var m = [];
     m.push([0, Math.max(vh * 0.3, layout.introBottom - vh * 0.65)]);                                    // introduction, at the top of the page
-    geo.forEach(function (g) { m.push([g.top, g.top + g.hold]); });                                     // projects
+    geo.forEach(function (g) { m.push([g.rest, g.top + g.hold]); });                                    // projects: parked after the swap
     var sT = docTop(skillsEl), sH = skillsEl.offsetHeight;
     m.push([sT - vh * 0.15, sT - vh * 0.15]);                                                           // skills, approaching
     m.push([sT + sH * 0.55 - vh * 0.5, sT + sH * 0.55 - vh * 0.5]);                                     // skills, at the ring
@@ -284,7 +287,29 @@
   /* ----------------------------------------------------------------- scroll */
   var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
   var cache = { prog: -1 };
-  var sceneVals = [];           // last written [e, h, x] per scene
+  var et = [], xt = [], ev = [], xv = [], hv = [], sceneVals = [];   // target and shown entering/leaving per scene, and the last --h written
+  var sceneRaf = 0, sceneLast = 0;
+  /* the entering and leaving values run on a clock, not on the scroll: 0.95 s to come in, 0.7 s to go */
+  function stepScenes(now) {
+    sceneRaf = 0;
+    var dt = sceneLast ? Math.min(0.05, (now - sceneLast) / 1000) : 0.016; sceneLast = now;
+    var moving = false;
+    for (var i = 0; i < projs.length; i++) {
+      var e0 = ev[i] || 0, x0 = xv[i] || 0;
+      var e1 = e0 < et[i] ? Math.min(et[i], e0 + dt / 0.95) : Math.max(et[i], e0 - dt / 0.6);
+      var x1 = x0 < xt[i] ? Math.min(xt[i], x0 + dt / 0.7) : Math.max(xt[i], x0 - dt / 0.6);
+      if (e1 !== e0 || x1 !== x0 || sceneVals[i] === undefined) {
+        ev[i] = e1; xv[i] = x1; sceneVals[i] = 1;
+        projs[i].style.setProperty('--e', e1.toFixed(4)); projs[i].style.setProperty('--x', x1.toFixed(4));
+      }
+      if (e1 !== et[i] || x1 !== xt[i]) moving = true;
+    }
+    if (moving) { sceneRaf = win.requestAnimationFrame(stepScenes); } else sceneLast = 0;
+  }
+  function kickScenes() {
+    if (reduceMQ.matches) { stepScenes(performance.now()); return; }
+    if (!sceneRaf) sceneRaf = win.requestAnimationFrame(stepScenes);
+  }
   var current = -1, railOn = false;
 
   function setVar(el, name, v) { el.style.setProperty(name, v); }
@@ -308,27 +333,26 @@
       if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
     }
 
-    // project scenes
-    var best = -1, bestP = 0;
+    // Project scenes. Which one is being read is decided by where the page is, and the swap between scenes then plays
+    // out in time, so stopping anywhere never leaves a title half-risen. Only --h (the rule filling) follows the scroll.
+    var best = -1;
     for (var i = 0; i < geo.length; i++) {
       var g = geo[i];
-      var e = num(clamp((y - (g.top - g.pin)) / g.pin, 0, 1));
+      var from = i === 0 ? g.top - g.pin * 0.35 : geo[i - 1].top + geo[i - 1].hold + geo[i - 1].z * 0.5;
+      var to = g.top + g.hold + g.z * 0.5;
+      var on = y >= from && y < to;
+      if (on) best = i;
+      et[i] = y >= from ? 1 : 0;
+      xt[i] = y >= to ? 1 : 0;
       var h = num(clamp((y - g.top) / g.hold, 0, 1));
-      var x = num(clamp((y - (g.top + g.hold)) / g.pin, 0, 1));
-      var sv = sceneVals[i];
-      if (force || !sv || sv[0] !== e || sv[1] !== h || sv[2] !== x) {
-        var el = projs[i];
-        el.style.setProperty('--e', e); el.style.setProperty('--h', h); el.style.setProperty('--x', x);
-        sceneVals[i] = [e, h, x];
-      }
-      var pres = Math.min(e, 1 - x);
-      if (pres > bestP + 1e-6) { bestP = pres; best = i; }
+      if (force || h !== hv[i]) { projs[i].style.setProperty('--h', h); hv[i] = h; }
     }
-    if (bestP < 0.35) best = -1;
+    if (reduceMQ.matches) { for (i = 0; i < geo.length; i++) { et[i] = 1; xt[i] = 0; ev[i] = 1; xv[i] = 0; } }
+    kickScenes();
     if (best !== current) setCurrent(best);
 
-    // the rail is on from just before the first scene to just after the last
-    var on = geo.length > 0 && y > layout.first - vh * 0.6 && y < layout.last - vh * 0.4;
+    // the rail is on while a project is being read
+    var on = best >= 0;
     if (on !== railOn && rail) { rail.classList.toggle('is-on', on); railOn = on; }
   }
 
@@ -337,6 +361,7 @@
   function setCurrent(i) {
     var prev = current;
     current = i;
+    projs.forEach(function (el, k) { el.classList.toggle('is-cur', k === i); });
     if (rail) {
       railLinks.forEach(function (a, k) {
         if (k === i) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
@@ -350,26 +375,7 @@
     else setCaption(sectionKey);
   }
 
-  /* Resting between two scenes would leave a title half hidden. When scrolling stops there, ease on to the nearer
-     resting place: the end of the scene you were in, or the start of the next. Resting anywhere inside a scene is fine. */
-  var snapTimer = 0, touching = false;
-  function snapToScene() {
-    if (reduceMQ.matches || touching || !geo.length) return;
-    var y = win.scrollY, target = null, i;
-    for (i = 0; i < geo.length; i++) {
-      var g = geo[i], endHold = g.top + g.hold, nextTop = i + 1 < geo.length ? geo[i + 1].top : endHold + g.pin;
-      if (i === 0 && y > g.top - g.pin * 0.9 && y < g.top) { target = y - (g.top - g.pin * 0.9) < g.top - y ? g.top - g.pin * 0.9 : g.top; break; }
-      if (y > endHold && y < nextTop) { target = y - endHold < nextTop - y ? endHold : nextTop; break; }
-    }
-    if (target !== null && Math.abs(target - y) > 6) win.scrollTo({ top: target, behavior: 'smooth' });
-  }
-  function queueSnap() { clearTimeout(snapTimer); snapTimer = setTimeout(snapToScene, 170); }
-  win.addEventListener('touchstart', function () { touching = true; clearTimeout(snapTimer); }, { passive: true });
-  win.addEventListener('touchend', function () { touching = false; queueSnap(); }, { passive: true });
-  win.addEventListener('touchcancel', function () { touching = false; queueSnap(); }, { passive: true });
-
   win.addEventListener('scroll', function () {
-    queueSnap();
     send({ type: 'scroll', y: win.scrollY });
     onScrollForFocus();
     if (!scrollQueued) {
@@ -458,13 +464,14 @@
       var g = geo[i];
       if (!g) return;
       var y = win.scrollY;
-      if (y < g.top - 2 || y > g.top + g.hold + 2) win.scrollTo({ top: clamp(y, g.top, g.top + g.hold), behavior: 'instant' });
+      if (y < g.rest - 2 || y > g.top + g.hold + 2) win.scrollTo({ top: clamp(y, g.rest, g.top + g.hold), behavior: 'instant' });
     });
   });
 
   // the rail: hover names a project, click goes to its scene
   if (rail) {
     railLinks.forEach(function (a, k) {
+      a.addEventListener('click', function (ev2) { if (geo[k]) { ev2.preventDefault(); win.scrollTo({ top: geo[k].rest }); } });
       a.addEventListener('pointerenter', function () { rail.setAttribute('data-now', railLabel(k)); });
       a.addEventListener('focus', function () { rail.setAttribute('data-now', railLabel(k)); });
       a.addEventListener('pointerleave', function () { if (current >= 0) rail.setAttribute('data-now', railLabel(current)); });
@@ -478,7 +485,7 @@
     if (h.indexOf('#p-') !== 0) return;
     var el = doc.querySelector(h);
     var i = projs.indexOf(el);
-    if (i >= 0 && geo[i]) win.scrollTo({ top: geo[i].top, behavior: 'instant' });
+    if (i >= 0 && geo[i]) win.scrollTo({ top: geo[i].rest, behavior: 'instant' });
   }
 
   /* ---------------------------------------------------------------- caption */

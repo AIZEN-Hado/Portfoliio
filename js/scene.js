@@ -1,7 +1,7 @@
 /* ============================================================================
    scene.js — "the figure"
 
-   More than 10,000 points in a 3D latent space, drawn on a plain 2D canvas with our
+   About 8,000 points in a 3D latent space, drawn on a plain 2D canvas with our
    own perspective projection (no WebGL). Each cluster is one body of work; its
    shape hints at what the project does. Scrolling flies the camera from cluster
    to cluster, the cursor acts as a retrieval query (its nearest points light up),
@@ -581,6 +581,7 @@
     var focusW = 0, focusWV = 0, focusIdx = -1;
     var act = new Float32Array(NC), actV = new Float32Array(NC);
     var camSpeed = 0;
+    var disA = new Float32Array(NC + 1);   // how far each cluster is from taking its shape (index c+1; 0 is the wall)
     var bcx = new Float32Array(NC + 1), bcz = new Float32Array(NC + 1), bcos = new Float32Array(NC + 1), bsin = new Float32Array(NC + 1);
     bcos[0] = 1;   // index 0 is the wall, which never turns
     var scat = 0, scatV = 0, lastSY = -1, svE = 0;   // how far the figure is scattered, and the scroll speed behind it
@@ -782,6 +783,14 @@
         if (act[c] > maxAct) maxAct = act[c];
       }
 
+      // A shape is whole only while the camera is parked on it. Between two stations both shapes are loose and keep
+      // moving, drawing in toward their outlines as the camera arrives, so a stop half-way still shows points on their way.
+      for (c = 0; c < NC; c++) {
+        var dd0 = c < NPROJ ? Math.abs(uS - (c + 1))
+                : uS < NPROJ + 1 ? NPROJ + 1 - uS : uS > NPROJ + 2 ? uS - (NPROJ + 2) : 0;
+        disA[c + 1] = reduced || dd0 >= 1 ? 0 : clamp(Math.sin(Math.PI * dd0) * 1.3, 0, 1);
+      }
+
       // Every shape turns about its own vertical axis to face the camera, so none is ever seen edge-on.
       for (c = 0; c < NC; c++) {
         var cb = CLUSTERS[c], tc = Math.atan2(P[2] - cb.c[2], P[0] - cb.c[0]) - Math.atan2(cb.out[2], cb.out[0]);
@@ -837,6 +846,16 @@
             if (lc > 1) lc = 1;
             lc = lc * lc * (3 - 2 * lc);
             p0 += ox[i] * lc; p1 += oy[i] * lc; p2 += oz[i] * lc;
+          }
+        }
+        var dsv = disA[cb1];
+        if (dsv > 0.002) {
+          var lf = (dsv - dl[i] * 0.35) / 0.65;
+          if (lf > 0) {
+            if (lf > 1) lf = 1;
+            lf = lf * lf * (3 - 2 * lf);
+            var ph = dl[i] * 10.47, surge = (0.55 + 0.45 * Math.sin(t * 2.1 + ph)) * lf * 0.5, swirl = Math.sin(t * 1.3 + ph * 0.7) * lf * 0.28;
+            p0 += ox[i] * surge - oz[i] * swirl; p1 += oy[i] * surge; p2 += oz[i] * surge + ox[i] * swirl;
           }
         }
         if (introOn) {
@@ -916,9 +935,10 @@
       ctx.lineWidth = 0.9;
       var edgeFade = clamp(1 - scat * 2.6, 0, 1);
       for (c = 0; c < NC; c++) {
-        if (act[c] < 0.03 || edgeFade < 0.02) continue;
+        var ef = edgeFade * clamp(1 - disA[c + 1] * 1.6, 0, 1);
+        if (act[c] < 0.03 || ef < 0.02) continue;
         var edgesC = world.edges[c], eN = edgesC.length;
-        ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',' + (0.5 * act[c] * edgeFade).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',' + (0.5 * act[c] * ef).toFixed(3) + ')';
         ctx.beginPath();
         for (kk = 0; kk < eN; kk += 2) {
           var ea = edgesC[kk], eb = edgesC[kk + 1];
@@ -945,7 +965,7 @@
             var from = counts[key], to = key + 1 <= K - 1 ? counts[key + 1] : counts[K];
             if (to <= from) continue;
             // `counts[key]` was turned into start offsets; end is the next key's start
-            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd] * (bnd < NB - 1 && cc >= 0 ? lerp(0.5, 1, a2) : 1);
+            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd] * (bnd < NB - 1 && cc >= 0 ? lerp(0.38, 1, a2) : 1);
             ctx.fillStyle = rgb(side ? colPaper : colInk);
             ctx.beginPath();
             for (var q2 = from; q2 < to; q2++) {
@@ -1010,7 +1030,7 @@
         var LY = cy - (lx * ux + ly * uy + lz * uz) * lsc;
         var tp = world.meta[c].top * lsc;
         var ax = Math.min(Math.max(LX - lb.w * 0.5, 16), W - lb.w - 16), ay = Math.max(LY - tp - 16, lb.h + 76);
-        ctx.globalAlpha = act[c];
+        ctx.globalAlpha = act[c] * clamp(1 - disA[c + 1] * 1.2, 0, 1);
         ctx.strokeStyle = 'rgba(' + COBALT.join(',') + ',0.7)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(LX, ay + 2); ctx.lineTo(LX, ay + 12); ctx.stroke();
         ctx.drawImage(lb.bitmap, ax, ay - lb.h, lb.w, lb.h);
