@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Yashsingh Chauhan — AI engineer</title>
-  <meta name="description" content="Yashsingh Chauhan is an AI engineer working on LLM agents, retrieval and fine-tuning. Seven shipped projects, each measured.">
+  <meta name="description" content="Yashsingh Chauhan is an AI engineer working on LLM agents, retrieval and fine-tuning. Ten shipped projects, each measured.">
   <meta name="theme-color" content="#E9EBF0">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Yashsingh Chauhan — AI engineer">
@@ -58,7 +58,7 @@
       <span id="projects" class="anchor"></span>
       <div class="wrap">
         <h2 class="h2">Selected work</h2>
-        <p class="intro">Seven projects. Each one is a cluster in the figure behind this page. Point at a row to fly to it, or open it to read the case.</p>
+        <p class="intro">Ten projects. Each one is a cluster in the figure behind this page. Point at a row to fly to it, or open it to read the case.</p>
       </div>
 
       <ol class="rows" id="rows">
@@ -224,6 +224,75 @@
           </div></div></div>
         </li>
 
+        <li class="row" id="p-fisherman" data-i="7">
+          <h3 class="row__h">
+            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-7">
+              <span class="row__title">Fisherman</span>
+              <span class="row__line">CI for LLM agents. It tells a real regression from noise before you merge.</span>
+              <span class="row__year">2026</span>
+              <span class="row__icon" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="row__case" id="case-7"><div class="row__clip"><div class="case">
+            <p class="case__role">Regression gate for AI agents. Creator and maintainer.</p>
+            <div class="case__cols">
+              <div><h4>Problem</h4><p>Agents break silently. Changing a prompt, swapping a model or editing a tool can shift behaviour, and unit tests can’t say whether things got worse because agent behaviour is probabilistic and multi-turn.</p></div>
+              <div><h4>Approach</h4><p>Replay the same eval suite on the old and new version, then let statistics decide. McNemar’s exact test sets the verdict and a paired bootstrap reports the effect size. Cases mix deterministic rules with an LLM judge that is itself scored against a human-labelled set. Simulated users with hidden goals, including adversarial ones, test multi-turn behaviour.</p></div>
+              <div><h4>Result</h4><p>A merge gate that exits 2 on a significant regression, runs in GitHub Actions and works with any LiteLLM provider. Runs are traced with OpenTelemetry into SQLite, a read-only dashboard computes the same verdict as CI, and an offline suite of 359 tests needs no API keys.</p></div>
+            </div>
+            <p class="case__stack">Built with Python, OpenTelemetry, SQLite, LiteLLM, FastAPI, McNemar and bootstrap statistics, GitHub Actions.</p>
+            <p class="case__links">
+              <a href="https://github.com/AIZEN-Hado/Fisherman" target="_blank" rel="noopener">Source on GitHub</a>
+            </p>
+          </div></div></div>
+        </li>
+
+        <li class="row" id="p-lazyform" data-i="8">
+          <h3 class="row__h">
+            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-8">
+              <span class="row__title">LazyForm</span>
+              <span class="row__line">A Chrome extension that fills job applications from a profile you save once.</span>
+              <span class="row__year">2026</span>
+              <span class="row__icon" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="row__case" id="case-8"><div class="row__clip"><div class="case">
+            <p class="case__role">Autofill for job portals. Solo developer.</p>
+            <div class="case__cols">
+              <div><h4>Problem</h4><p>Every job portal asks for the same name, work history and “Are you authorized to work?” answer, and every portal words and lays them out differently.</p></div>
+              <div><h4>Approach</h4><p>You save a profile once. On an application the extension reads each question from its label, ARIA text, placeholder and section heading, works out what it asks, and fills it. Auto-apply mode carries on through every step and page until you press Stop. It never submits, never ticks consent boxes and never overwrites what you typed.</p></div>
+              <div><h4>Result</h4><p>A Manifest V3 extension where all data stays in the browser, with no server and no network calls. 111 Playwright checks run the real extension in Chromium against Greenhouse-, Lever- and React-style forms, multi-step pages and a hostile page.</p></div>
+            </div>
+            <p class="case__stack">Built with JavaScript, Chrome Manifest V3, chrome.storage, Playwright.</p>
+            <p class="case__links">
+              <a href="https://github.com/AIZEN-Hado/LazyForm" target="_blank" rel="noopener">Source on GitHub</a>
+            </p>
+          </div></div></div>
+        </li>
+
+        <li class="row" id="p-loadbalancer" data-i="9">
+          <h3 class="row__h">
+            <button class="row__head" type="button" aria-expanded="false" aria-controls="case-9">
+              <span class="row__title">Dispatch Load Balancer</span>
+              <span class="row__line">A REST service that assigns delivery orders to vehicles by priority and capacity, and plans short routes.</span>
+              <span class="row__year">2026</span>
+              <span class="row__icon" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="row__case" id="case-9"><div class="row__clip"><div class="case">
+            <p class="case__role">Priority-aware fleet allocation. Solo developer.</p>
+            <div class="case__cols">
+              <div><h4>Problem</h4><p>Orders have priorities and weights, vehicles have capacities and positions, and the fleet can’t carry everything. Higher-priority orders must win, and nothing may exceed a vehicle’s capacity.</p></div>
+              <div><h4>Approach</h4><p>Orders are placed HIGH, then MEDIUM, then LOW onto the vehicle and route position that adds the least Haversine distance. A bounded swap pass trades one order for unassigned ones that fit, and 2-opt shortens each route. The optimizer is pure and deterministic, so the same data always gives the same plan.</p></div>
+              <div><h4>Result</h4><p>On the official 30 orders and 5 vehicles it places all 12 HIGH, all 8 MEDIUM and 4 of 10 LOW orders, filling every vehicle to capacity, and lists the 6 it can’t carry with a reason. 16 unit and 6 PostgreSQL integration tests pass.</p></div>
+            </div>
+            <p class="case__stack">Built with Java 21, Spring Boot 3.5, PostgreSQL 16, Flyway, springdoc (Swagger UI), JUnit 5, Docker Compose.</p>
+            <p class="case__links">
+              <a href="https://github.com/AIZEN-Hado/LoadBALANCER" target="_blank" rel="noopener">Source on GitHub</a>
+            </p>
+          </div></div></div>
+        </li>
+
       </ol>
     </section>
 
@@ -257,7 +326,7 @@
       <div class="wrap">
         <h2 class="h2">Skills</h2>
         <div class="skills__grid">
-          <div class="skillset" data-i="7">
+          <div class="skillset" data-i="10">
             <h3>AI and ML systems</h3>
             <ul>
               <li>LangGraph, LlamaIndex</li>
@@ -268,7 +337,7 @@
               <li>vLLM, Ollama, Agents SDK</li>
             </ul>
           </div>
-          <div class="skillset" data-i="8">
+          <div class="skillset" data-i="11">
             <h3>Backend and APIs</h3>
             <ul>
               <li>FastAPI, Spring Boot</li>
@@ -278,7 +347,7 @@
               <li>REST, JWT auth</li>
             </ul>
           </div>
-          <div class="skillset" data-i="9">
+          <div class="skillset" data-i="12">
             <h3>Frontend</h3>
             <ul>
               <li>React, Vite</li>
@@ -287,7 +356,7 @@
               <li>Responsive layout</li>
             </ul>
           </div>
-          <div class="skillset" data-i="10">
+          <div class="skillset" data-i="13">
             <h3>Cloud and tools</h3>
             <ul>
               <li>Docker, Kubernetes</li>
@@ -320,7 +389,7 @@
   </main>
 
   <!-- A caption for the figure, like the one under a chart in a paper. -->
-  <p class="caption" id="caption" aria-hidden="true"><b>Figure.</b> <span class="caption__t">Nearly 9,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.</span></p>
+  <p class="caption" id="caption" aria-hidden="true"><b>Figure.</b> <span class="caption__t">More than 10,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.</span></p>
 
   <noscript><style>.hero__title .line > span { transform: none; } .hero__foot { opacity: 1; }</style></noscript>
   <script src="js/main.js" defer></script>

@@ -1,7 +1,7 @@
 /* ============================================================================
    scene.js — "the figure"
 
-   About 9,000 points in a 3D latent space, drawn on a plain 2D canvas with our
+   More than 10,000 points in a 3D latent space, drawn on a plain 2D canvas with our
    own perspective projection (no WebGL). Each cluster is one body of work; its
    shape hints at what the project does. Scrolling flies the camera from cluster
    to cluster, the cursor acts as a retrieval query (its nearest points light up),
@@ -59,15 +59,19 @@
     { name: 'ClasslyAI', shape: 'trio', n: 720 },
     { name: 'Offline UPI Mesh', shape: 'chain', n: 640 },
     { name: 'All-Ears', shape: 'ring', n: 700 },
+    { name: 'Fisherman', shape: 'pairs', n: 640 },
+    { name: 'LazyForm', shape: 'grid', n: 620 },
+    { name: 'Dispatch Load Balancer', shape: 'routes', n: 640 },
     { name: 'AI and ML systems', shape: 'shell', n: 520, sx: 1.0, sy: 1.0, sz: 1.0 },
     { name: 'Backend and APIs', shape: 'shell', n: 460, sx: 1.5, sy: 0.7, sz: 1.0 },
     { name: 'Frontend', shape: 'shell', n: 380, sx: 0.8, sy: 1.3, sz: 0.8 },
     { name: 'Cloud and tools', shape: 'shell', n: 420, sx: 1.3, sy: 0.9, sz: 1.2 }
   ];
   var HAZE = 2200;
-  var NPROJ = 7;
+  var NPROJ = 10;
 
   // Cluster centres: projects wind down a helix, skills sit in a ring below it.
+  var SKY = -63.5;   // height of the skills ring
   (function placeClusters() {
     for (var i = 0; i < NPROJ; i++) {
       var a = i * 0.92 + 0.4;
@@ -76,12 +80,12 @@
     }
     for (var k = 0; k < 4; k++) {
       var b = k * TAU / 4 + 0.6;
-      CLUSTERS[NPROJ + k].c = [12 * Math.cos(b), -44 + Math.sin(k * 2.1) * 2.5, 12 * Math.sin(b)];
+      CLUSTERS[NPROJ + k].c = [12 * Math.cos(b), SKY + Math.sin(k * 2.1) * 2.5, 12 * Math.sin(b)];
       CLUSTERS[NPROJ + k].out = [Math.cos(b), 0, Math.sin(b)];
     }
   })();
 
-  // Camera stations: hero, seven projects, about, skills (two), contact.
+  // Camera stations: hero, ten projects, about, skills (two), contact.
   var STATIONS = (function () {
     var s = [{ p: [8, 44, 62], t: [0, -3, 0] }];
     for (var i = 0; i < NPROJ; i++) {
@@ -91,10 +95,10 @@
         t: [c.c[0], c.c[1], c.c[2]]
       });
     }
-    s.push({ p: [-44, -4, 38], t: [0, -14, 0] });      // about: the whole helix from the side
-    s.push({ p: [6, -38, 52], t: [0, -44, 0] });       // skills, approaching the ring
-    s.push({ p: [-7, -42, 40], t: [0, -44, 0] });      // skills, at the ring
-    s.push({ p: [34, 14, 74], t: [0, -12, 0] });       // contact: pull back
+    s.push({ p: [-52, -3, 46], t: [0, -9, 0] });       // about: the whole helix from the side
+    s.push({ p: [6, SKY + 6, 52], t: [0, SKY, 0] });   // skills, approaching the ring
+    s.push({ p: [-7, SKY + 2, 40], t: [0, SKY, 0] });  // skills, at the ring
+    s.push({ p: [38, 16, 84], t: [0, -14, 0] });       // contact: pull back
     return s;
   })();
 
@@ -193,6 +197,71 @@
           var th = R() * TAU;
           var rr = 5 + 1.6 * Math.sin(7 * th) * (0.6 + 0.4 * Math.sin(3 * th + 1)) + gauss(R) * 0.18;
           out.push([rr * Math.cos(th), rr * Math.sin(th), gauss(R) * 0.35]);
+        }
+      } else if (kind === 'pairs') {
+        // Two strands, baseline and candidate, sampled at the same places. A paired test compares them point by point.
+        var A0 = [], B0 = [], np = (n / 2) | 0;
+        for (i = 0; i < np; i++) {
+          var tp = R(), xp = lerp(-6, 6, tp), yp = 2.4 * Math.sin(tp * 5.2 + 0.4) + gauss(R) * 0.22;
+          A0.push([xp, yp, -1.7 + gauss(R) * 0.25]);
+          var flip = R() < 0.14 ? 1.1 : 0.12;           // a few points have regressed
+          B0.push([xp + gauss(R) * 0.08, yp + gauss(R) * flip, 1.7 + gauss(R) * 0.25]);
+        }
+        for (i = 0; i < np; i++) { out.push(A0[i]); out.push(B0[i]); }
+        for (i = 0; i < 18; i++) {                       // anchor pairs joined by an edge
+          var u = i / 17, xa = lerp(-6, 6, u), ya = 2.4 * Math.sin(u * 5.2 + 0.4);
+          var ia = out.length;
+          out.push([xa, ya, -1.7]); out.push([xa, ya, 1.7]);
+          edges.push([ia, ia + 1]);
+        }
+      } else if (kind === 'grid') {
+        // A multi-step form: three pages of fields, filled in a serpentine order, step after step.
+        var slots = [], gl, gj, gi;
+        for (gl = 0; gl < 3; gl++) for (gj = 0; gj < 3; gj++) for (gi = 0; gi < 4; gi++) {
+          var colg = ((gj + gl * 3) % 2) ? 3 - gi : gi;
+          slots.push([-4.2 + colg * 2.8, 2.8 - gj * 2.8, (gl - 1) * 3.6]);
+        }
+        for (i = 0; i < n - slots.length; i++) {
+          var sl = slots[(R() * slots.length) | 0];
+          out.push([sl[0] + gauss(R) * 0.6, sl[1] + gauss(R) * 0.32, sl[2] + gauss(R) * 0.32]);
+        }
+        var gBase = out.length;
+        for (i = 0; i < slots.length; i++) out.push(slots[i]);
+        for (i = 0; i < slots.length - 1; i++) edges.push([gBase + i, gBase + i + 1]);
+      } else if (kind === 'routes') {
+        // A depot with five vehicles, each driving its own route.
+        var depot = out.length;
+        out.push([0, 0, 0]);
+        var stopsAll = [];
+        for (var rt = 0; rt < 5; rt++) {
+          var dir = [gauss(R), gauss(R) * 0.5, gauss(R)], dl = Math.hypot(dir[0], dir[1], dir[2]) || 1;
+          var cur = [0, 0, 0], path = [];
+          for (var sp = 0; sp < 6; sp++) {
+            var jd = [dir[0] / dl + gauss(R) * 0.45, dir[1] / dl + gauss(R) * 0.35, dir[2] / dl + gauss(R) * 0.45];
+            var jl = Math.hypot(jd[0], jd[1], jd[2]) || 1, st = 1.6 + R() * 1.1;
+            cur = [cur[0] + jd[0] / jl * st, cur[1] + jd[1] / jl * st, cur[2] + jd[2] / jl * st];
+            path.push(cur);
+          }
+          stopsAll.push(path);
+        }
+        var perLeg = ((n - 31) / 30) | 0;
+        for (var r2 = 0; r2 < 5; r2++) {
+          var prevP = [0, 0, 0];
+          for (var s3 = 0; s3 < 6; s3++) {
+            var nxt = stopsAll[r2][s3];
+            for (var q2 = 0; q2 < perLeg; q2++) {
+              var tq2 = R();
+              out.push([lerp(prevP[0], nxt[0], tq2) + gauss(R) * 0.14, lerp(prevP[1], nxt[1], tq2) + gauss(R) * 0.14, lerp(prevP[2], nxt[2], tq2) + gauss(R) * 0.14]);
+            }
+            prevP = nxt;
+          }
+        }
+        for (var r3 = 0; r3 < 5; r3++) {
+          var last = depot;
+          for (var s4 = 0; s4 < 6; s4++) {
+            var idxS = out.length; out.push(stopsAll[r3][s4]);
+            edges.push([last, idxS]); last = idxS;
+          }
         }
       } else { // shell
         for (i = 0; i < n; i++) {

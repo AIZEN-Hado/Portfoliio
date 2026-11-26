@@ -4,7 +4,7 @@ AI engineer. LLM agents, retrieval, fine-tuning and the backends that carry them
 
 ## What the site is
 
-One long page with a single figure behind it. The figure is a field of about 8,800 points drawn on a 2D canvas with its own perspective projection, so it reads as 3D without WebGL. Each project is a cluster whose shape follows what the project does: a graph, a tree, a drift from tight to diffuse, a chain, a waveform ring. Scrolling flies the camera between clusters. Pointing at a project row, or opening it, flies the camera to that project's cluster.
+One long page with a single figure behind it. The figure is a field of more than 10,000 points drawn on a 2D canvas with its own perspective projection, so it reads as 3D without WebGL. Each project is a cluster whose shape follows what the project does: a graph, a tree, a drift from tight to diffuse, a chain, a waveform ring. Scrolling flies the camera between clusters. Pointing at a project row, or opening it, flies the camera to that project's cluster.
 
 ## How it is built
 

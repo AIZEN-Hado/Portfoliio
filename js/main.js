@@ -17,10 +17,11 @@
   var coarse = win.matchMedia('(pointer: coarse)').matches;
 
   var CLUSTER_NAMES = ['PolicyPilot AI', 'SemiGit', 'ProvChain', 'InterviewIQ', 'ClasslyAI', 'Offline UPI Mesh', 'All-Ears',
+    'Fisherman', 'LazyForm', 'Dispatch Load Balancer',
     'AI and ML systems', 'Backend and APIs', 'Frontend', 'Cloud and tools'];
 
   var CAPTIONS = {
-    hero: 'Nearly 9,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.',
+    hero: 'More than 10,000 points in a three-dimensional space, each one a fragment of my work. Your cursor is a query: its nearest points light up.',
     work: 'Each cluster is one project, and its shape follows what the project does: a graph, a tree, a drift, a mesh.',
     about: 'The same space from the side. The projects wind down a helix.',
     skills: 'Skills sit in four clusters below the projects.',
