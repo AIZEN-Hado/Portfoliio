@@ -38,7 +38,7 @@ Plain HTML, CSS and JavaScript. No framework, no bundler, no build step.
 
 ## The portrait
 
-The introduction shows a still: a cut-out of the photo (`assets/portrait.webp`, a 4:5 WebP with a transparent background) on a cobalt disc with a dot screen, standing on a baseline. It stays in view beside the text on wide screens. To change the photo, replace the file with another 4:5 cut-out; the disc and baseline are CSS (`.portrait` in `css/home.css`).
+The introduction shows a plain photograph, `assets/portrait.webp` (4:5, head and shoulders), which stays in view beside the text on wide screens. To change it, replace the file with another 4:5 image (about 1000 x 1250).
 
 ## Run it locally
 
