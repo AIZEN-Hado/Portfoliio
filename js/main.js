@@ -289,15 +289,15 @@
   var cache = { prog: -1 };
   var et = [], xt = [], ev = [], xv = [], hv = [], sceneVals = [];   // target and shown entering/leaving per scene, and the last --h written
   var sceneRaf = 0, sceneLast = 0;
-  /* the entering and leaving values run on a clock, not on the scroll: 0.95 s to come in, 0.7 s to go */
+  /* the entering and leaving values run on a clock, not on the scroll: 0.55 s to come in, 0.42 s to go */
   function stepScenes(now) {
     sceneRaf = 0;
     var dt = sceneLast ? Math.min(0.05, (now - sceneLast) / 1000) : 0.016; sceneLast = now;
     var moving = false;
     for (var i = 0; i < projs.length; i++) {
       var e0 = ev[i] || 0, x0 = xv[i] || 0;
-      var e1 = e0 < et[i] ? Math.min(et[i], e0 + dt / 0.95) : Math.max(et[i], e0 - dt / 0.6);
-      var x1 = x0 < xt[i] ? Math.min(xt[i], x0 + dt / 0.7) : Math.max(xt[i], x0 - dt / 0.6);
+      var e1 = e0 < et[i] ? Math.min(et[i], e0 + dt / 0.55) : Math.max(et[i], e0 - dt / 0.4);
+      var x1 = x0 < xt[i] ? Math.min(xt[i], x0 + dt / 0.42) : Math.max(xt[i], x0 - dt / 0.4);
       if (e1 !== e0 || x1 !== x0 || sceneVals[i] === undefined) {
         ev[i] = e1; xv[i] = x1; sceneVals[i] = 1;
         projs[i].style.setProperty('--e', e1.toFixed(4)); projs[i].style.setProperty('--x', x1.toFixed(4));

@@ -705,8 +705,8 @@
         focusW = focus >= 0 ? 1 : 0; focusIdx = focus >= 0 ? focus : focusIdx;
       } else {
         // quick enough that the camera is where the content says it should be, soft enough to take the steps out of a wheel
-        s = damp(uS, uTarget, uV, 10.5, dt); uS = s[0]; uV = s[1];
-        s = damp(drS, drTarget, drV, 8, dt); drS = s[0]; drV = s[1];
+        s = damp(uS, uTarget, uV, 22, dt); uS = s[0]; uV = s[1];
+        s = damp(drS, drTarget, drV, 14, dt); drS = s[0]; drV = s[1];
         var yawT = pointer.on ? (pointer.x / W - 0.5) * 0.30 : 0;
         var pitT = pointer.on ? (pointer.y / H - 0.5) * -0.16 : 0;
         s = damp(yawS, yawT, yawV, 3.2, dt); yawS = s[0]; yawV = s[1];
@@ -765,7 +765,7 @@
       // camera speed (for streaks)
       var spd = Math.abs(uV) * 0.8 + Math.abs(yawV) * 4;
       camSpeed += (spd - camSpeed) * Math.min(1, dt * 8);
-      var streakOn = !reduced && camSpeed > 0.25;
+      var streakOn = false;   // points are not stretched into streaks while the camera moves: it read as elastic
       var streakLen = clamp(camSpeed * 0.035, 0, 0.09);
 
       // activity per cluster follows where the camera is looking
