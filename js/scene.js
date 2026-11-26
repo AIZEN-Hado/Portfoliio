@@ -104,7 +104,7 @@
       s.push({
         p: [c.c[0] + c.out[0] * 30, c.c[1] + 3, c.c[2] + c.out[2] * 30],
         t: [c.c[0], c.c[1], c.c[2]],
-        orb: 0.12, dolly: 0.07
+        orb: 0.2, dolly: 0.12
       });
     }
     s.push({ p: [0, SKY + 4, 58], t: [0, SKY, 0], orb: 0, dolly: 0 });    // skills, approaching the column
@@ -788,8 +788,7 @@
       for (c = 0; c < NC; c++) {
         var dd0 = c < NPROJ ? Math.abs(uS - (c + 1))
                 : uS < NPROJ + 1 ? NPROJ + 1 - uS : uS > NPROJ + 2 ? uS - (NPROJ + 2) : 0;
-        // whole while the camera rests on it and for a moment either side, loosest half-way between two stations
-        disA[c + 1] = reduced || dd0 >= 1 ? 0 : smooth((dd0 - 0.12) / 0.4) * (1 - smooth((dd0 - 0.7) / 0.3));
+        disA[c + 1] = reduced || dd0 >= 1 ? 0 : clamp(Math.sin(Math.PI * dd0) * 1.3, 0, 1);
       }
 
       // Every shape turns about its own vertical axis to face the camera, so none is ever seen edge-on.

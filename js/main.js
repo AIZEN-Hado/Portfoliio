@@ -1,7 +1,7 @@
 /* ============================================================================
    main.js — everything on the page that isn't the figure.
    Starts the figure (in a Worker when possible) and feeds it scroll, pointer and layout.
-   Drives the continuous project flow (--p / --h), the project rail, the line-mask
+   Drives the pinned project scenes (--e / --h / --x), the project rail, the line-mask
    reveals, the introduction's scroll effects, the caption and the nav colour.
    The camera marks it sends are built from the same scene geometry that drives the text,
    so the figure and the page are always on the same beat.
@@ -29,7 +29,7 @@
 
   var CAPTIONS = {
     about: 'About 8,000 points in a three-dimensional space, each one a fragment of my work. The ten projects wind down a helix. Your cursor is a query: its nearest points light up.',
-    work: 'Each shape is one project. Scroll and the points loosen, then pull together into the next one.',
+    work: 'Each shape is one project. Scroll and the points scatter, then settle into the next one.',
     skills: 'Skills sit in a column below the projects: a network, a database, a browser and a cloud.',
     contact: 'The end of the space. Write to me.'
   };
@@ -240,8 +240,7 @@
   }
 
   /* ---------------------------------------------------------------- layout */
-  var geo = [];                 // per project: { top, cy (centre of its text, in the document), rest (scroll position at which that centre is on the resting line) }
-  var REST = 0.6;               // the resting line, as a share of the screen height
+  var geo = [];                 // per project scene: { top, hold, pin }
   var layout = { vh: 0, introTop: 0, introBottom: 0, workTop: 0, first: 0, last: 0 };
   var measureQueued = false;
   function queueMeasure() {
@@ -253,21 +252,23 @@
   function measure() {
     var vh = win.innerHeight, sy = win.scrollY;
     geo = projs.map(function (el) {
-      var inner = el.querySelector('.proj__inner');
-      var top = docTop(el), cy = docTop(inner) + inner.offsetHeight / 2;
-      return { top: top, h: el.offsetHeight, cy: cy, rest: Math.max(0, cy - vh * REST) };
+      var pin = el.querySelector('.proj__pin').offsetHeight;
+      var z = reduceMQ.matches ? 0 : pin * 0.5;       // the swap between scenes (see --z in home.css)
+      var hold = Math.max(1, el.offsetHeight - pin - z);
+      var top = docTop(el);
+      return { top: top, hold: hold, pin: pin, z: z, rest: top + (el === projs[0] ? 0 : z) };
     });
     layout.vh = vh;
         layout.introTop = docTop(introEl); layout.introBottom = layout.introTop + introEl.offsetHeight;
     layout.first = geo.length ? geo[0].top : 0;
-    layout.last = geo.length ? geo[geo.length - 1].top + projs[projs.length - 1].offsetHeight : 0;
+    layout.last = geo.length ? geo[geo.length - 1].top + geo[geo.length - 1].hold + geo[geo.length - 1].z + geo[geo.length - 1].pin : 0;
 
-    // Camera marks: [start, end] of the scroll range where the camera rests on each station. The projects are one
-    // continuous flow, so each rest is short (a third of a screen, centred on the text's resting line) and the camera
-    // is flying the rest of the time, at the pace of the scroll.
+    // Camera marks: [start, end] of the scroll range where the camera is parked on each station.
+    // Between one park's end and the next one's start it flies. For the project scenes the park is
+    // exactly the pinned range, so the camera arrives as the title finishes rising and leaves when the scene lets go.
     var m = [];
     m.push([0, Math.max(vh * 0.3, layout.introBottom - vh * 0.65)]);                                    // introduction, at the top of the page
-    geo.forEach(function (g) { m.push([Math.max(0, g.rest - vh * 0.16), g.rest + vh * 0.16]); });       // projects
+    geo.forEach(function (g) { m.push([g.rest, g.top + g.hold]); });                                    // projects: parked after the swap
     var sT = docTop(skillsEl), sH = skillsEl.offsetHeight;
     m.push([sT - vh * 0.15, sT - vh * 0.15]);                                                           // skills, approaching
     m.push([sT + sH * 0.55 - vh * 0.5, sT + sH * 0.55 - vh * 0.5]);                                     // skills, at the ring
@@ -286,8 +287,30 @@
   /* ----------------------------------------------------------------- scroll */
   var scrollQueued = false, lastInv = null, lastCapInv = null, lastCapOff = null;
   var cache = { prog: -1 };
-  var hv = [], pv = [], near = [];   // the last --h and --p written, and whether the project is near the screen, per project
-  var current = -1, railOn = false, inWork = false;
+  var et = [], xt = [], ev = [], xv = [], hv = [], sceneVals = [];   // target and shown entering/leaving per scene, and the last --h written
+  var sceneRaf = 0, sceneLast = 0;
+  /* the entering and leaving values run on a clock, not on the scroll: 0.95 s to come in, 0.7 s to go */
+  function stepScenes(now) {
+    sceneRaf = 0;
+    var dt = sceneLast ? Math.min(0.05, (now - sceneLast) / 1000) : 0.016; sceneLast = now;
+    var moving = false;
+    for (var i = 0; i < projs.length; i++) {
+      var e0 = ev[i] || 0, x0 = xv[i] || 0;
+      var e1 = e0 < et[i] ? Math.min(et[i], e0 + dt / 0.95) : Math.max(et[i], e0 - dt / 0.6);
+      var x1 = x0 < xt[i] ? Math.min(xt[i], x0 + dt / 0.7) : Math.max(xt[i], x0 - dt / 0.6);
+      if (e1 !== e0 || x1 !== x0 || sceneVals[i] === undefined) {
+        ev[i] = e1; xv[i] = x1; sceneVals[i] = 1;
+        projs[i].style.setProperty('--e', e1.toFixed(4)); projs[i].style.setProperty('--x', x1.toFixed(4));
+      }
+      if (e1 !== et[i] || x1 !== xt[i]) moving = true;
+    }
+    if (moving) { sceneRaf = win.requestAnimationFrame(stepScenes); } else sceneLast = 0;
+  }
+  function kickScenes() {
+    if (reduceMQ.matches) { stepScenes(performance.now()); return; }
+    if (!sceneRaf) sceneRaf = win.requestAnimationFrame(stepScenes);
+  }
+  var current = -1, railOn = false;
 
   function setVar(el, name, v) { el.style.setProperty(name, v); }
 
@@ -310,34 +333,27 @@
       if (pr !== cache.prog) { progress.style.transform = 'scaleX(' + pr + ')'; cache.prog = pr; }
     }
 
-    // The projects flow. For each, --p is how far its text is from the resting line (in screen heights, positive below),
-    // and everything that moves in it is a function of that, so there is nothing to catch up and nothing to get stuck.
-    // The nearest one is the one being read. Projects well off screen are left as they were.
-    var best = -1, bestD = 0.62, still = reduceMQ.matches;
+    // Project scenes. Which one is being read is decided by where the page is, and the swap between scenes then plays
+    // out in time, so stopping anywhere never leaves a title half-risen. Only --h (the rule filling) follows the scroll.
+    var best = -1;
     for (var i = 0; i < geo.length; i++) {
       var g = geo[i];
-      var pp = still ? 0 : (g.cy - y) / vh - REST;
-      var ad = Math.abs(pp);
-      if (ad < bestD) { bestD = ad; best = i; }
-      var nr = ad < 1.7;
-      if (nr !== !!near[i]) { projs[i].classList.toggle('is-near', nr); near[i] = nr; }
-      var pc = clamp(pp, -1.6, 1.6);
-      if (force || Math.abs(pc - (pv[i] === undefined ? 9 : pv[i])) > 0.0004) {
-        projs[i].style.setProperty('--p', pc.toFixed(4)); pv[i] = pc;
-        var h = still ? 1 : num(clamp(0.5 - pc / 0.9, 0, 1));
-        if (h !== hv[i]) { projs[i].style.setProperty('--h', h); hv[i] = h; }
-      }
+      var from = i === 0 ? g.top - g.pin * 0.35 : geo[i - 1].top + geo[i - 1].hold + geo[i - 1].z * 0.5;
+      var to = g.top + g.hold + g.z * 0.5;
+      var on = y >= from && y < to;
+      if (on) best = i;
+      et[i] = y >= from ? 1 : 0;
+      xt[i] = y >= to ? 1 : 0;
+      var h = num(clamp((y - g.top) / g.hold, 0, 1));
+      if (force || h !== hv[i]) { projs[i].style.setProperty('--h', h); hv[i] = h; }
     }
-    if (best >= 0 !== inWork) { root.classList.toggle('in-work', best >= 0); inWork = best >= 0; }
+    if (reduceMQ.matches) { for (i = 0; i < geo.length; i++) { et[i] = 1; xt[i] = 0; ev[i] = 1; xv[i] = 0; } }
+    kickScenes();
     if (best !== current) setCurrent(best);
-    // a case left open closes once its project has left the screen, so the camera is not left in close on an old project
-    for (i = 0; i < geo.length; i++) {
-      if (projs[i].classList.contains('is-open') && (y > geo[i].top + geo[i].h + vh * 0.3 || y + vh < geo[i].top - vh * 0.3)) setOpen(projs[i], false);
-    }
 
     // the rail is on while a project is being read
-    var onRail = best >= 0;
-    if (onRail !== railOn && rail) { rail.classList.toggle('is-on', onRail); railOn = onRail; }
+    var on = best >= 0;
+    if (on !== railOn && rail) { rail.classList.toggle('is-on', on); railOn = on; }
   }
 
   function projectName(i) { return CLUSTER_NAMES[i]; }
@@ -353,6 +369,8 @@
       });
       if (i >= 0) rail.setAttribute('data-now', railLabel(i));
     }
+    // a case left open stays with its scene: closing it as you move on keeps the camera from sitting in close on an old project
+    if (prev >= 0 && projs[prev].classList.contains('is-open')) setOpen(projs[prev], false);
     if (i >= 0) setCaption('p' + i, PROJECT_CAPTIONS[i]);
     else setCaption(sectionKey);
   }
@@ -519,22 +537,18 @@
     if (v) { caseFocus = i; setFocus(i); }
     else if (caseFocus === i) { caseFocus = -1; clearTimeout(focusTimer); sendFocus(-1); }
   }
-  /* An opening case grows below the title. Scroll so the title sits near the top and the case has room, aiming at where
-     the text will be once it has finished growing. */
-  function bringCaseIntoView(proj, i) {
-    var inner = proj.querySelector('.proj__inner'), clip = proj.querySelector('.proj__clip');
-    var innerH = inner.offsetHeight + clip.scrollHeight, minH = win.innerHeight;
-    var blockH = Math.max(minH, innerH), top = docTop(proj) + (blockH - innerH) / 2;
-    var nav0 = nav ? nav.offsetHeight : 64;
-    var target = Math.max(0, top - nav0 - 12);
-    if (Math.abs(target - win.scrollY) > 40) win.scrollTo({ top: target, behavior: reduceMQ.matches ? 'instant' : 'smooth' });
-  }
   projs.forEach(function (proj, i) {
     proj.querySelector('.proj__open').addEventListener('click', function () {
       var willOpen = !proj.classList.contains('is-open');
       projs.forEach(function (p) { if (p !== proj && p.classList.contains('is-open')) setOpen(p, false); });
       setOpen(proj, willOpen);
-      if (willOpen) bringCaseIntoView(proj, i);
+    });
+    // reaching a scene by keyboard: bring it to its resting place so it is read, not half-risen
+    proj.addEventListener('focusin', function () {
+      var g = geo[i];
+      if (!g) return;
+      var y = win.scrollY;
+      if (y < g.rest - 2 || y > g.top + g.hold + 2) win.scrollTo({ top: clamp(y, g.rest, g.top + g.hold), behavior: 'instant' });
     });
   });
 
