@@ -18,7 +18,6 @@ Plain HTML, CSS and JavaScript. No framework, no bundler, no build step.
 | `css/docs.css` | Layout for the per-project docs in `docs/` |
 | `js/scene.js` | The figure: projection, camera, depth of field, batching |
 | `js/main.js` | Boot, scroll and pointer wiring, project scenes and rail, line-mask reveals, captions |
-| `js/portrait.js` | The halftone portrait in the introduction |
 | `fonts/` | Bricolage Grotesque and Newsreader, self-hosted variable fonts |
 
 ### Rendering notes
@@ -34,12 +33,12 @@ Plain HTML, CSS and JavaScript. No framework, no bundler, no build step.
 - Shapes are authored in `js/scene.js` (`SHAPES`) with a small drawing kit: outlines are sampled at an even spacing and carry edges, interior dots are loose. Outline points are never thinned by the governor.
 - While parked the camera keeps moving a little (a slow orbit and a small push-in) so a held scene is never dead still. Opening a case moves the camera in closer on that cluster.
 - Hover focus on skill groups waits until scrolling stops, so the camera isn't sent to a different cluster mid-scroll.
-- With reduced motion on, the scene draws on demand, does not scatter, scenes are not pinned, titles do not move and the portrait is drawn once.
+- With reduced motion on, the scene draws on demand, does not scatter, scenes are not pinned, titles do not move.
 - The canvas can only run as fast as the display refreshes. On a 120 Hz screen it targets 120 fps.
 
 ## The portrait
 
-The introduction draws a halftone portrait: a hex lattice of dots whose size follows the tone of a picture. It shows a monogram until a photo is supplied. To use a photo, add it as `assets/portrait.jpg` (a head and shoulders shot with a plain background works best, about 800 x 1000) and set `data-src="assets/portrait.jpg"` on `<figure id="portrait">` in `index.html`. If the file is missing or fails to load, the monogram is drawn instead.
+The introduction shows a still: a cut-out of the photo (`assets/portrait.webp`, a 4:5 WebP with a transparent background) on a cobalt disc with a dot screen, standing on a baseline. It stays in view beside the text on wide screens. To change the photo, replace the file with another 4:5 cut-out; the disc and baseline are CSS (`.portrait` in `css/home.css`).
 
 ## Run it locally
 

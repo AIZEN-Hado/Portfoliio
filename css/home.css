@@ -57,8 +57,21 @@
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3rem 2rem; align-items: start;
   margin-top: clamp(3rem, 9vh, 6.5rem);
 }
-.portrait { grid-column: 1 / span 5; margin: 0; position: relative; aspect-ratio: 4 / 5; }
-.portrait__cv { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The portrait is a still: a cut-out on a cobalt disc with a dot screen, standing on a baseline. The head rises past the disc.
+   It sits beside the text and stays in view while the text beside it is read. */
+.portrait { grid-column: 1 / span 5; margin: 0; position: sticky; top: calc(var(--nav-h) + 1.5rem); aspect-ratio: 4 / 5; border-bottom: 2px solid var(--ink); }
+.portrait::before {
+  content: ""; position: absolute; left: 7%; width: 86%; aspect-ratio: 1; top: 17%; border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(233, 235, 240, 0.3) 1.25px, transparent 1.7px) 0 0 / 11px 11px,
+    linear-gradient(155deg, rgba(255, 255, 255, 0.12), rgba(16, 19, 38, 0.32)),
+    var(--cobalt);
+}
+.portrait img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom;
+  /* the photo itself is cut off at the left shoulder, so let that edge fade */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%); mask-image: linear-gradient(to right, transparent 0, #000 7%);
+}
 .intro__body { grid-column: 7 / span 6; display: grid; gap: 1.15rem; }
 .intro__body p { max-width: 34rem; }
 .intro__actions { display: flex; align-items: center; gap: 1.8rem; padding-top: 0.3rem; }
@@ -331,7 +344,7 @@
   .proj__case .case__cols { background: rgba(233, 235, 240, 0.9); padding: 1.2rem 1rem; margin-top: 0.6rem; }
   .intro__grid { grid-template-columns: 1fr; }
   .portrait, .intro__body { grid-column: 1 / -1; }
-  .portrait { max-width: 24rem; }
+  .portrait { max-width: 24rem; position: relative; top: auto; }
 }
 @media (max-width: 900px) {
   .case__cols, .principles { grid-template-columns: 1fr; }
