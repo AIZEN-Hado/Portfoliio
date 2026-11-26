@@ -1,15 +1,14 @@
 /* ==========================================================================
    Home page.
    Stacking, bottom to top:  contact background (1)  <  the figure canvas (2)
-   <  all text (3+).  Pinned project scenes are sticky, and sticky creates a
-   stacking context, so .proj__pin carries z-index 3 itself.
+   <  all text (3+).
 
-   Scroll-linked variables (written by main.js, one set per project scene):
-     --e  entering, 0 → 1 as the scene's top travels from the bottom of the screen to the top
-     --h  holding, 0 → 1 while the scene is pinned
-     --x  leaving, 0 → 1 as the pinned scene scrolls away
-   The camera in the figure parks on the cluster for exactly the --h range and flies during --e / --x,
-   so what you read and what you see move together.
+   The projects are one continuous flow, not scenes: nothing is pinned and nothing swaps.
+   main.js writes two variables on each project as the page scrolls:
+     --p  how far the text is from its resting line, in screen heights: positive below it, negative above
+     --h  0 → 1 as the text passes the resting line (fills the rule)
+   Everything that moves in a project is a function of --p, so it always matches the scroll position.
+   The camera in the figure flies along the same line: it is on a project's cluster when --p is 0.
    ========================================================================== */
 
 .figure {
@@ -85,44 +84,32 @@
 
 .projects { position: relative; list-style: none; margin: 0; padding: 0; }
 .proj {
-  /* Scenes overlap: the next one starts while this one is still pinned, so the two swap in place over --z of scrolling
-     and nothing physically slides past. --hold is the scroll each scene owns. */
-  --hold: 110vh; --z: 50vh; --e: 1; --h: 0; --x: 0;
-  position: relative; height: calc(100vh + var(--hold) + var(--z));
-  margin-bottom: calc(-100vh - var(--z));
+  --p: 0; --h: 0;
+  position: relative; min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: center;
   scroll-margin-top: calc(var(--nav-h) * -1);
 }
-.proj:last-child { margin-bottom: 0; }
-@supports (height: 100svh) { .proj { --hold: 110svh; --z: 50svh; height: calc(100svh + var(--hold) + var(--z)); margin-bottom: calc(-100svh - var(--z)); } }
-.proj__pin {
-  position: sticky; top: 0; z-index: 3;
-  height: 100vh; height: 100svh;
-  display: flex; align-items: flex-end;
-  pointer-events: none;
-}
-.proj__pin a, .proj__pin button { pointer-events: auto; }
-/* scenes overlap, so only the one being read takes clicks */
-.proj:not(.is-cur) .proj__pin a, .proj:not(.is-cur) .proj__pin button { pointer-events: none; }
+.proj__pin { position: relative; z-index: 3; width: 100%; }
 .proj__inner {
-  width: 100%; max-height: 100%;
+  width: 100%;
   display: flex; flex-direction: column; align-items: flex-start; gap: 1.15rem;
-  padding-top: calc(var(--nav-h) + 1rem);
-  padding-bottom: clamp(4.4rem, 10vh, 6.4rem);
-  /* bottom-aligned while it fits; when an open case is taller than the screen it scrolls instead of running off the top */
-  overflow-y: auto; scrollbar-width: thin;
+  padding-block: clamp(3rem, 9vh, 5.4rem);
 }
 .proj__inner > * { flex: none; }
-.proj__inner > :first-child { margin-top: auto; }
-.proj.is-open .proj__inner { pointer-events: auto; padding-bottom: clamp(5rem, 11vh, 6.4rem); }
 
-/* things that fade and lift in once the title is most of the way up, and leave before it */
+/* only the projects near the screen get their own layers, so the moving text is moved, not repainted */
+.proj.is-near .proj__title, .proj.is-near .proj__meta, .proj.is-near .proj__line, .proj.is-near .proj__actions, .proj.is-near .proj__rule { will-change: transform, opacity; }
+.proj.is-near .proj__title .line > span { will-change: transform; }
+
+/* The rest of the text arrives a little after the title and leaves a little before it. All of it is fully there for most of the way across the screen. */
 .proj__meta, .proj__line, .proj__actions, .proj__rule {
-  --o: 0.6;
-  --in: clamp(0, (var(--e) - var(--o)) * 4.5, 1);
-  opacity: calc(var(--in) * (1 - clamp(0, var(--x) * 4, 1)));
-  transform: translateY(calc((1 - var(--in)) * 26px - clamp(0, var(--x) * 4, 1) * 18px));
+  --o: 0;
+  --in: clamp(0, (0.46 - var(--p) - var(--o)) / 0.3, 1);
+  --out: clamp(0, (-0.18 - var(--p)) / 0.42, 1);
+  opacity: calc(var(--in) * (1 - var(--out)));
+  transform: translateY(calc((1 - var(--in)) * 26px - var(--out) * 22px));
 }
-.proj__meta { --o: 0.5; display: flex; flex-wrap: wrap; gap: 0.2rem 1.4rem; font-family: var(--sans); font-size: 0.97rem; font-weight: 520; color: var(--ink-2); }
+.proj__meta { --o: 0; display: flex; flex-wrap: wrap; gap: 0.2rem 1.4rem; font-family: var(--sans); font-size: 0.97rem; font-weight: 520; color: var(--ink-2); }
 .proj__year { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 650; }
 
 .proj__title {
@@ -132,12 +119,14 @@
   line-height: 0.9; letter-spacing: -0.032em;
   font-variation-settings: "wdth" 86;
   transition: font-size 0.7s var(--ease);
+  /* a slow sideways drift with the scroll, in a direction of its own for each project */
+  transform: translateX(calc(clamp(-1.2, var(--p), 1.2) * var(--dx, 5vw)));
 }
 .proj__title .line {
   display: block; width: fit-content; max-width: 100%; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em;
   /* how far this line has come in (--ti) and gone out (--to), 0 to 1; each project's data-fx says how it moves */
-  --ti: clamp(0, (var(--e) - 0.38 - var(--li, 0) * 0.08) * 2.4, 1);
-  --to: clamp(0, (var(--x) - 0.04 - var(--li, 0) * 0.06) * 2.6, 1);
+  --ti: clamp(0, (0.5 - var(--p) - var(--li, 0) * 0.07) / 0.36, 1);
+  --to: clamp(0, (-0.2 - var(--p) - var(--li, 0) * 0.05) / 0.5, 1);
 }
 .proj__title .line:nth-child(2) { --li: 1; }
 .proj__title .line > span {
@@ -155,13 +144,16 @@
 .proj[data-fx="pop"] .proj__title .line > span { transform-origin: 0 100%; transform: translateY(calc((1 - var(--ti)) * 130% - var(--to) * 130%)) scale(calc(0.88 + 0.12 * var(--ti))); }
 .proj[data-fx="split"] .proj__title .line:nth-child(1) > span { transform: translateX(calc((1 - var(--ti)) * -110% + var(--to) * -110%)); }
 .proj[data-fx="split"] .proj__title .line:nth-child(2) > span { transform: translateX(calc((1 - var(--ti)) * 110% + var(--to) * 110%)); }
+.proj[data-fx="slide-l"], .proj[data-fx="wipe-rl"], .proj[data-fx="split"] { --dx: -6vw; }
+.proj[data-fx="slide-r"], .proj[data-fx="wipe-x"] { --dx: 6vw; }
+.proj[data-fx="drop"], .proj[data-fx="pop"], .proj[data-fx="wipe-y"] { --dx: 2.5vw; }
 
 /* a line that runs the width of the text column and fills as you read the scene */
-.proj__rule { --o: 0.56; display: block; width: min(100%, 46rem); height: 2px; background: var(--rule); }
+.proj__rule { --o: 0.05; display: block; width: min(100%, 46rem); height: 2px; background: var(--rule); }
 .proj__rule i { display: block; height: 100%; background: var(--cobalt); transform-origin: 0 50%; transform: scaleX(calc(0.03 + 0.97 * var(--h))); }
 
-.proj__line { --o: 0.66; max-width: 34rem; font-size: clamp(1.15rem, 1.5vw, 1.4rem); line-height: 1.5; }
-.proj__actions { --o: 0.74; display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.8rem; margin-top: 0.4rem; }
+.proj__line { --o: 0.09; max-width: 34rem; font-size: clamp(1.15rem, 1.5vw, 1.4rem); line-height: 1.5; }
+.proj__actions { --o: 0.13; display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.8rem; margin-top: 0.4rem; }
 .proj__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; }
 .proj__links a {
   font-family: var(--sans); font-weight: 600; font-size: 1rem;
@@ -323,11 +315,13 @@
   .intro__body .intro__lead { padding-block: 0.55rem; }
   .intro__name { padding-block: 0.12em 0.2em; }
   .work__head .h2, .skills .h2 { padding-block: 0.15em; }
-  .proj__pin::before {
-    content: ""; position: absolute; inset: auto 0 0 0; height: 66%; z-index: -1; pointer-events: none;
-    opacity: calc(var(--e) * (1 - var(--x)));
-    background: linear-gradient(to top, rgba(233, 235, 240, 0.95) 38%, rgba(233, 235, 240, 0));
+  /* while the projects are being read, a veil holds the lower part of the screen so the figure stays above the text */
+  html::after {
+    content: ""; position: fixed; inset: auto 0 0 0; height: 58vh; height: 58svh; z-index: 2; pointer-events: none;
+    background: linear-gradient(to top, rgba(233, 235, 240, 0.96) 42%, rgba(233, 235, 240, 0));
+    opacity: 0; transition: opacity 0.45s ease;
   }
+  html.in-work::after { opacity: 1; }
   .proj__case .case__cols { background: rgba(233, 235, 240, 0.9); padding: 1.2rem 1rem; margin-top: 0.6rem; }
   .intro__grid { grid-template-columns: 1fr; }
   .portrait, .intro__body { grid-column: 1 / -1; }
@@ -349,7 +343,7 @@
 }
 /* short screens: leave the case more room */
 @media (max-height: 760px) {
-  .proj__inner { gap: 0.8rem; padding-top: calc(var(--nav-h) + 0.4rem); }
+  .proj__inner { gap: 0.8rem; padding-block: 2.4rem; }
   .proj.is-open .proj__title { --fs: clamp(2rem, 3.6vw, 3.4rem); }
   .proj__case .case__cols { padding-top: 1rem; }
   .proj__case .case__cols p { font-size: 1rem; line-height: 1.45; }
@@ -360,11 +354,9 @@
   .js .rv, .js .rv.is-split { visibility: visible; animation: none; }
   .js .rv.is-split:not(.in) .l > span, .js .rv.is-split.in .l > span { transform: none; transition: none; }
   .js .intro__name:not(.in) .line > span, .js .intro__name.in .line > span { transform: none; transition: none; }
-  .proj { height: auto; min-height: 100vh; min-height: 100svh; margin-bottom: 0; }
-  .proj:not(.is-cur) .proj__pin a, .proj:not(.is-cur) .proj__pin button { pointer-events: auto; }
-  .proj__pin { position: relative; height: auto; min-height: inherit; }
+  .proj { --p: 0; --h: 1; }
   .proj[data-fx] .proj__title .line > span { transform: none; clip-path: none; }
-  .proj__title .line > span, .proj__meta, .proj__line, .proj__actions, .proj__rule { transform: none; opacity: 1; }
+  .proj__title, .proj__title .line > span, .proj__meta, .proj__line, .proj__actions, .proj__rule { transform: none; opacity: 1; }
   .proj__rule i { transform: none; }
   .proj__case, .proj__title, .proj__case .case__cols > div, .proj__case .case__stack, .rail, .rail a { transition: none; }
 }
