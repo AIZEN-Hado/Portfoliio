@@ -377,7 +377,7 @@
     var cores = opts.cores || 4;
 
     // quality: fraction of points drawn, and pixel ratio multiplier
-    var quality = coarse ? 0.55 : (cores >= 8 ? 1 : 0.8);
+    var quality = coarse ? 0.52 : (cores >= 8 ? 1 : 0.82);
     var pixelScale = 1;
 
     // inputs (latest values posted by the page)
@@ -400,14 +400,16 @@
     var sr = new Float32Array(M);
     var skey = new Int32Array(M);
     var sorted = new Uint32Array(M);
-    var K = (NC + 1) * BUCKETS * 2;
+    var NB = 10;                        // x-bands: the left fade is baked into point alpha, not a full-screen mask pass
+    var K = (NC + 1) * BUCKETS * 2 * NB;
+    var bandA = new Float32Array(NB), bandW = -1, bandWide = null;
+    var cursor = new Int32Array(K);
     var counts = new Int32Array(K + 1);
     var streaks = new Uint32Array(M), nStreaks = 0;
     var nearI = new Int32Array(NEIGHBOURS), nearD = new Float32Array(NEIGHBOURS), nNear = 0;
 
-    var maskGrad = null, maskW = 0;
     var started = false, startT = 0, introDur = 2.7;
-    var lastT = 0, frames = 0, dtEMA = 1 / 60, periodGuess = 1 / 60, samples = [], slowRun = 0, fastRun = 0;
+    var missEMA = 0, lastT = 0, frames = 0, ticks = 0, skip = 1, baseHz = 60, introGrace = 150, dtEMA = 1 / 60, periodGuess = 1 / 60, samples = [], slowRun = 0;
     var raf = null, queued = false, hasWorkerRaf = typeof root.requestAnimationFrame === 'function';
     var dirty = true;
 
@@ -431,9 +433,10 @@
     }
 
     function applySize() {
-      var pr = Math.max(0.5, Math.min(dpr, 2) * pixelScale);
-      // keep total pixels sane on very large displays
-      var area = W * H * pr * pr, cap = 4.6e6;
+      // The figure is soft dots and hairlines, so it does not need a retina backing store.
+      // Fill cost scales with pixels, so cap both the ratio and the total.
+      var pr = Math.max(0.5, Math.min(dpr, 1.5) * pixelScale);
+      var area = W * H * pr * pr, cap = 2.2e6;
       if (area > cap) pr *= Math.sqrt(cap / area);
       canvas.width = Math.max(1, Math.round(W * pr));
       canvas.height = Math.max(1, Math.round(H * pr));
@@ -478,6 +481,7 @@
     function frame(now) {
       queued = false;
       if (!started) { schedule(); return; }
+      if (skip > 1 && !reduced && (++ticks % skip) !== 0) { schedule(); return; }
       var cpu0 = performance.now();
       var t = now / 1000;
       var dt = lastT ? clamp(t - lastT, 0.0005, 0.05) : 1 / 60;
@@ -576,6 +580,17 @@
       }
 
       // --- project ---
+      // left-hand fade, as alpha per x-band: the old mask was 1 - (0.74 -> 0.5 -> 0) over 0..0.72W
+      if (bandW !== W || bandWide !== wide) {
+        bandW = W; bandWide = wide;
+        for (var bb = 0; bb < NB - 1; bb++) {
+          var u0 = (bb + 0.5) / (NB - 1);                 // 0..1 across the faded region
+          var mk = u0 < 0.55 ? lerp(0.74, 0.5, u0 / 0.55) : lerp(0.5, 0, (u0 - 0.55) / 0.45);
+          bandA[bb] = 1 - mk;
+        }
+        bandA[NB - 1] = 1;
+      }
+      var bandEdge = W * 0.72, bandK = (NB - 1) / bandEdge;
       var Nq = Math.max(400, (M * quality) | 0);
       Nq = Math.min(Nq, M);
       counts.fill(0);
@@ -616,7 +631,8 @@
         rad = rw * sc * jit[i] * B_SIZE[bk];
         sr[i] = rad < 0.4 ? 0.4 : rad > 7 ? 7 : rad;
         side = edgeOn && Y > edgeY ? 1 : 0;
-        key = ((cl[i] + 1) * BUCKETS + bk) * 2 + side;
+        var band = wide ? (X >= bandEdge ? NB - 1 : (X * bandK) | 0) : NB - 1;
+        key = (((cl[i] + 1) * BUCKETS + bk) * 2 + side) * NB + band;
         skey[i] = key; counts[key + 1]++;
 
         if (streakOn && bk >= 3 && (i & 3) === 0) streaks[nStreaks++] = i;
@@ -636,7 +652,7 @@
       // counting sort by (cluster, bucket, side)
       for (kk = 0; kk < K; kk++) counts[kk + 1] += counts[kk];
       // `counts` now holds starting offsets; scatter using a moving cursor
-      var cursor = counts.slice(0, K);
+      for (kk = 0; kk < K; kk++) cursor[kk] = counts[kk];
       for (i = 0; i < Nq; i++) {
         key = skey[i];
         if (key >= 0) sorted[cursor[key]++] = i;
@@ -696,14 +712,13 @@
         var colPaper = mix(PAPER, WHITE, a2);
         var cdim = cc >= 0 ? lerp(dim, 1, a2) : dim * 0.62;
         for (bk = 0; bk < BUCKETS; bk++) {
-          for (side = 0; side < 2; side++) {
-            key = ((cc + 1) * BUCKETS + bk) * 2 + side;
+          for (side = 0; side < 2; side++) for (var bnd = 0; bnd < NB; bnd++) {
+            key = (((cc + 1) * BUCKETS + bk) * 2 + side) * NB + bnd;
             var from = counts[key], to = key + 1 <= K - 1 ? counts[key + 1] : counts[K];
             if (to <= from) continue;
             // `counts[key]` was turned into start offsets; end is the next key's start
-            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale;
-            var col = side ? colPaper : colInk;
-            ctx.fillStyle = rgb(col);
+            ctx.globalAlpha = B_ALPHA[bk] * cdim * aScale * bandA[bnd];
+            ctx.fillStyle = rgb(side ? colPaper : colInk);
             ctx.beginPath();
             for (var q2 = from; q2 < to; q2++) {
               i = sorted[q2];
@@ -726,16 +741,6 @@
         }
       }
       ctx.globalAlpha = 1;
-      if (wide) {
-        if (!maskGrad || maskW !== W) {
-          maskGrad = ctx.createLinearGradient(0, 0, W * 0.72, 0);
-          maskGrad.addColorStop(0, 'rgba(0,0,0,0.74)'); maskGrad.addColorStop(0.55, 'rgba(0,0,0,0.5)'); maskGrad.addColorStop(1, 'rgba(0,0,0,0)'); maskW = W;
-        }
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.fillStyle = maskGrad; ctx.fillRect(0, 0, W * 0.72, H);
-        ctx.globalCompositeOperation = 'source-over';
-      }
-
       // retrieval query: ring at the cursor and lines to its nearest points
       if (qOn && px >= 0) {
         var below = edgeOn && py > edgeY;
@@ -799,8 +804,16 @@
       else if (dirty) schedule();
     }
 
-    /* ---- frame pacing and quality governor ---- */
+    /* ---- frame pacing and quality governor ----
+       Uneven frames look worse than a steady lower rate, and changing quality
+       back and forth looks worse than either. So: it only ever steps down, in
+       this order (resolution is invisible on soft dots, point count is not),
+       waits after every step, and on a 100 Hz+ screen that can't keep up it
+       settles on every second refresh instead of alternating 8 and 16 ms.      */
+    var PX_STEPS = [1, 0.84, 0.7, 0.58], Q_STEPS = [1, 0.82, 0.66, 0.52, 0.4];
+    var pxStep = 0, qStep = quality >= 1 ? 0 : (quality >= 0.8 ? 1 : 3), cooldown = 0, calmRun = 0;
     function governor(dt) {
+      if (root.__noGov) return;
       if (frames <= 12) return;                  // ignore start-up hitches
       if (samples.length < 48) {
         samples.push(dt);
@@ -812,27 +825,36 @@
             var d = Math.abs(Math.log(hz / STD_HZ[j]));
             if (d < bd) { bd = d; best = STD_HZ[j]; }
           }
-          periodGuess = 1 / best;
+          baseHz = best; periodGuess = 1 / best;
           if (post) post({ type: 'stats', hz: best });
         }
         return;
       }
-      dtEMA += (dt - dtEMA) * 0.08;
-      if (dtEMA > periodGuess * 1.35) { slowRun++; fastRun = 0; }
-      else if (dtEMA < periodGuess * 1.1) { fastRun++; slowRun = 0; }
-      else { slowRun = 0; fastRun = 0; }
-
-      if (slowRun > 30) {
+      if (introGrace > 0) { introGrace--; return; }   // the intro and font loading cause real but short hitches
+      dtEMA += (dt - dtEMA) * 0.1;
+      missEMA += ((dt > periodGuess * 1.5 ? 1 : 0) - missEMA) * 0.03;   // share of frames that missed their slot
+      if (cooldown > 0) { cooldown--; return; }
+      var slow = dtEMA > periodGuess * 1.3 || missEMA > 0.07;
+      if (slow) {
+        calmRun = 0; slowRun++;
+        if (slowRun < 24) return;
         slowRun = 0;
-        if (quality > 0.34) quality = Math.max(0.3, quality * 0.84);
-        else if (pixelScale > 0.6) { pixelScale = Math.max(0.55, pixelScale * 0.85); applySize(); }
-        dtEMA = periodGuess;
-        if (post) post({ type: 'stats', q: quality, px: pixelScale });
-      } else if (fastRun > 240) {
-        fastRun = 0;
-        if (pixelScale < 1) { pixelScale = Math.min(1, pixelScale * 1.1); applySize(); }
-        else if (quality < 1) quality = Math.min(1, quality * 1.06);
-        if (post) post({ type: 'stats', q: quality, px: pixelScale });
+        if (baseHz >= 100 && skip === 1) skip = 2;                         // steady 60 beats a ragged 85
+        else if (pxStep < PX_STEPS.length - 1) { pxStep++; pixelScale = PX_STEPS[pxStep]; applySize(); }
+        else if (qStep < Q_STEPS.length - 1) { qStep++; quality = Q_STEPS[qStep]; }
+        else if (baseHz >= 100 && skip === 2 && dtEMA > periodGuess * 1.3) { skip = 3; }
+        periodGuess = skip / baseHz;
+        dtEMA = periodGuess; missEMA = 0; cooldown = 90;
+        if (post) post({ type: 'stats', q: quality, px: pixelScale, skip: skip });
+      } else {
+        slowRun = 0;
+        // one cautious step back up after a long calm spell, never faster
+        if (++calmRun > 1500 && (pxStep > 0 || qStep > 0)) {
+          calmRun = 0;
+          if (qStep > 0) { qStep--; quality = Q_STEPS[qStep]; } else { pxStep--; pixelScale = PX_STEPS[pxStep]; applySize(); }
+          cooldown = 240;
+          if (post) post({ type: 'stats', q: quality, px: pixelScale, skip: skip });
+        }
       }
     }
 

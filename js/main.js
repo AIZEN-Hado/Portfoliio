@@ -183,6 +183,7 @@
   }
   win.addEventListener('scroll', function () {
     send({ type: 'scroll', y: win.scrollY });
+    onScrollForFocus();
     if (!scrollQueued) {
       scrollQueued = true;
       win.requestAnimationFrame(function () { scrollQueued = false; paintChrome(); });
@@ -216,22 +217,41 @@
   win.addEventListener('blur', function () { send({ type: 'pointer', x: -1, y: -1, on: false }); });
 
   /* ------------------------------------------------- focus: rows and skills */
-  var focusTimer = 0;
-  function setFocus(i) { clearTimeout(focusTimer); send({ type: 'focus', i: i }); }
-  function clearFocus() { clearTimeout(focusTimer); focusTimer = setTimeout(function () { send({ type: 'focus', i: -1 }); }, 90); }
+  var focusTimer = 0, focusSent = -1;
+  function sendFocus(i) { if (i === focusSent) return; focusSent = i; send({ type: 'focus', i: i }); }
+  function setFocus(i) { clearTimeout(focusTimer); sendFocus(i); }
+  function clearFocus() { clearTimeout(focusTimer); focusTimer = setTimeout(function () { sendFocus(-1); }, 90); }
+
+  /* Rows and skill groups slide under a resting cursor while you scroll. Each one would fire a hover and send
+     the camera off to a different cluster mid-scroll, which reads as erratic motion. So hover focus is held back
+     until scrolling has been still for a moment, and only applied if the cursor is still over that element. */
+  var lastScrollAt = 0, settleTimer = 0, hoverEl = null, hoverIdx = -1;
+  function scrolling() { return performance.now() - lastScrollAt < 170; }
+  function hoverFocus(el, i) { hoverEl = el; hoverIdx = i; if (!scrolling()) setFocus(i); }
+  function hoverBlur() { hoverEl = null; hoverIdx = -1; clearFocus(); }
+  function onScrollForFocus() {
+    lastScrollAt = performance.now();
+    if (focusSent >= 0 && !(doc.activeElement && doc.activeElement.classList && doc.activeElement.classList.contains('row__head'))) {
+      clearTimeout(focusTimer); sendFocus(-1);
+    }
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(function () {
+      if (hoverEl && hoverEl.matches(':hover')) setFocus(hoverIdx);
+    }, 190);
+  }
 
   rows.forEach(function (row, i) {
     var head = row.querySelector('.row__head');
-    row.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') setFocus(i); });
-    row.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') clearFocus(); });
+    row.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') hoverFocus(row, i); });
+    row.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') hoverBlur(); });
     head.addEventListener('focus', function () { setFocus(i); });
     head.addEventListener('blur', clearFocus);
     head.addEventListener('click', function () { toggle(row); });
   });
   sets.forEach(function (el) {
     var i = parseInt(el.getAttribute('data-i'), 10);
-    el.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') setFocus(i); });
-    el.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') clearFocus(); });
+    el.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') hoverFocus(el, i); });
+    el.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch') hoverBlur(); });
   });
 
   function setOpen(row, v) {

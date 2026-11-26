@@ -24,7 +24,9 @@ Plain HTML, CSS and JavaScript. No framework, no bundler, no build step.
 
 - The scene runs in a Web Worker on an `OffscreenCanvas`, so scrolling and text never wait on the canvas. Browsers without it fall back to the same code on the main thread.
 - Motion is time-based and uses critically damped springs, so it looks the same at 60, 120 or 240 Hz. The refresh rate is measured at startup.
-- Points are sorted into depth buckets and drawn in batched paths. A quality governor lowers the point count, then the pixel scale, if frames run long.
+- Points are sorted into depth buckets and drawn in batched paths. The canvas renders at no more than 1.5x pixel ratio and about 2.2 million pixels, since the figure is soft dots.
+- A governor only ever steps down: first resolution, then point count. On a 100 Hz or faster screen that can't keep up it renders every second refresh, so frames stay even instead of alternating long and short.
+- Hover focus on project rows waits until scrolling stops, so the camera isn't sent to a different cluster mid-scroll.
 - With reduced motion on, the scene draws on demand and does not drift.
 - The canvas can only run as fast as the display refreshes. On a 120 Hz screen it targets 120 fps.
 
