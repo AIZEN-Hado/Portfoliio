@@ -75,7 +75,7 @@
 
 .principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 3.5vw, 4rem); margin-top: clamp(4rem, 11vh, 8rem); }
 .principle { border-top: 1px solid var(--rule-strong); padding-top: 1rem; }
-.principle h3 { font-family: var(--sans); font-weight: 650; font-size: 1.2rem; margin-bottom: 0.5rem; }
+.principle h2 { font-family: var(--sans); font-weight: 650; font-size: 1.2rem; margin-bottom: 0.5rem; }
 .principle p { font-size: 1.08rem; line-height: 1.6; color: var(--ink-2); max-width: 28rem; }
 
 /* ---------- Work: a head, then ten pinned scenes ---------- */
@@ -276,6 +276,8 @@
   /* the veil reaches past the text on every side, and the negative margin keeps the text itself on the gutter */
   .intro__name, .work__head .h2, .work__lede, .intro__body p, .facts, .principle, .skills .h2, .skillset { padding-inline: 0.7rem; margin-inline: -0.7rem; }
   .intro__body p, .work__lede { padding-block: 0.35rem; }
+  .intro__body .intro__lead { padding-block: 0.55rem; }
+  .intro__name { padding-block: 0.12em 0.2em; }
   .work__head .h2, .skills .h2 { padding-block: 0.15em; }
   .proj__pin::before {
     content: ""; position: absolute; inset: auto 0 0 0; height: 66%; z-index: -1; pointer-events: none;
